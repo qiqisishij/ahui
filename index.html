@@ -6560,8 +6560,8 @@ const els = {
     userName: document.getElementById('userName'),
     userSignature: document.getElementById('userSignature'),
     userPersona: document.getElementById('userPersona'),
-    likedCount: document.getElementById('mMineFavSub'),
-    playlistCount: document.getElementById('mMinePlSub'),
+    likedCount: document.getElementById('likedCount'),
+    playlistCount: document.getElementById('playlistCount'),
     
     chatMessages: document.getElementById('chatMessages'),
     chatInput: document.getElementById('chatInput'),
@@ -8119,11 +8119,11 @@ function toggleLike(e) {
     window.updateLikeButton = updateLikeButton;
     
     function updateLikedCount() {
-        if (els.likedCount) els.likedCount.textContent = `${state.likedSongs.length}首`;
+        els.likedCount.textContent = `${state.likedSongs.length}首`;
     }
     
     function updatePlaylistCount() {
-        if (els.playlistCount) els.playlistCount.textContent = `${state.playlists.length}个歌单`;
+        els.playlistCount.textContent = `${state.playlists.length}个歌单`;
     }
     
     function togglePlayMode() {
@@ -10400,8 +10400,7 @@ function markLastUserMessageAsRead() {
         if (!document.getElementById('playerPage').classList.contains('active')) {
             fetchThoughts();
         }
-        // 每次AI回复后实时更新状态栏（不等待，后台执行）
-        setTimeout(function() { if (typeof updateMood === 'function') updateMood(); }, 200);
+        // Fix3: 状态栏只在addAIMessage全部发完后更新一次（见addAIMessage末尾），此处不重复调用
     } catch (error) {
         console.error('AI错误:', error);
         _closeToast('网络错误，请检查API配置', false);
@@ -13171,9 +13170,12 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div style="font-size:10px;color:#408070;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🌿 隐晦心绪</div>
                     <div id="popupSecret" style="font-size:13px;color:#1a4035;line-height:1.6;font-style:italic;">${secret}</div>
                 </div>
-                <div style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);">
-                    <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲</div>
-                    <div id="popupLust" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;">${lust}</div>
+                <div style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);cursor:pointer;user-select:none;" onclick="(function(el){var revealed=el.dataset.revealed==='1';if(revealed){el.dataset.revealed='0';el.querySelector('.lust-text').style.filter='blur(8px)';el.querySelector('.lust-hint').style.display='block';}else{el.dataset.revealed='1';el.querySelector('.lust-text').style.filter='none';el.querySelector('.lust-hint').style.display='none';}})(this)">
+                    <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲 <span style="font-size:9px;opacity:0.6;font-weight:400;">(点击显示)</span></div>
+                    <div style="position:relative;">
+                        <div class="lust-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#a0205a;opacity:0.7;pointer-events:none;">点击查看</div>
+                        <div id="popupLust" class="lust-text" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;filter:blur(8px);transition:filter 0.2s;">${lust}</div>
+                    </div>
                 </div>
                 ${clothing && clothing !== '—' ? `
                 <div style="background:linear-gradient(135deg,rgba(255,245,210,0.4),rgba(255,235,190,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,190,130,0.25);">
@@ -13251,7 +13253,14 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
         if (eEl) eEl.textContent = mood.emotion || '—';
         if (iEl) iEl.textContent = mood.inner || '—';
         if (sEl) sEl.textContent = mood.secret || '—';
-        if (lEl) lEl.textContent = mood.lust || '—';
+        if (lEl) {
+            lEl.textContent = mood.lust || '—';
+            // Fix4: 刷新后如果用户没有点开，保持模糊；已点开的保持显示
+            const lustCard = lEl.closest('[data-revealed]');
+            if (!lustCard || lustCard.dataset.revealed !== '1') {
+                lEl.style.filter = 'blur(8px)';
+            }
+        }
         if (cEl) cEl.textContent = mood.clothing || '—';
     };
     // Keep renderMood override for compatibility (unused but harmless)
@@ -13268,7 +13277,13 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
         if (eEl) eEl.textContent = mood.emotion || '—';
         if (iEl) iEl.textContent = mood.inner || '—';
         if (sEl) sEl.textContent = mood.secret || '—';
-        if (lEl) lEl.textContent = mood.lust || '—';
+        if (lEl) {
+            lEl.textContent = mood.lust || '—';
+            const lustCard = lEl.closest('[data-revealed]');
+            if (!lustCard || lustCard.dataset.revealed !== '1') {
+                lEl.style.filter = 'blur(8px)';
+            }
+        }
         if (cEl) cEl.textContent = mood.clothing || '—';
     };
     
@@ -13299,7 +13314,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div><span style="color:#b06090;font-weight:600;">💫 心情：</span><span style="color:var(--text-primary);">${h.emotion||'—'}</span></div>
                     <div><span style="color:#6070b0;font-weight:600;">💭 内心：</span><span style="color:var(--text-primary);">${h.inner||'—'}</span></div>
                     <div><span style="color:#408070;font-weight:600;">🌿 隐晦：</span><span style="color:var(--text-primary);font-style:italic;">${h.secret||'—'}</span></div>
-                    ${h.lust ? `<div><span style="color:#a0205a;font-weight:600;">🔥 色欲：</span><span style="color:var(--text-primary);font-style:italic;">${h.lust}</span></div>` : ''}
+                    ${h.lust ? `<div style="cursor:pointer;" onclick="(function(el){var s=el.querySelector('.hl-text');var hh=el.querySelector('.hl-hint');if(s.style.filter){s.style.filter='';if(hh)hh.style.display='none';}else{s.style.filter='blur(7px)';if(hh)hh.style.display='inline';}})(this)"><span style="color:#a0205a;font-weight:600;">🔥 色欲：</span><span style="position:relative;display:inline;"><span class="hl-hint" style="font-size:10px;color:#a0205a;opacity:0.6;">点击显示</span><span class="hl-text" style="color:var(--text-primary);font-style:italic;filter:blur(7px);transition:filter 0.2s;">${h.lust}</span></span></div>` : ''}
                     ${h.clothing ? `<div><span style="color:#806030;font-weight:600;">✨ 着装：</span><span style="color:var(--text-primary);">${h.clothing}</span></div>` : ''}
                   </div>
                   <button onclick="(function(i){if(!confirm('删除此条记录？'))return;state.moodHistory.splice(i,1);if(window.saveData)saveData();document.getElementById('moodHistoryOverlay').remove();window.openMoodHistory();})(${history.indexOf(h)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--text-secondary);opacity:0.5;">🗑</button>
@@ -17587,6 +17602,15 @@ document.getElementById('genDiaryNowBtn')?.addEventListener('click', async () =>
 // openPage 进入日记页面时渲染
 const _origOpenPage = window.openPage;
 window.openPage = function(pageId) {
+    // Fix1: 离开朋友圈页面时暂停背景视频，防止切换到其他页面后继续播放声音
+    if (pageId !== 'friendCirclePage') {
+        var _fcBg = document.getElementById('fcCoverBg');
+        if (_fcBg) {
+            _fcBg.querySelectorAll('video.fc-cover-video').forEach(function(v) {
+                if (!v.paused) v.pause();
+            });
+        }
+    }
     // 先执行原始导航
     try { _origOpenPage(pageId); } catch(e) { console.warn('openPage diary wrapper:', e); }
     // 日记页特殊处理
@@ -36903,7 +36927,10 @@ function extractJsonArray(text) {
         el.appendChild(textDiv);
 
         el.onclick = function() {
-            dismiss();
+            // Fix2: 立即移除弹窗，不等动画
+            clearTimeout(el._dt);
+            if (el.parentNode) el.parentNode.removeChild(el);
+            if (done) { done(); done = null; }
             if (typeof state !== 'undefined' && typeof openPage === 'function') {
                 var cts = (state && state.contacts) ? state.contacts : [];
                 var cidx = cts.findIndex(function(c) { return c.name === name; });
