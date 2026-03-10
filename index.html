@@ -2255,11 +2255,17 @@
             align-content: start;
             gap: 0;
         }
+        .ios-page-slide {
+            pointer-events: none;
+        }
         .ios-page-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
+            justify-items: center;
+            align-items: start;
             gap: 16px 8px;
             margin-bottom: 20px;
+            pointer-events: none;
         }
         .ios-app-icon {
             display: flex;
@@ -2269,6 +2275,9 @@
             cursor: pointer;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            width: fit-content;
+            max-width: 80px;
+            pointer-events: auto;
         }
         .ios-app-icon-img {
             width: 62px; height: 62px;
@@ -2423,6 +2432,19 @@ setRealVh();window.addEventListener('resize',setRealVh);
 window.addEventListener('orientationchange',function(){setTimeout(setRealVh,300);});
 </script>
 </head>
+<script>
+// Global stubs for functions defined later (prevents "not defined" errors on early clicks)
+window.openShopPage = function(shop) {
+    // Defer until real definition is ready
+    var _t = setInterval(function() {
+        if (window._openShopPageReady) {
+            clearInterval(_t);
+            window.openShopPage(shop);
+        }
+    }, 50);
+};
+</script>
+
 <body class="day-mode">
 <script>
 window.onerror = function(msg, src, line, col, err) {
@@ -23120,6 +23142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // 礼物记录 & 购物页面
+    window._openShopPageReady = true;
     window.openShopPage = function(shop) {
         // Hide + buttons when leaving to other pages
         var tbBtn = document.getElementById('tbAddBtn'); if(tbBtn) tbBtn.style.display='none';
@@ -26753,52 +26776,51 @@ function initSwipe() {
     swiping = false;
   }, { passive: true });
 
-  // ===== 边缘连点三下翻页 =====
-  // 每页右边缘区域（连点→下一页），左边缘区域（连点→上一页）
-  var _tapLog = []; // {time, side}  side: 'left' | 'right'
-  var EDGE_W = 60;  // 边缘触发宽度(px)
-  var TAP_WIN = 700; // 三次点击必须在700ms内
+  // ===== 边缘连点三下翻页（使用视口左右边缘） =====
+  var _et = { log: [], WIN: 700, EDGE: 70 };
 
-  container.addEventListener('touchend', function(e) {
-    if (swiping) return; // 滑动时不触发
-    var touch = e.changedTouches[0];
-    var cw = container.offsetWidth;
-    var x = touch.clientX - container.getBoundingClientRect().left;
-    var side = null;
-    if (x >= cw - EDGE_W) side = 'right';
-    else if (x <= EDGE_W) side = 'left';
-    if (!side) { _tapLog = []; return; }
-
+  function _etCheck(clientX, vw) {
+    var side = clientX <= _et.EDGE ? 'left' : (clientX >= vw - _et.EDGE ? 'right' : null);
+    if (!side) { _et.log = []; return; }
     var now = Date.now();
-    _tapLog.push({ time: now, side: side });
-    // 只保留最近3次同侧点击
-    _tapLog = _tapLog.filter(function(t){ return now - t.time < TAP_WIN && t.side === side; });
-
-    if (_tapLog.length >= 3) {
-      _tapLog = [];
+    // 过滤掉超时或不同侧的记录
+    _et.log = _et.log.filter(function(t){ return now - t.time < _et.WIN && t.side === side; });
+    _et.log.push({ time: now, side: side });
+    if (_et.log.length >= 3) {
+      _et.log = [];
       if (side === 'right' && curPage < totalPages - 1) {
         goTo(curPage + 1);
-        _edgeTapFeedback(container, 'right');
+        _etFeedback('right');
       } else if (side === 'left' && curPage > 0) {
         goTo(curPage - 1);
-        _edgeTapFeedback(container, 'left');
+        _etFeedback('left');
       }
     }
+  }
+
+  // 监听主页的点击（只在主页激活时生效）
+  document.addEventListener('touchend', function(e) {
+    var hp = document.getElementById('homePage');
+    if (!hp || !hp.classList.contains('active')) return;
+    if (swiping) return;
+    _etCheck(e.changedTouches[0].clientX, window.innerWidth);
   }, { passive: true });
 
-  function _edgeTapFeedback(parent, side) {
+  function _etFeedback(side) {
+    if (!document.getElementById('_etFadeStyle')) {
+      var s = document.createElement('style');
+      s.id = '_etFadeStyle';
+      s.textContent = '@keyframes _etF{0%{opacity:0.85;transform:translateY(-50%) scale(1.15)}100%{opacity:0;transform:translateY(-50%) scale(0.75)}}';
+      document.head.appendChild(s);
+    }
     var fb = document.createElement('div');
-    fb.style.cssText = 'position:absolute;top:50%;' + (side==='right'?'right:8px;':'left:8px;') +
-      'transform:translateY(-50%);background:rgba(255,255,255,0.55);border-radius:50%;' +
-      'width:40px;height:40px;display:flex;align-items:center;justify-content:center;' +
-      'font-size:18px;pointer-events:none;z-index:999;animation:_etFade 0.5s ease forwards;';
+    fb.style.cssText = 'position:fixed;top:50%;' + (side==='right'?'right:12px;':'left:12px;') +
+      'transform:translateY(-50%);background:rgba(0,0,0,0.18);backdrop-filter:blur(6px);border-radius:50%;' +
+      'width:38px;height:38px;display:flex;align-items:center;justify-content:center;' +
+      'font-size:16px;color:#fff;pointer-events:none;z-index:9999;animation:_etF 0.5s ease forwards;';
     fb.textContent = side === 'right' ? '▶' : '◀';
-    var style = document.createElement('style');
-    style.textContent = '@keyframes _etFade{0%{opacity:0.9;transform:translateY(-50%) scale(1.1)}100%{opacity:0;transform:translateY(-50%) scale(0.8)}}';
-    document.head.appendChild(style);
-    parent.style.position = 'relative';
-    parent.appendChild(fb);
-    setTimeout(function(){ if(fb.parentNode) fb.parentNode.removeChild(fb); }, 550);
+    document.body.appendChild(fb);
+    setTimeout(function(){ if(fb.parentNode) fb.parentNode.removeChild(fb); }, 520);
   }
 }
 
