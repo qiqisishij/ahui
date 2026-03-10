@@ -10404,8 +10404,7 @@ function markLastUserMessageAsRead() {
         if (!document.getElementById('playerPage').classList.contains('active')) {
             fetchThoughts();
         }
-        // 每次AI回复后实时更新状态栏（不等待，后台执行）
-        setTimeout(function() { if (typeof updateMood === 'function') updateMood(); }, 200);
+        // Fix: 状态栏只在addAIMessage所有句子全部发完后更新一次（addAIMessage末尾触发）
     } catch (error) {
         console.error('AI错误:', error);
         _closeToast('网络错误，请检查API配置', false);
@@ -13119,7 +13118,81 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
     });
 
     // ★ AI内心状态弹窗
-    window.openAIStatePopup = function() {
+    
+// ===== 色欲密码保护系统 =====
+(function() {
+    var LUST_PW = '阿晦天天开心';
+    var LUST_KEY = '_lustUnlockDate';
+
+    function _lustIsUnlocked() {
+        try {
+            var d = localStorage.getItem(LUST_KEY);
+            if (!d) return false;
+            var today = new Date().toDateString();
+            return d === today;
+        } catch(e) { return false; }
+    }
+
+    function _lustUnlock() {
+        try { localStorage.setItem(LUST_KEY, new Date().toDateString()); } catch(e) {}
+    }
+
+    // 主入口：点击色欲块时调用
+    window._lustClick = function(el, onUnlocked) {
+        if (_lustIsUnlocked()) {
+            onUnlocked(el);
+            return;
+        }
+        // 显示密码输入弹窗
+        var existing = document.getElementById('_lustPwOverlay');
+        if (existing) existing.remove();
+
+        var ov = document.createElement('div');
+        ov.id = '_lustPwOverlay';
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = `
+            <div style="background:linear-gradient(145deg,#fff9fc,#fff0f6);border-radius:20px;padding:28px 24px;width:min(300px,85vw);box-shadow:0 8px 40px rgba(160,32,90,0.2);border:1px solid rgba(220,100,160,0.2);text-align:center;">
+                <div style="font-size:22px;margin-bottom:8px;">🔒</div>
+                <div style="font-size:15px;font-weight:700;color:#6a0030;margin-bottom:6px;">内容已加密</div>
+                <div style="font-size:12px;color:#a0205a;margin-bottom:18px;opacity:0.75;">输入密码解锁今日色欲内容</div>
+                <input id="_lustPwInput" type="password" placeholder="请输入密码" autocomplete="off"
+                    style="width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(220,100,160,0.4);background:rgba(255,240,248,0.8);font-size:14px;color:#6a0030;outline:none;box-sizing:border-box;margin-bottom:14px;text-align:center;letter-spacing:2px;">
+                <div style="display:flex;gap:10px;">
+                    <button onclick="document.getElementById('_lustPwOverlay').remove();" style="flex:1;padding:10px;border:1px solid rgba(220,100,160,0.3);border-radius:10px;background:transparent;color:#a0205a;font-size:13px;cursor:pointer;">取消</button>
+                    <button id="_lustPwConfirm" style="flex:2;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,#c9a0f0,#e8b4d0);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">确认解锁</button>
+                </div>
+                <div id="_lustPwErr" style="font-size:11px;color:#e00;margin-top:8px;display:none;">密码错误，请重试</div>
+            </div>
+        `;
+        document.body.appendChild(ov);
+
+        var inp = document.getElementById('_lustPwInput');
+        var errEl = document.getElementById('_lustPwErr');
+        if (inp) setTimeout(function(){ inp.focus(); }, 100);
+
+        function tryPw() {
+            var val = inp ? inp.value : '';
+            if (val === LUST_PW) {
+                _lustUnlock();
+                document.getElementById('_lustPwOverlay').remove();
+                onUnlocked(el);
+            } else {
+                if (errEl) { errEl.style.display = 'block'; }
+                if (inp) { inp.value = ''; inp.focus(); }
+            }
+        }
+
+        document.getElementById('_lustPwConfirm').addEventListener('click', tryPw);
+        if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') tryPw(); });
+
+        // 点遮罩关闭
+        ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    };
+
+    window._lustIsUnlocked = _lustIsUnlocked;
+})();
+
+window.openAIStatePopup = function() {
         const existing = document.getElementById('aiStatePopup');
         if (existing) { existing.remove(); return; }
         const f = state.friend || {};
@@ -13175,7 +13248,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div style="font-size:10px;color:#408070;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🌿 隐晦心绪</div>
                     <div id="popupSecret" style="font-size:13px;color:#1a4035;line-height:1.6;font-style:italic;">${secret}</div>
                 </div>
-                <div id="_lustCard" data-open="0" onclick="(function(el){var t=el.querySelector('#popupLust');var hint=el.querySelector('#_lustHint');if(el.dataset.open==='1'){el.dataset.open='0';t.style.filter='blur(10px)';hint.style.display='flex';}else{el.dataset.open='1';t.style.filter='none';hint.style.display='none';}})(this)" style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);cursor:pointer;user-select:none;position:relative;">
+                <div id="_lustCard" data-open="0" onclick="(function(el){if(el.dataset.open==='1'){el.dataset.open='0';el.querySelector('#popupLust').style.filter='blur(10px)';el.querySelector('#_lustHint').style.display='flex';return;}window._lustClick(el,function(card){card.dataset.open='1';card.querySelector('#popupLust').style.filter='none';card.querySelector('#_lustHint').style.display='none';});})(this)" style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);cursor:pointer;user-select:none;position:relative;">
                     <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲 <span style="font-weight:400;font-size:9px;opacity:0.55;">点击显示</span></div>
                     <div id="_lustHint" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;pointer-events:none;z-index:2;"><span style="font-size:12px;color:#a0205a;opacity:0.75;background:rgba(255,210,230,0.7);padding:3px 12px;border-radius:8px;backdrop-filter:blur(3px);">🔒 点击查看</span></div>
                     <div id="popupLust" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${lust}</div>
@@ -13312,7 +13385,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div><span style="color:#b06090;font-weight:600;">💫 心情：</span><span style="color:var(--text-primary);">${h.emotion||'—'}</span></div>
                     <div><span style="color:#6070b0;font-weight:600;">💭 内心：</span><span style="color:var(--text-primary);">${h.inner||'—'}</span></div>
                     <div><span style="color:#408070;font-weight:600;">🌿 隐晦：</span><span style="color:var(--text-primary);font-style:italic;">${h.secret||'—'}</span></div>
-                    ${h.lust ? `<div onclick="(function(e){var t=e.querySelector('.hl-t');e.dataset.o==='1'?(e.dataset.o='0',t.style.filter='blur(10px)'):(e.dataset.o='1',t.style.filter='none')})(this)" style="cursor:pointer;"><span style="color:#a0205a;font-weight:600;">🔥 色欲：<small style="opacity:0.55;font-weight:400;">点击显示</small></span> <span class="hl-t" style="color:#6a0030;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${h.lust}</span></div>` : ''}
+                    ${h.lust ? `<div onclick="(function(e){if(e.dataset.o==='1'){e.dataset.o='0';e.querySelector('.hl-t').style.filter='blur(10px)';return;}window._lustClick(e,function(card){card.dataset.o='1';card.querySelector('.hl-t').style.filter='none';});})(this)" style="cursor:pointer;"><span style="color:#a0205a;font-weight:600;">🔥 色欲：<small style="opacity:0.55;font-weight:400;">点击显示</small></span> <span class="hl-t" style="color:#6a0030;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${h.lust}</span></div>` : ''}
                     ${h.clothing ? `<div><span style="color:#806030;font-weight:600;">✨ 着装：</span><span style="color:var(--text-primary);">${h.clothing}</span></div>` : ''}
                   </div>
                   <button onclick="(function(i){if(!confirm('删除此条记录？'))return;state.moodHistory.splice(i,1);if(window.saveData)saveData();document.getElementById('moodHistoryOverlay').remove();window.openMoodHistory();})(${history.indexOf(h)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--text-secondary);opacity:0.5;">🗑</button>
