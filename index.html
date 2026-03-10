@@ -6560,8 +6560,8 @@ const els = {
     userName: document.getElementById('userName'),
     userSignature: document.getElementById('userSignature'),
     userPersona: document.getElementById('userPersona'),
-    likedCount: document.getElementById('likedCount'),
-    playlistCount: document.getElementById('playlistCount'),
+    likedCount: document.getElementById('mMineFavSub'),
+    playlistCount: document.getElementById('mMinePlSub'),
     
     chatMessages: document.getElementById('chatMessages'),
     chatInput: document.getElementById('chatInput'),
@@ -8119,11 +8119,11 @@ function toggleLike(e) {
     window.updateLikeButton = updateLikeButton;
     
     function updateLikedCount() {
-        els.likedCount.textContent = `${state.likedSongs.length}首`;
+        if (els.likedCount) els.likedCount.textContent = `${state.likedSongs.length}首`;
     }
     
     function updatePlaylistCount() {
-        els.playlistCount.textContent = `${state.playlists.length}个歌单`;
+        if (els.playlistCount) els.playlistCount.textContent = `${state.playlists.length}个歌单`;
     }
     
     function togglePlayMode() {
