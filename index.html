@@ -3126,7 +3126,7 @@ window.onerror = function(msg, src, line, col, err) {
       <button style="background:none;border:none;cursor:pointer;color:var(--text-secondary);padding:4px;display:flex;align-items:center;" onclick="openPage('homePage')" title="返回主屏幕">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px;height:20px;"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <div style="font-size:18px;font-weight:700;color:var(--text-primary);" id="wechatHomeTitle">微信</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text-primary);" id="wechatHomeTitle">微信(1)</div>
     </div>
     <div style="display:flex;gap:8px;">
       <button style="background:none;border:none;cursor:pointer;color:var(--text-secondary);padding:6px;" onclick="openWechatSearch()">
@@ -4119,11 +4119,15 @@ window.onerror = function(msg, src, line, col, err) {
   var WS_KEY = 'writingStylePresets_v2';
   var WS_ACTIVE = 'writingStyleActive_v2';
 
-  // Fix6: 默认不再内置文风预设，用户自己新建
-  var defaultPresets = [];
+  var defaultPresets = [
+    { id:'ws1', name:'温柔日系', desc:'语气轻柔，多用省略号和感叹', prompt:'【文风指令】请用温柔日系的风格输出所有文字，语气轻柔，适当使用「…」「！」，像少女漫画的对话风格，带点日系少女感。', enabled:false },
+    { id:'ws2', name:'文艺诗意', desc:'用词雅致，偶用意象', prompt:'【文风指令】请用文艺诗意的风格输出所有文字，用词雅致，偶尔带有意象和比喻，像散文诗一样。', enabled:false },
+    { id:'ws3', name:'俏皮可爱', desc:'活泼搞怪，多表情', prompt:'【文风指令】请用俏皮可爱的风格输出所有文字，语气活泼，多用可爱语气词，偶尔有点中二。', enabled:false },
+    { id:'ws4', name:'冷淡疏离', desc:'惜字如金，淡漠克制', prompt:'【文风指令】请用冷淡疏离的风格输出所有文字，语言简练克制，不带多余情感，像高冷的人说话。', enabled:false },
+  ];
 
   function loadWS() {
-    try { return JSON.parse(localStorage.getItem(WS_KEY)) || []; } catch(e){ return []; }
+    try { return JSON.parse(localStorage.getItem(WS_KEY)) || JSON.parse(JSON.stringify(defaultPresets)); } catch(e){ return JSON.parse(JSON.stringify(defaultPresets)); }
   }
   function saveWS(p) { try{ localStorage.setItem(WS_KEY, JSON.stringify(p)); }catch(e){} }
   function getEnabledWSIds() { try{ return JSON.parse(localStorage.getItem(WS_ACTIVE) || '[]'); }catch(e){ return []; } }
@@ -5588,12 +5592,10 @@ window.onerror = function(msg, src, line, col, err) {
             
             <button class="btn" onclick="saveSettings()">保存设置</button>
         </div>
-        <!-- Fix5: 固定在底部的保存按钮 -->
-        <div style="flex-shrink:0;padding:10px 16px 14px;background:var(--bg-primary);border-top:1px solid var(--border-color);">
-            <button class="btn" onclick="saveSettings()" style="width:100%;font-weight:700;">💾 保存设置</button>
-        </div>
     </div>
-</div> 全屏页面 -->
+</div>
+
+<!-- 认识日历 全屏页面 -->
 <div id="relationshipCalendarPage" style="display:none;position:fixed;inset:0;z-index:3000;background:var(--bg-primary);overflow:hidden;flex-direction:column;">
   <!-- 顶栏 -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-shrink:0;">
@@ -7278,11 +7280,13 @@ window.safeBackToSearch = function() {
     (function _loadFriendAvatar() {
         var av = state.friend.avatar;
         var _letterEl = document.getElementById('friendAvatarLetter');
-        var _firstLetter = (state.friend.name || 'A').charAt(0);
-        // 默认显示首字母占位（在头像加载成功前）
-        if (_letterEl) { _letterEl.textContent = _firstLetter; _letterEl.style.display = 'flex'; }
+        var _firstLetter = (state.friend.name || '').charAt(0);
+        // 默认隐藏字母，只在头像完全加载失败时才显示
+        if (_letterEl) { _letterEl.textContent = _firstLetter; _letterEl.style.display = 'none'; }
         function _showAv(url) {
             els.friendAvatar.style.backgroundImage = 'url(' + url + ')';
+            els.friendAvatar.style.backgroundSize = 'cover';
+            els.friendAvatar.style.backgroundPosition = 'center';
             if (_letterEl) _letterEl.style.display = 'none';
         }
         if (!av && av !== 0) { els.friendAvatar.style.backgroundImage = ''; return; }
@@ -7323,6 +7327,8 @@ window.safeBackToSearch = function() {
             } catch(e2) {}
         }).catch(function() {
             els.friendAvatar.style.backgroundImage = '';
+            // 只有真的加载失败才显示字母
+            if (_letterEl && _firstLetter) { _letterEl.style.display = 'flex'; }
         });
     })();
     els.friendName.textContent = state.friend.name;
@@ -13169,12 +13175,9 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div style="font-size:10px;color:#408070;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🌿 隐晦心绪</div>
                     <div id="popupSecret" style="font-size:13px;color:#1a4035;line-height:1.6;font-style:italic;">${secret}</div>
                 </div>
-                <div id="_lustCard" style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);cursor:pointer;user-select:none;" onclick="(function(el){var t=el.querySelector('#popupLust');var h=el.querySelector('#lustHint');if(el.dataset.open==='1'){el.dataset.open='0';t.style.filter='blur(10px)';h.style.display='flex';}else{el.dataset.open='1';t.style.filter='none';h.style.display='none';}})(this)">
-                    <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲 <span style="font-weight:400;opacity:0.6;font-size:9px;">点击显示</span></div>
-                    <div style="position:relative;">
-                        <div id="lustHint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><span style="font-size:11px;color:#a0205a;opacity:0.7;background:rgba(255,220,235,0.5);padding:2px 10px;border-radius:8px;backdrop-filter:blur(2px);">🔒 点击查看</span></div>
-                        <div id="popupLust" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${lust}</div>
-                    </div>
+                <div style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);">
+                    <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲</div>
+                    <div id="popupLust" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;">${lust}</div>
                 </div>
                 ${clothing && clothing !== '—' ? `
                 <div style="background:linear-gradient(135deg,rgba(255,245,210,0.4),rgba(255,235,190,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,190,130,0.25);">
@@ -13252,12 +13255,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
         if (eEl) eEl.textContent = mood.emotion || '—';
         if (iEl) iEl.textContent = mood.inner || '—';
         if (sEl) sEl.textContent = mood.secret || '—';
-        if (lEl) {
-            lEl.textContent = mood.lust || '—';
-            // 刷新后保持磨砂状态（除非用户已点开）
-            var _lc = document.getElementById('_lustCard');
-            if (!_lc || _lc.dataset.open !== '1') { lEl.style.filter = 'blur(10px)'; }
-        }
+        if (lEl) lEl.textContent = mood.lust || '—';
         if (cEl) cEl.textContent = mood.clothing || '—';
     };
     // Keep renderMood override for compatibility (unused but harmless)
@@ -13274,11 +13272,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
         if (eEl) eEl.textContent = mood.emotion || '—';
         if (iEl) iEl.textContent = mood.inner || '—';
         if (sEl) sEl.textContent = mood.secret || '—';
-        if (lEl) {
-            lEl.textContent = mood.lust || '—';
-            var _lc2 = document.getElementById('_lustCard');
-            if (!_lc2 || _lc2.dataset.open !== '1') { lEl.style.filter = 'blur(10px)'; }
-        }
+        if (lEl) lEl.textContent = mood.lust || '—';
         if (cEl) cEl.textContent = mood.clothing || '—';
     };
     
@@ -13309,7 +13303,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div><span style="color:#b06090;font-weight:600;">💫 心情：</span><span style="color:var(--text-primary);">${h.emotion||'—'}</span></div>
                     <div><span style="color:#6070b0;font-weight:600;">💭 内心：</span><span style="color:var(--text-primary);">${h.inner||'—'}</span></div>
                     <div><span style="color:#408070;font-weight:600;">🌿 隐晦：</span><span style="color:var(--text-primary);font-style:italic;">${h.secret||'—'}</span></div>
-                    ${h.lust ? `<div onclick="(function(e){var t=e.querySelector('.hl');e.dataset.o==='1'?(e.dataset.o='0',t.style.filter='blur(10px)'):(e.dataset.o='1',t.style.filter='none')})(this)" style="cursor:pointer;"><span style="color:#a0205a;font-weight:600;">🔥 色欲：<small style="font-weight:400;opacity:0.6;"> 点击显示</small></span><span class="hl" style="color:#6a0030;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${h.lust}</span></div>` : ''}
+                    ${h.lust ? `<div><span style="color:#a0205a;font-weight:600;">🔥 色欲：</span><span style="color:var(--text-primary);font-style:italic;">${h.lust}</span></div>` : ''}
                     ${h.clothing ? `<div><span style="color:#806030;font-weight:600;">✨ 着装：</span><span style="color:var(--text-primary);">${h.clothing}</span></div>` : ''}
                   </div>
                   <button onclick="(function(i){if(!confirm('删除此条记录？'))return;state.moodHistory.splice(i,1);if(window.saveData)saveData();document.getElementById('moodHistoryOverlay').remove();window.openMoodHistory();})(${history.indexOf(h)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--text-secondary);opacity:0.5;">🗑</button>
@@ -13448,12 +13442,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
     window._refreshActivityUI = _refreshActivityUI;
     // 在设置页打开时也刷新一次
     document.addEventListener('pageOpen', function(e) {
-      if (e.detail === 'settingsPage') {
-          setTimeout(_refreshActivityUI, 100);
-          // Fix5: 进入设置页自动滚到顶部
-          var _sb = document.querySelector('#settingsPage .modal-body');
-          if (_sb) _sb.scrollTop = 0;
-      }
+      if (e.detail === 'settingsPage') setTimeout(_refreshActivityUI, 100);
     });
 
     window.openSettingsModal = function() {
@@ -16777,21 +16766,11 @@ function buildAISystemPrompt(contact) {
     // 添加世界观设定 - 读当前联系人自己的启用列表（默认全关）
     const _friendEnabledWvIds = new Set(_c && _c._enabledWvIds ? _c._enabledWvIds : []);
     const enabledWorldviews = (state.worldviews || []).filter(wv => _friendEnabledWvIds.has(wv.id));
-    // Fix4: 如果该角色没有手动勾选任何世界书，则自动注入其人设(persona/description)作为兜底世界书
-    // 这样即使忘记启动世界书，AI也会用正确人设回复，而不会用默认人格
     if (enabledWorldviews.length > 0) {
         systemPrompt += '\n\n【世界观设定】';
         enabledWorldviews.forEach(wv => {
             systemPrompt += `\n• ${wv.title}: ${wv.content}`;
         });
-    } else {
-        // 没有启用世界书时，将角色自己的所有专属世界书条目自动注入
-        var _catId = _c._worldviewCategoryId || _c._categoryId || null;
-        var _ownWvs = _catId ? (state.worldviews || []).filter(function(wv){ return wv.categoryId === _catId || wv.ownerId === _catId; }) : [];
-        if (_ownWvs.length > 0) {
-            systemPrompt += '\n\n【世界观设定（自动注入，请在世界书页面手动勾选以精确控制）】';
-            _ownWvs.forEach(function(wv){ systemPrompt += '\n• ' + wv.title + ': ' + wv.content; });
-        }
     }
     
     // 只使用当前联系人启用的提示词
@@ -26802,9 +26781,7 @@ function _cmpGetAudio() { return document.getElementById('audio') || window._aud
 
 function _cmpSyncState() {
     try {
-        // Fix1: 播放列表为空时，忽略currentSong，不显示旧歌曲信息
-        const _playlistEmpty = !(state.playlist && state.playlist.length > 0);
-        const song = _playlistEmpty ? null : state.currentSong;
+        const song = state.currentSong;
         const audio = _cmpGetAudio();
 
         // 封面
@@ -29085,71 +29062,37 @@ window.selectContact = function(idx) {
 };
 
 window.deleteContact = function(idx) {
-    if (!confirm('确定删除这个角色吗？聊天记录、朋友圈、世界书等所有相关数据将一并清空。')) return;
+    if (!confirm('确定删除这个角色吗？聊天记录将一并清空。')) return;
     var st = window.state || {};
     var contacts = st.contacts || [];
     var friend = st.friend || {};
+    // allContacts mirrors the same logic as renderWechatContactsList
     var allContacts = contacts.length > 0 ? contacts : (friend.name ? [friend] : []);
     if (idx < 0 || idx >= allContacts.length) return;
-    var target = null;
     if (contacts.length > 0) {
-        target = allContacts[idx];
+        // Contacts array: find and remove by reference
+        var target = allContacts[idx];
         var realIdx = st.contacts.indexOf(target);
         if (realIdx !== -1) st.contacts.splice(realIdx, 1);
         else st.contacts.splice(idx, 1);
+        // If we deleted the current active friend, reset friend
         if (friend.name && target.name === friend.name) {
             var remaining = st.contacts || [];
             if (remaining.length > 0) {
+                // Switch to first remaining contact
                 st.friend = Object.assign({}, remaining[0]);
                 st.messages = remaining[0]._messages || [];
             } else {
+                // No contacts left, clear friend
                 st.friend = { name: '', avatar: '', description: '', signature: '' };
                 st.messages = [];
             }
         }
     } else {
-        target = friend.name ? Object.assign({}, friend) : null;
+        // The item shown is state.friend (no contacts array) — clear the main friend
         st.friend = { name: '', avatar: '', description: '', signature: '' };
         st.messages = [];
         st.contacts = [];
-    }
-    // Fix2: 彻底清除该角色的所有相关数据
-    if (target && target.name) {
-        var tName = target.name;
-        var _aiKey = 'ai_' + tName.replace(/[^\w\u4e00-\u9fa5]/g, '_');
-        if (st.moments) {
-            st.moments = st.moments.filter(function(m) {
-                return m.author !== _aiKey && m.author !== ('ai_' + tName) && m.author !== tName;
-            });
-        }
-        var _catId = target._worldviewCategoryId || target._categoryId || null;
-        if (st.worldviews) {
-            st.worldviews = st.worldviews.filter(function(wv) {
-                if (_catId && (wv.categoryId === _catId || wv.ownerId === _catId)) return false;
-                if (wv.source === tName) return false;
-                return true;
-            });
-        }
-        if (st.prompts) {
-            st.prompts = st.prompts.filter(function(p) {
-                if (_catId && (p.categoryId === _catId || p.ownerId === _catId)) return false;
-                if (p.source === tName) return false;
-                return true;
-            });
-        }
-        if (st.notifications) {
-            st.notifications = st.notifications.filter(function(n) {
-                return !(n.title && n.title.startsWith(tName));
-            });
-        }
-        if (st.moodHistory) {
-            st.moodHistory = st.moodHistory.filter(function(h) { return h.aiName !== tName; });
-        }
-        if (st.diaries) {
-            st.diaries = st.diaries.filter(function(d) {
-                return d.aiName !== tName && d.contactName !== tName;
-            });
-        }
     }
     if (window.saveData) window.saveData();
     if (window.showToast) window.showToast('已删除');
