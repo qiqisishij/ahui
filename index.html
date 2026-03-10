@@ -26752,6 +26752,54 @@ function initSwipe() {
     }
     swiping = false;
   }, { passive: true });
+
+  // ===== 边缘连点三下翻页 =====
+  // 每页右边缘区域（连点→下一页），左边缘区域（连点→上一页）
+  var _tapLog = []; // {time, side}  side: 'left' | 'right'
+  var EDGE_W = 60;  // 边缘触发宽度(px)
+  var TAP_WIN = 700; // 三次点击必须在700ms内
+
+  container.addEventListener('touchend', function(e) {
+    if (swiping) return; // 滑动时不触发
+    var touch = e.changedTouches[0];
+    var cw = container.offsetWidth;
+    var x = touch.clientX - container.getBoundingClientRect().left;
+    var side = null;
+    if (x >= cw - EDGE_W) side = 'right';
+    else if (x <= EDGE_W) side = 'left';
+    if (!side) { _tapLog = []; return; }
+
+    var now = Date.now();
+    _tapLog.push({ time: now, side: side });
+    // 只保留最近3次同侧点击
+    _tapLog = _tapLog.filter(function(t){ return now - t.time < TAP_WIN && t.side === side; });
+
+    if (_tapLog.length >= 3) {
+      _tapLog = [];
+      if (side === 'right' && curPage < totalPages - 1) {
+        goTo(curPage + 1);
+        _edgeTapFeedback(container, 'right');
+      } else if (side === 'left' && curPage > 0) {
+        goTo(curPage - 1);
+        _edgeTapFeedback(container, 'left');
+      }
+    }
+  }, { passive: true });
+
+  function _edgeTapFeedback(parent, side) {
+    var fb = document.createElement('div');
+    fb.style.cssText = 'position:absolute;top:50%;' + (side==='right'?'right:8px;':'left:8px;') +
+      'transform:translateY(-50%);background:rgba(255,255,255,0.55);border-radius:50%;' +
+      'width:40px;height:40px;display:flex;align-items:center;justify-content:center;' +
+      'font-size:18px;pointer-events:none;z-index:999;animation:_etFade 0.5s ease forwards;';
+    fb.textContent = side === 'right' ? '▶' : '◀';
+    var style = document.createElement('style');
+    style.textContent = '@keyframes _etFade{0%{opacity:0.9;transform:translateY(-50%) scale(1.1)}100%{opacity:0;transform:translateY(-50%) scale(0.8)}}';
+    document.head.appendChild(style);
+    parent.style.position = 'relative';
+    parent.appendChild(fb);
+    setTimeout(function(){ if(fb.parentNode) fb.parentNode.removeChild(fb); }, 550);
+  }
 }
 
 if (document.readyState === 'complete') { setTimeout(initSwipe, 300); }
