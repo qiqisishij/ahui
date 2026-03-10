@@ -26741,9 +26741,11 @@ function initSwipe() {
   }
 
   var sx = 0, sy = 0, swiping = false;
+  var mouseDown = false;
   var container = document.getElementById('iosAppGrid');
   if (!container) return;
 
+  // ── 触摸滑动（手机） ──
   container.addEventListener('touchstart', function(e) {
     sx = e.touches[0].clientX;
     sy = e.touches[0].clientY;
@@ -26776,14 +26778,69 @@ function initSwipe() {
     swiping = false;
   }, { passive: true });
 
-  // ===== 边缘连点三下翻页（使用视口左右边缘） =====
+  // ── 鼠标拖拽翻页（电脑） ──
+  container.addEventListener('mousedown', function(e) {
+    sx = e.clientX;
+    sy = e.clientY;
+    swiping = false;
+    mouseDown = true;
+    wrapper.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!mouseDown) return;
+    var hp = document.getElementById('homePage');
+    if (!hp || !hp.classList.contains('active')) return;
+    var dx = e.clientX - sx;
+    var dy = e.clientY - sy;
+    if (!swiping && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.1) swiping = true;
+    if (swiping) {
+      var basePct = curPage * (100 / totalPages);
+      var livePct = -(dx / container.offsetWidth) * (100 / totalPages);
+      var pct = basePct + livePct;
+      pct = Math.max(-5, Math.min((totalPages - 1) * (100 / totalPages) + 5, pct));
+      wrapper.style.transition = 'none';
+      wrapper.style.transform = 'translateX(-' + pct + '%)';
+    }
+  });
+
+  document.addEventListener('mouseup', function(e) {
+    if (!mouseDown) return;
+    mouseDown = false;
+    wrapper.style.userSelect = '';
+    wrapper.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+    var hp = document.getElementById('homePage');
+    if (!hp || !hp.classList.contains('active')) { swiping = false; return; }
+    var dx = e.clientX - sx;
+    if (swiping && Math.abs(dx) > 40) {
+      goTo(curPage + (dx < 0 ? 1 : -1));
+    } else {
+      goTo(curPage);
+    }
+    swiping = false;
+  });
+
+  // ── 滚轮翻页（电脑，横向滚动或 Shift+滚轮） ──
+  var _wheelCooldown = false;
+  container.addEventListener('wheel', function(e) {
+    var hp = document.getElementById('homePage');
+    if (!hp || !hp.classList.contains('active')) return;
+    if (_wheelCooldown) return;
+    var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(delta) < 30) return;
+    e.preventDefault();
+    _wheelCooldown = true;
+    setTimeout(function(){ _wheelCooldown = false; }, 500);
+    goTo(curPage + (delta > 0 ? 1 : -1));
+  }, { passive: false });
+
+  // ── 边缘连点/连击三下翻页（触摸 + 鼠标通用） ──
   var _et = { log: [], WIN: 700, EDGE: 70 };
 
   function _etCheck(clientX, vw) {
     var side = clientX <= _et.EDGE ? 'left' : (clientX >= vw - _et.EDGE ? 'right' : null);
     if (!side) { _et.log = []; return; }
     var now = Date.now();
-    // 过滤掉超时或不同侧的记录
     _et.log = _et.log.filter(function(t){ return now - t.time < _et.WIN && t.side === side; });
     _et.log.push({ time: now, side: side });
     if (_et.log.length >= 3) {
@@ -26798,13 +26855,21 @@ function initSwipe() {
     }
   }
 
-  // 监听主页的点击（只在主页激活时生效）
+  // 触摸端连点
   document.addEventListener('touchend', function(e) {
     var hp = document.getElementById('homePage');
     if (!hp || !hp.classList.contains('active')) return;
     if (swiping) return;
     _etCheck(e.changedTouches[0].clientX, window.innerWidth);
   }, { passive: true });
+
+  // 鼠标端连击（不是拖拽时才触发）
+  document.addEventListener('click', function(e) {
+    var hp = document.getElementById('homePage');
+    if (!hp || !hp.classList.contains('active')) return;
+    if (swiping) return;
+    _etCheck(e.clientX, window.innerWidth);
+  });
 
   function _etFeedback(side) {
     if (!document.getElementById('_etFadeStyle')) {
