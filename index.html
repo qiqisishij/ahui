@@ -13169,9 +13169,12 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div style="font-size:10px;color:#408070;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🌿 隐晦心绪</div>
                     <div id="popupSecret" style="font-size:13px;color:#1a4035;line-height:1.6;font-style:italic;">${secret}</div>
                 </div>
-                <div style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);">
-                    <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲</div>
-                    <div id="popupLust" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;">${lust}</div>
+                <div id="_lustCard" style="background:linear-gradient(135deg,rgba(255,200,230,0.4),rgba(255,170,210,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,100,160,0.25);cursor:pointer;user-select:none;" onclick="(function(el){var t=el.querySelector('#popupLust');var h=el.querySelector('#lustHint');if(el.dataset.open==='1'){el.dataset.open='0';t.style.filter='blur(10px)';h.style.display='flex';}else{el.dataset.open='1';t.style.filter='none';h.style.display='none';}})(this)">
+                    <div style="font-size:10px;color:#a0205a;font-weight:600;letter-spacing:0.08em;margin-bottom:5px;">🔥 色欲 <span style="font-weight:400;opacity:0.6;font-size:9px;">点击显示</span></div>
+                    <div style="position:relative;">
+                        <div id="lustHint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><span style="font-size:11px;color:#a0205a;opacity:0.7;background:rgba(255,220,235,0.5);padding:2px 10px;border-radius:8px;backdrop-filter:blur(2px);">🔒 点击查看</span></div>
+                        <div id="popupLust" style="font-size:13px;color:#6a0030;line-height:1.6;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${lust}</div>
+                    </div>
                 </div>
                 ${clothing && clothing !== '—' ? `
                 <div style="background:linear-gradient(135deg,rgba(255,245,210,0.4),rgba(255,235,190,0.3));border-radius:14px;padding:12px 14px;border:1px solid rgba(220,190,130,0.25);">
@@ -13249,7 +13252,12 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
         if (eEl) eEl.textContent = mood.emotion || '—';
         if (iEl) iEl.textContent = mood.inner || '—';
         if (sEl) sEl.textContent = mood.secret || '—';
-        if (lEl) lEl.textContent = mood.lust || '—';
+        if (lEl) {
+            lEl.textContent = mood.lust || '—';
+            // 刷新后保持磨砂状态（除非用户已点开）
+            var _lc = document.getElementById('_lustCard');
+            if (!_lc || _lc.dataset.open !== '1') { lEl.style.filter = 'blur(10px)'; }
+        }
         if (cEl) cEl.textContent = mood.clothing || '—';
     };
     // Keep renderMood override for compatibility (unused but harmless)
@@ -13266,7 +13274,11 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
         if (eEl) eEl.textContent = mood.emotion || '—';
         if (iEl) iEl.textContent = mood.inner || '—';
         if (sEl) sEl.textContent = mood.secret || '—';
-        if (lEl) lEl.textContent = mood.lust || '—';
+        if (lEl) {
+            lEl.textContent = mood.lust || '—';
+            var _lc2 = document.getElementById('_lustCard');
+            if (!_lc2 || _lc2.dataset.open !== '1') { lEl.style.filter = 'blur(10px)'; }
+        }
         if (cEl) cEl.textContent = mood.clothing || '—';
     };
     
@@ -13297,7 +13309,7 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
                     <div><span style="color:#b06090;font-weight:600;">💫 心情：</span><span style="color:var(--text-primary);">${h.emotion||'—'}</span></div>
                     <div><span style="color:#6070b0;font-weight:600;">💭 内心：</span><span style="color:var(--text-primary);">${h.inner||'—'}</span></div>
                     <div><span style="color:#408070;font-weight:600;">🌿 隐晦：</span><span style="color:var(--text-primary);font-style:italic;">${h.secret||'—'}</span></div>
-                    ${h.lust ? `<div><span style="color:#a0205a;font-weight:600;">🔥 色欲：</span><span style="color:var(--text-primary);font-style:italic;">${h.lust}</span></div>` : ''}
+                    ${h.lust ? `<div onclick="(function(e){var t=e.querySelector('.hl');e.dataset.o==='1'?(e.dataset.o='0',t.style.filter='blur(10px)'):(e.dataset.o='1',t.style.filter='none')})(this)" style="cursor:pointer;"><span style="color:#a0205a;font-weight:600;">🔥 色欲：<small style="font-weight:400;opacity:0.6;"> 点击显示</small></span><span class="hl" style="color:#6a0030;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${h.lust}</span></div>` : ''}
                     ${h.clothing ? `<div><span style="color:#806030;font-weight:600;">✨ 着装：</span><span style="color:var(--text-primary);">${h.clothing}</span></div>` : ''}
                   </div>
                   <button onclick="(function(i){if(!confirm('删除此条记录？'))return;state.moodHistory.splice(i,1);if(window.saveData)saveData();document.getElementById('moodHistoryOverlay').remove();window.openMoodHistory();})(${history.indexOf(h)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--text-secondary);opacity:0.5;">🗑</button>
