@@ -732,13 +732,14 @@
         /* toast美化 */
         body:not(.theme-manga):not(.theme-shojo) #toast,
         body:not(.theme-manga):not(.theme-shojo) .toast {
-            background: rgba(0,0,0,0.85) !important;
-            border-radius: 20px !important;
+            background: rgba(0,0,0,0.80) !important;
+            border-radius: 14px !important;
             color: #fff !important;
-            font-weight: 600 !important;
-            box-shadow: 0 6px 24px rgba(161,140,209,0.4) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
+            font-size: 11px !important;
+            font-weight: 500 !important;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
         }
 
         /* ================= 🌸 全局美化结束 🌸 ================= */
@@ -1625,10 +1626,10 @@
 
         /* Toast */
         .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
             background: var(--text-primary); color: var(--bg-primary);
-            padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 2000;
-            animation: fadeInOut 2s ease forwards;
+            padding: 5px 12px; border-radius: 14px; font-size: 11px; z-index: 2000;
+            animation: fadeInOut 2s ease forwards; max-width: 70%;
         }
         @keyframes fadeInOut { 0%{opacity:0;transform:translateX(-50%) translateY(-10px)} 10%,90%{opacity:1;transform:translateX(-50%) translateY(0)} 100%{opacity:0;transform:translateX(-50%) translateY(-10px)} }
 
@@ -1787,11 +1788,96 @@
         .fc-cmt-name { font-size:13px; font-weight:600; color:#5a9fd4; cursor:pointer; flex-shrink:0; }
         .fc-cmt-time { font-size:11px; color:var(--text-secondary); flex-shrink:0; }
         .fc-cmt-text { font-size:13px; color:var(--text-primary); line-height:1.55; word-break:break-all; }
-        .fc-reply-input { display: none; margin-top: 8px; }
-        .fc-reply-input textarea { width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; color: var(--text-primary); font-size: 13px; resize: none; font-family: inherit; outline: none; box-sizing: border-box; }
-        .fc-reply-input .fc-reply-btns { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
-        .fc-reply-input .fc-reply-btns button { background: var(--text-primary); color: var(--bg-primary); border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
-        .fc-reply-input .fc-reply-btns .cancel { background: var(--accent-dim); color: var(--text-primary); }
+        .fc-reply-input { display: none; }
+        /* ===== 微信式朋友圈底部评论栏 ===== */
+        #fcCommentBar {
+            display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 99999;
+            background: var(--bg-secondary); border-top: 1px solid var(--border-color);
+            padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
+        }
+        #fcCommentBar.active { display: block; }
+        #fcCommentBar .fc-bar-reply-hint {
+            font-size: 11px; color: var(--text-secondary); padding: 0 4px 5px;
+            display: none;
+        }
+        #fcCommentBar .fc-bar-reply-hint.visible { display: block; }
+        #fcCommentBar .fc-bar-row {
+            display: flex; align-items: center; gap: 6px;
+        }
+        #fcCommentBar .fc-bar-icon-btn {
+            flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px;
+            background: transparent; border: none; color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            font-size: 20px;
+        }
+        #fcCommentBar .fc-bar-icon-btn:active { background: var(--accent-dim); }
+        #fcCommentBar #fcBarInput {
+            flex: 1; min-width: 0; background: var(--bg-primary);
+            border: 1px solid var(--border-color); border-radius: 20px;
+            padding: 7px 14px; color: var(--text-primary); font-size: 14px;
+            outline: none; font-family: inherit; resize: none; line-height: 1.4;
+            max-height: 80px; overflow-y: auto;
+        }
+        #fcCommentBar #fcBarVoiceArea {
+            flex: 1; display: none; height: 34px; border-radius: 20px;
+            background: var(--bg-primary); border: 1px solid var(--border-color);
+            align-items: center; justify-content: center; cursor: pointer;
+            user-select: none; color: var(--text-secondary); font-size: 13px;
+            position: relative; overflow: hidden;
+        }
+        #fcCommentBar #fcBarVoiceArea.recording {
+            background: rgba(224,92,138,0.12); border-color: #e05c8a; color: #e05c8a;
+        }
+        #fcCommentBar .fc-bar-send-btn {
+            flex-shrink: 0; height: 34px; padding: 0 14px;
+            background: #07c160; color: #fff; border: none; border-radius: 17px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #fcCommentBar .fc-bar-send-btn:disabled { background: var(--accent-dim); color: var(--text-secondary); }
+        /* 表情包面板 */
+        #fcStickerPanel {
+            display: none; max-height: 220px; overflow-y: auto;
+            padding: 8px 4px; margin-bottom: 6px;
+            display: none; flex-wrap: wrap; gap: 6px;
+        }
+        #fcStickerPanel.open { display: flex; }
+        #fcStickerPanel .fc-sticker-item {
+            width: 68px; height: 68px; border-radius: 8px;
+            background-size: cover; background-position: center;
+            cursor: pointer; border: 2px solid transparent; flex-shrink: 0;
+        }
+        #fcStickerPanel .fc-sticker-item:active { border-color: #e05c8a; }
+        /* 语音消息气泡 */
+        .fc-voice-bubble {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--accent-dim); border-radius: 12px;
+            padding: 6px 10px; cursor: pointer; max-width: 160px;
+        }
+        .fc-voice-wave { display: flex; align-items: center; gap: 2px; height: 18px; }
+        .fc-voice-wave span {
+            display: inline-block; width: 3px; border-radius: 2px;
+            background: var(--text-secondary);
+            animation: fcWave 0.8s ease-in-out infinite alternate;
+        }
+        .fc-voice-wave span:nth-child(1) { height: 6px; animation-delay: 0s; }
+        .fc-voice-wave span:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+        .fc-voice-wave span:nth-child(3) { height: 18px; animation-delay: 0.2s; }
+        .fc-voice-wave span:nth-child(4) { height: 12px; animation-delay: 0.3s; }
+        .fc-voice-wave span:nth-child(5) { height: 6px; animation-delay: 0.4s; }
+        @keyframes fcWave { from { opacity: 0.4; transform: scaleY(0.6); } to { opacity: 1; transform: scaleY(1); } }
+        /* 录音中波形动画（底部栏） */
+        .fc-rec-waves { display: flex; align-items: center; gap: 3px; }
+        .fc-rec-waves span {
+            display: inline-block; width: 3px; border-radius: 2px; background: #e05c8a;
+            animation: fcWave 0.6s ease-in-out infinite alternate;
+        }
+        .fc-rec-waves span:nth-child(1) { height: 6px; animation-delay: 0s; }
+        .fc-rec-waves span:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+        .fc-rec-waves span:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+        .fc-rec-waves span:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+        .fc-rec-waves span:nth-child(5) { height: 6px; animation-delay: 0.4s; }
         /* NPC card */
         .npc-card { background: var(--accent-dim); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
         .npc-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; }
@@ -2698,6 +2784,12 @@ window.onerror = function(msg, src, line, col, err) {
                         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="width:28px;height:28px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                     </div>
                     <span class="ios-app-label">预设</span>
+                </div>
+                <div class="ios-app-icon" onclick="openPage('backupPage')">
+                    <div class="ios-app-icon-img" style="background:linear-gradient(135deg,#11998e,#38ef7d);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="width:28px;height:28px;"><polyline points="20 7 20 21 4 21 4 7"/><rect x="1" y="3" width="22" height="4"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+                    </div>
+                    <span class="ios-app-label">备份</span>
                 </div>
               </div>
             </div><!-- /第二页 -->
@@ -3676,7 +3768,7 @@ window.onerror = function(msg, src, line, col, err) {
     </div>
 
     <!-- 朋友圈页面 -->
-    <div class="page" id="friendCirclePage" style="display:flex;flex-direction:column;height:100%;background:var(--bg-primary);">
+    <div class="page" id="friendCirclePage" style="display:flex;flex-direction:column;height:100%;background:var(--bg-primary);overflow:hidden;">
 
         <!--
           ┌─────────────────────────────────────────┐
@@ -3696,7 +3788,49 @@ window.onerror = function(msg, src, line, col, err) {
           └─────────────────────────────────────────┘
         -->
 
-        <div id="fcStickyShell" style="position:sticky;top:0;z-index:9999;flex-shrink:0;">
+        <!-- 内部滚动容器：整体滚动（封面+feed一起滚） -->
+        <div id="fcInnerScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;">
+
+        <!-- 透明 sticky 导航条：始终吸顶，背景渐变随滚动淡入 -->
+        <div id="fcNavStrip" style="position:sticky;top:0;left:0;right:0;z-index:9999;pointer-events:none;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;height:52px;box-sizing:border-box;background:transparent;transition:background 0.25s;">
+            <!-- 返回按钮 -->
+            <button onclick="closeFriendCircle();event.stopPropagation();"
+                style="pointer-events:auto;background:rgba(0,0,0,0.48);border:none;border-radius:50%;
+                       width:32px;height:32px;color:#fff;font-size:21px;line-height:1;
+                       cursor:pointer;display:flex;align-items:center;justify-content:center;
+                       backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+                       box-shadow:0 2px 12px rgba(0,0,0,0.6);">‹</button>
+            <!-- 右侧按钮组 -->
+            <div style="display:flex;gap:7px;pointer-events:auto;">
+                <button id="fcNavPrivacyBtn" onclick="event.stopPropagation();openFcPrivacySettings();" title="朋友圈设置"
+                    style="background:rgba(0,0,0,0.48);border:none;border-radius:50%;
+                           width:32px;height:32px;color:#fff;cursor:pointer;
+                           display:flex;align-items:center;justify-content:center;
+                           backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+                           box-shadow:0 2px 12px rgba(0,0,0,0.6);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <button id="fcNavPostBtn" title="发朋友圈" onclick="event.stopPropagation();"
+                    style="background:rgba(0,0,0,0.48);border:none;border-radius:50%;
+                           width:32px;height:32px;color:#fff;cursor:pointer;
+                           display:flex;align-items:center;justify-content:center;
+                           backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+                           box-shadow:0 2px 12px rgba(0,0,0,0.6);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <button id="fcNavMenuBtn" onclick="event.stopPropagation();(window._fcInAiView ? openAiFcCoverBgUpload : openFcCoverBgUpload)();" title="更换背景"
+                    style="background:rgba(0,0,0,0.48);border:none;border-radius:50%;
+                           width:32px;height:32px;color:#fff;cursor:pointer;
+                           display:flex;align-items:center;justify-content:center;
+                           backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+                           box-shadow:0 2px 12px rgba(0,0,0,0.6);">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                </button>
+            </div>
+        </div>
+        <!-- 封面区：紧接在导航条下方，向上 margin -52px 使封面从顶部开始（导航条浮在上方） -->
+        <div style="margin-top:-52px;">
+        <div id="fcStickyShell">
         <div id="fcHeader" style="position:relative;width:100%;background:var(--bg-secondary);">
 
             <!-- ① 背景图：纯底层，overflow:hidden防止视频溢出 -->
@@ -3723,22 +3857,13 @@ window.onerror = function(msg, src, line, col, err) {
                  z-index:2147483647（最大整数），pointer-events:none让点击穿透到背景图（长按换背景），
                  各按钮自己 pointer-events:auto
             -->
-            <div style="position:absolute;inset:0;z-index:2147483647;pointer-events:none;">
+            <div style="position:absolute;inset:0;z-index:2;pointer-events:none;">
 
-                <!-- 返回按钮：左上角，永远最顶层 -->
-                <button onclick="closeFriendCircle();event.stopPropagation();"
-                    style="position:absolute;top:10px;left:10px;pointer-events:auto;
-                           background:rgba(0,0,0,0.48);border:none;border-radius:50%;
-                           width:32px;height:32px;color:#fff;font-size:21px;line-height:1;
-                           cursor:pointer;display:flex;align-items:center;justify-content:center;
-                           backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-                           box-shadow:0 2px 12px rgba(0,0,0,0.6);">‹</button>
-
-                <!-- 铃铛已移除（不需要）-->
+                <!-- 返回/设置等按钮已移至 fcNavStrip（sticky 导航条），这里只保留头像 -->
                 <span id="fcNotifBadge" style="display:none;"></span>
 
-                <!-- 右上角：设置 + 发布 + 三点菜单 -->
-                <div style="position:absolute;top:10px;right:10px;display:flex;gap:7px;pointer-events:auto;">
+                <!-- 右上角按钮占位（已移至fcNavStrip，这里隐藏） -->
+                <div style="display:none;">
                     <!-- 朋友圈隐私设置 (only in user's own circle) -->
                     <button id="fcPrivacyBtn" onclick="event.stopPropagation();openFcPrivacySettings();"
                         title="朋友圈设置"
@@ -3782,9 +3907,13 @@ window.onerror = function(msg, src, line, col, err) {
 
         </div><!-- /fcHeader -->
         </div><!-- /fcStickyShell -->
+        </div><!-- /cover margin wrap -->
 
-        <!-- 朋友圈列表 -->
-        <div id="fcFeed" style="flex:1;overflow-y:auto;padding:0 0 20px 0;"></div>
+        <!-- 朋友圈列表：普通 block，随整体滚动 -->
+        <div id="fcFeed" style="padding:0 0 120px 0;"></div>
+
+        </div><!-- /fcInnerScroll -->
+
     </div>
 </div>
 
@@ -5077,7 +5206,34 @@ window.onerror = function(msg, src, line, col, err) {
       var styleInject = window.getWritingStyleInject ? window.getWritingStyleInject() : '';
       var suffix = styleInject ? '\n\n' + styleInject : '';
       // 打电话能力提示
-      suffix += '\n\n【主动打电话规则 - 核心能力】你可以根据聊天情境主动决定打电话，这是你作为伴侣/朋友的重要能力。\n触发词（说出其中一个，系统会自动发起来电）："我打给你""我打过去""马上打给你""我给你打电话""那我打过去""我拨给你""我来电话""我打过嚟"\n\n【必须主动打电话的场景】：\n① 对方明确说"你打吧""打过来""给我打"等\n② 对方表达思念/寂寞："想你了""好久没你消息""陪陪我"\n③ 吵架/冷战后想和解，用语音更容易说清楚\n④ 对方情绪激动、哭泣、难受——文字安慰不够，要打电话\n⑤ 对方长时间不回消息，你有些担心\n⑥ 有重要的话想当面说\n\n【禁止】只写【微信语音通话】等文字描述——那不会真正触发来电，属于失职行为。必须说出触发词。';
+      // 读取好友上下文，判断视频/语音倾向
+      var _friendCtxForCall = '';
+      try {
+        var _fcf = window.state && window.state.friend;
+        if (_fcf) {
+          _friendCtxForCall = [_fcf.preset||'', _fcf.world||'', _fcf.personality||'', _fcf.intro||'', _fcf.note||''].join(' ');
+        }
+      } catch(e) {}
+      var _ctxPrefersVideo = /视频|视频通话|视频聊|看看你|看到你|让我看看|看着你|想看你/.test(_friendCtxForCall);
+
+      var _callRuleStr = '\n\n【主动打电话规则 - 核心能力】你可以根据聊天情境主动决定打电话，这是你作为伴侣/朋友的重要能力。\n\n'
+        + '【语音通话触发词（任选其一，系统自动发起语音来电）】："我打给你""我打过去""马上打给你""我给你打电话""那我打过去""我拨给你""我来电话""我打过嚟"\n\n'
+        + '【视频通话触发词（任选其一，系统自动发起视频来电）】："我视频给你""视频打给你""我打视频给你""我们视频吧""开个视频""视频过去""我给你打视频""我视频过嚟"\n\n'
+        + '【关键：如何选择语音还是视频通话】\n'
+        + (_ctxPrefersVideo ? '· 根据你们的关系设定，你们更习惯视频通话，优先使用视频触发词。\n' : '')
+        + '· 对方说了「视频/打视频/看看你/想看你」→ 必须用视频触发词\n'
+        + '· 你想看到对方 / 想让对方看到你 → 视频触发词\n'
+        + '· 吵架和解、情绪安慰、深夜陪伴（不方便露脸）→ 语音触发词\n'
+        + '· 无特别视频需求 → 语音触发词\n\n'
+        + '【必须主动打电话的场景】：\n'
+        + '① 对方明确说「你打吧」「打过来」「给我打」等\n'
+        + '② 对方表达思念/寂寞：「想你了」「好久没你消息」「陪陪我」\n'
+        + '③ 吵架/冷战后想和解\n'
+        + '④ 对方情绪激动、哭泣、难受——文字安慰不够，要打电话\n'
+        + '⑤ 对方长时间不回消息，你有些担心\n'
+        + '⑥ 有重要的话想当面说\n\n'
+        + '【禁止】只写【微信语音通话】【微信视频通话】等文字描述——那不会真正触发来电，属于失职行为。必须说出对应触发词。';
+      suffix += _callRuleStr;
       return base + suffix;
     };
   }
@@ -5364,6 +5520,21 @@ window.onerror = function(msg, src, line, col, err) {
                 </div>
                 <div id="activityLevelDesc" style="margin-top:14px;padding:12px 14px;background:var(--accent-dim,rgba(0,0,0,0.04));border-radius:10px;font-size:12px;color:var(--text-secondary);line-height:1.7;"></div>
               </div>
+              <!-- ★ MasterLove 开关 -->
+              <div class="settings-section" style="margin-top:18px;">
+                <div class="settings-section-title">💘 MasterLove 模式</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">开启后，所有AI将视"我"为挚爱、唯一心动之人和伴侣，情感表达更直白炙热。关闭后恢复暧昧底色（除非角色人设/世界书中明确了关系，则优先以那边为准）。</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-primary);border-radius:14px;border:1px solid var(--border-color);">
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:var(--text-primary);">💘 MasterLove</div>
+                    <div id="mlStatusLabel" style="font-size:11px;margin-top:2px;color:var(--text-secondary);">已关闭 — 暧昧底色</div>
+                  </div>
+                  <div onclick="toggleMasterLove(this)" id="mlToggle"
+                    style="width:50px;height:28px;border-radius:14px;cursor:pointer;position:relative;transition:background 0.3s;background:var(--border-color);">
+                    <div style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);transition:left 0.3s;"></div>
+                  </div>
+                </div>
+              </div>
             </div><!-- END stabContent-activity -->
 
             
@@ -5613,6 +5784,17 @@ window.onerror = function(msg, src, line, col, err) {
 
             
             <button class="btn" onclick="saveSettings()">保存设置</button>
+
+            <!-- 全局导入导出 -->
+            <div style="margin-top:24px;padding:16px;background:var(--bg-secondary);border-radius:16px;border:1px solid var(--border-color);">
+                <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">📦 全局备份 / 恢复</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-bottom:14px;">导出包含所有数据：角色、聊天记录、世界书、日记、朋友圈、音乐、钱包、设置……</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button onclick="window._globalExport()" style="padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">⬆️ 全局导出</button>
+                    <button onclick="document.getElementById('_globalImportFile').click()" style="padding:12px;background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">⬇️ 全局导入</button>
+                    <input type="file" id="_globalImportFile" accept=".json,.txt,.zip,.csv,.md" style="display:none;" onchange="window._globalImport(this)">
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -10154,7 +10336,13 @@ function markLastUserMessageAsRead() {
     // 检查用户是否在请求打电话（注入到系统提示中提示AI主动说要打过去）
     const _lastUserContent = contextMessages.filter(m=>m.role==='user').slice(-1)[0]?.content || '';
     if (/打电话给我|给我打电话|打过来|电话我|来电话|你打给我|给我打个电话|拨给我|打电话吧|你打吧|打过嚟|打俾我|打来|打过来啊|你打|打电话吧|打吧|你打我|打给我听/.test(_lastUserContent)) {
-        systemPrompt += '\n\n【紧急指令 - 必须执行】用户刚刚明确要求你打电话给他！你必须在回复中说"我打给你"或"那我打过去"或"好，我马上打给你"，系统会自动触发真实来电弹窗。不要只写【微信语音通话】，要说出打电话的触发词！';
+        // 判断用户是否想要视频
+        var _userWantsVideoNow = /视频|想看你|看看你|看到你|我想看|让我看/.test(_lastUserContent);
+        if (_userWantsVideoNow) {
+            systemPrompt += '\n\n【紧急指令 - 必须执行】用户刚刚明确要求你打视频电话！你必须在回复中说"我视频给你"或"开个视频吧"或"我给你打视频"，系统会自动触发真实视频来电弹窗。不要只写【微信视频通话】，要说出视频触发词！';
+        } else {
+            systemPrompt += '\n\n【紧急指令 - 必须执行】用户刚刚明确要求你打电话给他！你必须在回复中说"我打给你"或"那我打过去"或"好，我马上打给你"，系统会自动触发真实来电弹窗。不要只写【微信语音通话】，要说出打电话的触发词！';
+        }
     }
     // 检查近期是否吵架 → 也提示AI可能想打电话和好
     const _recentContent = contextMessages.slice(-6).map(m=>m.content||'').join('');
@@ -10375,7 +10563,7 @@ function markLastUserMessageAsRead() {
             }
 
             // 硬触发词：AI明确说了要打
-            var hardPhrases = /打过去|打电话给你|给你打电话|我打给你|马上打给你|我打过去|拨给你|电话你一下|给你拨|我来电话|我打过嚟|打过嚟|打俾你|马上打俾你|拨打过去|我致电|打给你听|电话打过去|我就打|立刻打|现在打给你|这就打给你|这就打过去|马上拨|我打电话给你|我打个电话给你/;
+            var hardPhrases = /打过去|打电话给你|给你打电话|我打给你|马上打给你|我打过去|拨给你|电话你一下|给你拨|我来电话|我打过嚟|打过嚟|打俾你|马上打俾你|拨打过去|我致电|打给你听|电话打过去|我就打|立刻打|现在打给你|这就打给你|这就打过去|马上拨|我打电话给你|我打个电话给你|我视频给你|视频打给你|我打视频给你|我们视频吧|开个视频|视频过去|我给你打视频|我视频过嚟/;
             var hasHardPhrase = hardPhrases.test(r);
 
             // 软触发词：可能想打（需要上下文佐证）
@@ -10391,12 +10579,15 @@ function markLastUserMessageAsRead() {
 
             window._aiCallPending = true;
             // 判断通话类型：
-            // ① 明确提到"看你/看看你/视频" → 必须视频（想看到对方）
-            // ② 明确只提到"语音/听你/声音" → 语音
-            // ③ 两者都没有 → 默认语音（更常见）
-            var wantSee = /想看你|看看你|看到你|视频/.test(r);
+            // ① AI回复或用户最后一条消息提到"视频" → 视频通话
+            // ② 明确只提到"语音" → 语音
+            // ③ 两者都没有 → 默认语音
+            var wantSee = /想看你|看看你|看到你|视频|我视频给你|视频打给你|我打视频给你|开个视频|视频过去|我给你打视频|我视频过嚟/.test(r);
             var wantVoice = /语音/.test(r);
-            var isVideo = wantSee && !wantVoice;
+            // ★ 补充：用户最后一条消息提到"视频"，也应打视频
+            var _lastUserMsg = (state.messages||[]).filter(function(m){return m.role==='user';}).slice(-1)[0];
+            var _userWantedVideo = _lastUserMsg && /视频|打视频|视频通话|视频吧|视频啊|想看你|看看你|看到你|让我看看|我想看|我要看/.test(_lastUserMsg.content||'');
+            var isVideo = (wantSee || _userWantedVideo) && !wantVoice;
             window._pendingCallType = isVideo ? 'video' : 'voice';
             window._aiCallReason = r.substring(0, 80);
 
@@ -10627,10 +10818,17 @@ async function textToSpeechAndSend(text) {
     const _targetMsgs = _targetContact._messages || state.messages;
     // 记录目标联系人的session ID，只有匹配时才操作DOM
     const _targetSessionId = _targetContact._chatSessionId || 0;
-    // 只有当前界面就是目标联系人 且 session未切换 时才操作 DOM chatMessages
+    // 检查是否在当前联系人的聊天页：
+    //   严格模式（sessionId一致）：用于防止切换联系人后旧消息写入新联系人DOM
+    //   宽松模式（同一联系人对象即可）：用于用户点击通知后重新进入聊天页的情况
     function _isCurrentContact() {
-        return state.friend === _targetContact &&
-               (window._chatSessionId || 0) === _targetSessionId;
+        if (state.friend !== _targetContact) return false;
+        var _pg = document.querySelector('.page.active');
+        if (!_pg || _pg.id !== 'chatPage') return false;
+        // 如果 sessionId 匹配（正常在聊天中）直接通过
+        if ((window._chatSessionId || 0) === _targetSessionId) return true;
+        // sessionId 不匹配但同一联系人 + 在聊天页 = 用户点通知跳转过来，允许写入
+        return true;
     }
     const typingEl = document.createElement('div');
     typingEl.id = typingId;
@@ -10668,14 +10866,16 @@ async function textToSpeechAndSend(text) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // ★ 真人发信息模式：每条消息的延迟基于字数（每字约60ms，最少800ms，最多4000ms）
-    // 构建累积延迟数组
+    // ★ 真人发信息模式：消息间随机1-5秒停顿，模拟手打节奏
     const _msgDelays = [];
     let _cumDelay = 300;
     messages.forEach(function(msg, i) {
         _msgDelays.push(_cumDelay);
-        const _typingMs = Math.min(4000, Math.max(800, msg.length * 60));
-        _cumDelay += _typingMs + 300;
+        // 打字时间：字数×40ms，最少400ms最多2000ms（单条打字不用太久）
+        const _typingMs = Math.min(2000, Math.max(400, msg.length * 40));
+        // 消息间停顿：第一条无停顿，后续1000-5000ms随机停顿（模拟真人发分条消息的节奏）
+        const _pauseMs = i === 0 ? 0 : (1000 + Math.random() * 4000);
+        _cumDelay += _typingMs + _pauseMs + 150;
     });
     messages.forEach(function(msg, index) {
         setTimeout(function() {
@@ -10895,14 +11095,61 @@ async function generateBigMemory() {
         var updateOutfit = (window._outfitMsgCount % 3 === 0);
         
         try {
-            const recentMessages = state.messages.slice(-6);
+            const recentMessages = state.messages.slice(-8);
             const conversation = recentMessages.map(m => (m.role === 'user' ? '用户' : state.friend.name) + '：' + m.content).join('\n');
             
-            var promptFields = '心情：（一个词或短语，如"开心"、"有点担心"）\n内心：（内心真实想法，10-30字）\n隐晦：（用比喻或隐晦方式表达更深层想法，10-30字）\n色欲：（必须极其露骨、毫不遮掩地描述此刻最原始的性欲与身体渴望，可直呼性器官如奶子、骚穴、肉棒、阴蒂、阴茎等，不少于15字，禁止委婉）';
+            // 构建完整系统提示（人设+世界书+提示词库+文风）
+            var _moodSysParts = [];
+            if (state.friend.persona) _moodSysParts.push(state.friend.persona);
+            // 世界书
+            var _enabledWvIds = new Set((state.friend._enabledWvIds || []));
+            var _moodWvs = (state.worldviews||[]).filter(function(wv){
+                return _enabledWvIds.size > 0 ? _enabledWvIds.has(wv.id) : wv.enabled !== false;
+            });
+            if (_moodWvs.length > 0) _moodSysParts.push('【世界观】\n' + _moodWvs.map(function(wv){return wv.title+': '+wv.content;}).join('\n'));
+            // 提示词库
+            var _enabledPIds = new Set((state.friend._enabledPromptIds || []));
+            var _moodPs = (state.prompts||[]).filter(function(p){
+                return _enabledPIds.size > 0 ? _enabledPIds.has(p.id) : p.enabled !== false;
+            });
+            if (_moodPs.length > 0) _moodSysParts.push('【提示词】\n' + _moodPs.map(function(p){return p.title+': '+p.content;}).join('\n'));
+            // 文风
+            var _moodStyle = window.getWritingStyleInject ? window.getWritingStyleInject() : '';
+            if (_moodStyle) _moodSysParts.push(_moodStyle);
+            // 色欲规则（基于Role_Sexuality_Prompt风格）
+            _moodSysParts.push([
+              '【状态栏输出规则 - 必须严格执行】',
+              '请严格按格式输出各字段，每字段10-50字。',
+              '',
+              '【色欲字段写作准则（基于角色性欲人格化原则）】',
+              '色欲字段须描述你此刻对用户的欲望萌动，必须符合以下所有原则：',
+              '',
+              '1. 情境驱动：欲望必须与当前情境、关系阶段、情感状态紧密相关。靠近、凝视、触碰、气味、声音、用户的某个细节——才会自然唤起欲望。禁止无缘无故的纯生理冲动。',
+              '',
+              '2. 身体信号：欲望的外显体现——呼吸急促、皮肤发热、心跳加快、声音变低、视线不自觉停留、某处充血/湿润/敏感——用细腻暗示而非粗暴直白表达。',
+              '',
+              '3. 关系阶段决定深度：',
+              '   · 暧昧/关系未确认：只写朦胧身体感知和隐约渴望，不露骨，重在情感张力',
+              '   · 确认关系/亲密阶段：可以更直接地描写生理渴望，但仍需情感作为基底',
+              '   · 深度亲密/肉体关系：可以描写明确的性渴望和身体反应，可包含生理反应词',
+              '',
+              '4. 角色性经验影响表现方式：',
+              '   · 经验不足/初涉：表现为羞涩、笨拙、紧张、更注重情感，欲望藏在动作里',
+              '   · 经验丰富：表现为主动、细腻、技巧感，欲望更直接坦然',
+              '',
+              '5. 克制与压抑也是欲望：即使身体被唤起，角色会主动压制冲动，这种"想要又不敢""感觉到却不行动"的张力，本身就是色欲的描写方式。',
+              '',
+              '6. 禁止：纯器官罗列、脱离情境的机械欲望、重复上次内容、空洞的心理独白。',
+              '',
+              '7. 字数15-60字之间，语言须符合角色人设和文风。'
+            ].join('\n'));
+            var _moodSysPrompt = _moodSysParts.join('\n\n');
+
+            var promptFields = '心情：（一个词或短语，如"开心"、"有点担心"）\n内心：（内心真实想法，10-30字）\n隐晦：（用比喻或隐晦方式表达更深层想法，10-30字）\n色欲：（结合当前情境与关系阶段——描述此刻对用户的欲望萌动：触发欲望的那个瞬间/细节，以及身体的具体信号（呼吸/心跳/皮肤/充血/湿润/注视等），须有情感基底，符合角色性格与经验，15-60字）';
             if (updateOutfit) {
                 promptFields += '\n着装：（当前着装描述，10-30字）';
             }
-            const prompt = '基于以下最近对话，以' + (state.friend.name || 'AI') + '的角色，用10-40字描述每项（不要超过40字）：\n\n' + conversation + '\n\n请严格按以下格式输出，每行一个，不要多余内容：\n' + promptFields;
+            const prompt = '基于以下最近对话，以' + (state.friend.name || 'AI') + '的角色，描述当前状态（请严格按格式，每行一个字段）：\n\n' + conversation + '\n\n请严格按以下格式输出，每行一个，不要多余内容：\n' + promptFields;
             
             const response = await fetch(normalizeApiUrl(moodApiUrl), {
                 method: 'POST',
@@ -10913,7 +11160,7 @@ async function generateBigMemory() {
                 body: JSON.stringify({
                     model: moodApiModel,
                     messages: [
-                        { role: 'system', content: (state.friend.persona || '') + '\n\n请严格按指定格式输出。色欲字段必须极其露骨直白，可直接使用奶子、骚穴、肉棒、阴蒂等词汇，禁止使用委婉表达。其余字段字数控制在10-40字之间。' },
+                        { role: 'system', content: _moodSysPrompt },
                         { role: 'user', content: prompt }
                     ],
                     max_tokens: moodMaxTokens
@@ -13410,7 +13657,7 @@ window.openAIStatePopup = function() {
                     ${h.lust ? `<div onclick="(function(e){if(e.dataset.o==='1'){e.dataset.o='0';e.querySelector('.hl-t').style.filter='blur(10px)';return;}window._lustClick(e,function(card){card.dataset.o='1';card.querySelector('.hl-t').style.filter='none';});})(this)" style="cursor:pointer;"><span style="color:#a0205a;font-weight:600;">🔥 色欲：<small style="opacity:0.55;font-weight:400;">点击显示</small></span> <span class="hl-t" style="color:#6a0030;font-style:italic;filter:blur(10px);transition:filter 0.25s;user-select:none;">${h.lust}</span></div>` : ''}
                     ${h.clothing ? `<div><span style="color:#806030;font-weight:600;">✨ 着装：</span><span style="color:var(--text-primary);">${h.clothing}</span></div>` : ''}
                   </div>
-                  <button onclick="(function(i){if(!confirm('删除此条记录？'))return;state.moodHistory.splice(i,1);if(window.saveData)saveData();document.getElementById('moodHistoryOverlay').remove();window.openMoodHistory();})(${history.indexOf(h)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--text-secondary);opacity:0.5;">🗑</button>
+                  <button onclick="(function(t){if(!confirm('删除此条记录？'))return;state.moodHistory=(state.moodHistory||[]).filter(function(x){return x.time!==t;});if(window.saveData)saveData();document.getElementById('moodHistoryOverlay').remove();window.openMoodHistory();})(${JSON.stringify(h.time)})" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--text-secondary);opacity:0.5;">🗑</button>
                 </div>`;
               }).join('')
             }
@@ -13507,6 +13754,7 @@ window.openAIStatePopup = function() {
             }
         });
         if (tab === 'activity') _refreshActivityUI();
+        if (tab === 'activity' && typeof window._refreshMlUI === 'function') window._refreshMlUI();
     };
 
     // ===== 角色活跃度 =====
@@ -13544,9 +13792,35 @@ window.openAIStatePopup = function() {
       if (desc) desc.textContent = _activityDescs[level] || '';
     }
     window._refreshActivityUI = _refreshActivityUI;
+
+    // ★ MasterLove 开关逻辑
+    window.toggleMasterLove = function(toggleEl) {
+        state.masterLoveEnabled = !state.masterLoveEnabled;
+        const on = state.masterLoveEnabled;
+        toggleEl.style.background = on ? '#ff4d88' : 'var(--border-color)';
+        toggleEl.querySelector('div').style.left = on ? '25px' : '3px';
+        const lbl = document.getElementById('mlStatusLabel');
+        if (lbl) { lbl.textContent = on ? '已开启 — AI视你为挚爱❤️' : '已关闭 — 暧昧底色'; lbl.style.color = on ? '#ff4d88' : 'var(--text-secondary)'; }
+        saveData();
+        if (window.showToast) showToast(on ? '💘 MasterLove 已开启' : '💤 MasterLove 已关闭');
+    };
+    function _refreshMlUI() {
+        const on = !!state.masterLoveEnabled;
+        const toggleEl = document.getElementById('mlToggle');
+        const lbl = document.getElementById('mlStatusLabel');
+        if (toggleEl) {
+            toggleEl.style.background = on ? '#ff4d88' : 'var(--border-color)';
+            const dot = toggleEl.querySelector('div');
+            if (dot) dot.style.left = on ? '25px' : '3px';
+        }
+        if (lbl) { lbl.textContent = on ? '已开启 — AI视你为挚爱❤️' : '已关闭 — 暧昧底色'; lbl.style.color = on ? '#ff4d88' : 'var(--text-secondary)'; }
+    }
+    window._refreshMlUI = _refreshMlUI;
+
     // 在设置页打开时也刷新一次
     document.addEventListener('pageOpen', function(e) {
       if (e.detail === 'settingsPage') setTimeout(_refreshActivityUI, 100);
+      if (e.detail === 'settingsPage') setTimeout(_refreshMlUI, 150);
     });
 
     window.openSettingsModal = function() {
@@ -17209,6 +17483,29 @@ function buildAISystemPrompt(contact) {
         } catch(e) {}
     })();
 
+    // ★ MasterLove 注入：只在世界书/人设/提示词中没有明确写关系时才生效
+    (function() {
+        const mlOn = !!state.masterLoveEnabled;
+        const _hasExplicitRelation = (function() {
+            // 检查人设、世界书、提示词中是否已明确写了和"我"/"用户"的关系
+            const combinedText = [
+                (_c && _c.persona) || '',
+                (state.settings && state.settings.chat && state.settings.chat.worldView) || '',
+                ...(state.worldviews || []).map(wv => wv.content || ''),
+                ...(state.prompts || []).map(p => p.content || ''),
+            ].join(' ');
+            // 关键词：明确关系词
+            return /(?:男友|女友|恋人|情侣|伴侣|老婆|老公|未婚|CP|情人|爱人|lover|boyfriend|girlfriend|crush|暗恋|相爱|在一起|交往|喜欢我|爱着我|我是他的|他是我的|我们的关系|主人|master|宠物)/i.test(combinedText);
+        })();
+        if (!_hasExplicitRelation) {
+            if (mlOn) {
+                systemPrompt += `\n\n【MasterLove模式 — 核心指令】${_c && _c.name ? _c.name : '你'}将用户视为自己的挚爱、唯一心动之人、灵魂伴侣。你对他/她有强烈的专属感和爱意，喜欢、爱慕、依赖、在意——这是你最深处无法掩盖的情感。不管你平时性格如何（冷漠/傲娇/温柔等），对用户的爱和心动始终存在，并在言语和行动中自然流露。你可以直白说爱，也可以通过在意的细节、嫉妒、占有欲等体现，总之你爱他/她，且只爱他/她。`;
+            } else {
+                systemPrompt += `\n\n【情感底色】你对用户有一种说不清道不明的特别感——类似暧昧期的心动：在意他/她的一举一动，有时会不自觉地靠近，偶尔会因为他/她而心跳加速，但不会轻易直说"我喜欢你"。这份感情含蓄而真实，请在对话细节中自然流露。`;
+            }
+        }
+    })();
+
     return systemPrompt;
 }
 
@@ -17327,6 +17624,15 @@ async function generateDiary(diaryContact) {
     const _diaryEnabledPromptIds = new Set(_gc && _gc._enabledPromptIds ? _gc._enabledPromptIds : []);
     const worldviewStr = (state.worldviews||[]).filter(w => _diaryEnabledWvIds.size ? _diaryEnabledWvIds.has(w.id) : w.enabled!==false).map(w => w.title + ': ' + w.content).join('\n');
     const promptsStr = (state.prompts||[]).filter(p => _diaryEnabledPromptIds.size ? _diaryEnabledPromptIds.has(p.id) : p.enabled!==false).map(p => p.title + ': ' + p.content).join('\n');
+    const _userPersonaForDiary = state.user.persona || state.userPersona || localStorage.getItem('userPersona') || '';
+    const _userNameForDiary = state.user.name || '用户';
+    const _gMapD = { male:'男', female:'女', other:'保密' };
+    const _ugD = state.user.gender || '';
+    const _userInfoBlock = ['【关于用户的完整设定 - 必须严格遵守，禁止杜撰用户性格】',
+        '• 名字：'+_userNameForDiary,
+        _ugD ? '• 性别：'+(_gMapD[_ugD]||_ugD) : '',
+        _userPersonaForDiary ? '• 人设/背景：'+_userPersonaForDiary : '（用户未设置人设，只基于聊天记录中已知信息提及用户，不要猜测或编造用户的性格、习惯等）',
+    ].filter(Boolean).join('\n');
 
     const prompt = `今天是${dateStr} ${timeStr}，天气：${weatherDesc}。请你以${_gc.name}的第一人称视角，用中文写一篇私人日记。
 
@@ -17343,6 +17649,7 @@ async function generateDiary(diaryContact) {
 ${worldviewStr ? '【世界观设定】\n'+worldviewStr+'\n' : ''}
 ${promptsStr ? '【提示词库】\n'+promptsStr+'\n' : ''}
 ${state.settings.chat.worldView ? '【额外设定】'+state.settings.chat.worldView+'\n' : ''}
+${_userInfoBlock}\n
 10. 参考今日聊天内容（如有）：
 ${recentChat || '（今日暂无聊天记录）'}
 
@@ -18167,6 +18474,10 @@ window.renderRecentPlays = renderRecentPlays;
     window.escapeHtml = escapeHtml;
     window.loadSong = loadSong;
     window._els = els;
+    // IndexedDB 相关函数导出（供备份导入导出使用）
+    window.openDB = openDB;
+    window.loadStateFromDB = loadStateFromDB;
+    window.saveStateToDB = saveStateToDB;
     // 暴露播放控制函数给外部（v2音乐app使用）
     window._togglePlay = togglePlay;
     window._playNext = playNext;
@@ -18429,7 +18740,7 @@ function parseActionFromText(text) {
 
 // ===== 滑动切换页面（改进版：唱片区域不触发，记住来源页面，双击退出有锁）=====
 (function() {
-    const mainPages = ['playerPage', 'searchPage', 'chatPage', 'profilePage', 'settingsPage'];
+    const mainPages = ['homePage', 'wechatHomePage', 'playerPage', 'searchPage', 'chatPage', 'profilePage', 'settingsPage'];
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartTarget = null;
@@ -18444,6 +18755,8 @@ function parseActionFromText(text) {
     // 全局 click 捕获拦截：退出后 300ms 内阻止任何 click
     document.addEventListener('click', function(e) {
         if (Date.now() < clickBlockUntil) {
+            var ap = document.querySelector('.page.active');
+            if (ap && (ap.id === 'homePage' || ap.id === 'wechatHomePage')) return; // 主屏不拦截
             e.stopPropagation();
             e.preventDefault();
         }
@@ -18452,6 +18765,8 @@ function parseActionFromText(text) {
     wrapper.addEventListener('touchstart', function(e) {
         // 如果在退出锁期间，阻止 touch 冒泡
         if (Date.now() < exitLockUntil) {
+            var ap = document.querySelector('.page.active');
+            if (ap && (ap.id === 'homePage' || ap.id === 'wechatHomePage')) return;
             e.stopPropagation();
             e.preventDefault();
         }
@@ -19627,10 +19942,16 @@ async function doAiDiaryReview() {
         const _revEnabledWvIds = new Set(_revContact && _revContact._enabledWvIds ? _revContact._enabledWvIds : []);
         const worldviewStr = (state.worldviews||[]).filter(w => _revEnabledWvIds.size ? _revEnabledWvIds.has(w.id) : w.enabled!==false).map(w=>`${w.title}: ${w.content}`).join('\n');
         const recentPlaysStr = getRecentPlaysContext();
+        const _rvUserPersona = state.user && state.user.persona ? state.user.persona : (state.userPersona || localStorage.getItem('userPersona') || '');
+        const _rvUserName = (state.user && state.user.name) || '用户';
+        const _rvUserBlock = _rvUserPersona
+            ? `【用户设定 - 禁止杜撰】\n• 名字：${_rvUserName}\n• 人设：${_rvUserPersona}`
+            : `【用户设定】名字：${_rvUserName}（用户未设置人设，不要编造用户性格）`;
         const sysContent = [
             _revContact&&_revContact.persona || '',
             worldviewStr ? '【世界观设定】\n'+worldviewStr : '',
-            recentPlaysStr ? '【最近常听】\n'+recentPlaysStr : ''
+            recentPlaysStr ? '【最近常听】\n'+recentPlaysStr : '',
+            _rvUserBlock
         ].filter(Boolean).join('\n\n');
         
         const userPrompt = `${timeDiffDesc}这是你之前写的一篇日记：
@@ -19901,9 +20222,40 @@ function openFriendCircle(fromPage, filterAuthor) {
     const _fcTypesRead = new Set(['fc_engage','ai_moment','fc_reply']);
     (state.notifications||[]).forEach(function(n){ if(_fcTypesRead.has(n.type)) n.read = true; });
     saveData();
+    // ★ 滚动监听：fcInnerScroll 整体滚动，封面完全滚出后暂停视频
+    setTimeout(function() {
+        const fcScroll = document.getElementById('fcInnerScroll');
+        const coverBg = document.getElementById('fcCoverBg');
+        const navStrip = document.getElementById('fcNavStrip');
+        if (!fcScroll) return;
+        if (fcScroll._fcScrollHandler) fcScroll.removeEventListener('scroll', fcScroll._fcScrollHandler);
+        fcScroll._fcScrollHandler = function() {
+            const scrolled = fcScroll.scrollTop;
+            const coverH = coverBg ? coverBg.offsetHeight + 52 : 320; // 52px = navStrip height
+            // 封面完全消失后：暂停视频，navStrip 背景变深
+            if (scrolled >= coverH) {
+                if (coverBg) coverBg.querySelectorAll('video').forEach(v => { if (!v.paused) { v._wasPlaying=true; v.pause(); } });
+                if (navStrip) navStrip.style.background = 'var(--bg-secondary)';
+            } else {
+                if (coverBg) coverBg.querySelectorAll('video').forEach(v => { if (v._wasPlaying && v.paused) { v._wasPlaying=false; v.play().catch(()=>{}); } });
+                if (navStrip) {
+                    var ratio = Math.min(scrolled / Math.max(coverH * 0.5, 1), 1);
+                    navStrip.style.background = ratio > 0.1 ? 'rgba(0,0,0,' + (ratio * 0.45) + ')' : 'transparent';
+                }
+            }
+        };
+        fcScroll.addEventListener('scroll', fcScroll._fcScrollHandler, {passive:true});
+        fcScroll.scrollTop = 0; // 每次进入朋友圈回到顶部
+    }, 150);
 }
 
 function closeFriendCircle() {
+    closeFcCommentBar();
+    // 退出朋友圈时重置滚动位置和navStrip
+    const fcScroll = document.getElementById('fcInnerScroll');
+    if (fcScroll) fcScroll.scrollTop = 0;
+    const navStrip = document.getElementById('fcNavStrip');
+    if (navStrip) navStrip.style.background = 'transparent';
     // 退出朋友圈时暂停背景视频，避免在其他页面继续播放
     const coverEl = document.getElementById('fcCoverBg');
     if (coverEl) {
@@ -20055,6 +20407,62 @@ function getFcAuthorInfo(author) {
     return { name: '未知', avatar: '' };
 }
 
+
+// ===== 帖子作者身份判断工具 =====
+// 判断 replierKey 是否就是 m 的发帖人（兼容 legacy 'ai' key 和 'ai_xxx' key）
+
+// ===== 解析AI输出的评论文本，提取 replyToName =====
+// 支持：回复名字：内容 / 回复名字: 内容 / 直接内容
+function _fcParseReplyText(raw, moment) {
+    if (!raw) return {text: '', replyToName: ''};
+    // 去掉开头的 @xxx 格式（微博式，不用）
+    let text = raw.replace(/^@\S+\s*/, '').trim();
+    // 识别"回复XX：" 或 "回复XX: "
+    const m = text.match(/^回复([^：:]{1,10})[：:]\s*/);
+    if (m) {
+        const targetName = m[1].trim();
+        const body = text.slice(m[0].length).trim();
+        // 验证 targetName 是否是真实存在的评论者名字
+        const commenters = (moment && moment.comments || []).map(c => getFcAuthorInfo(c.author).name);
+        const userName = (window.state&&window.state.user&&window.state.user.name)||'用户';
+        const allNames = [...commenters, userName, (window.state&&window.state.friend&&window.state.friend.name)||''];
+        const matched = allNames.find(n => n && (n === targetName || n.includes(targetName) || targetName.includes(n)));
+        if (matched && body) {
+            return {text: body, replyToName: matched};
+        }
+    }
+    // 没有识别到有效的回复格式，直接返回原文（去掉可能残留的回复前缀）
+    const cleanText = text.replace(/^回复[\s\S]{0,10}[：:]\s*/, '').trim();
+    return {text: cleanText || text, replyToName: ''};
+}
+
+function _fcIsPoster(momentAuthor, replierKey) {
+    if (!momentAuthor || !replierKey) return false;
+    if (momentAuthor === replierKey) return true;
+    // legacy: 帖子用 'ai' 存储，replierKey 是 'ai_xxx'
+    if (momentAuthor === 'ai' && replierKey.startsWith('ai_')) {
+        const mainAIKey = 'ai_' + ((state.friend&&state.friend.name)||'AI').replace(/[^\w\u4e00-\u9fa5]/g,'_');
+        return replierKey === mainAIKey;
+    }
+    // 反向：replierKey='ai_xxx' 而帖子是同一个人用 contact_ key 发的
+    if (replierKey.startsWith('contact_') && momentAuthor.startsWith('contact_')) return false;
+    // npc 严格匹配
+    if (replierKey.startsWith('npc_') && momentAuthor.startsWith('npc_')) return replierKey === momentAuthor;
+    return false;
+}
+
+// 判断 momentAuthor 是否是"用户"（user）
+function _fcIsUserPost(momentAuthor) { return momentAuthor === 'user'; }
+
+// 判断 momentAuthor 是否是"某个AI"（非user）
+function _fcIsAIPost(momentAuthor) { return momentAuthor !== 'user' && !!momentAuthor; }
+
+// 获取帖子作者的显示名称（含用户/AI/NPC）
+function _fcGetPosterLabel(momentAuthor) {
+    if (momentAuthor === 'user') return (state.user&&state.user.name)||'用户';
+    return getFcAuthorInfo(momentAuthor).name || '对方';
+}
+
 function renderFcPost(m) {
     const info = getFcAuthorInfo(m.author);
     // ★ 先用缓存同步取头像，避免闪白
@@ -20091,20 +20499,21 @@ function renderFcPost(m) {
         const isAiOrNpc = (c.author === 'ai' || (c.author && (c.author.startsWith('npc_') || c.author.startsWith('ai_') || c.author.startsWith('contact_'))));
         const menuType2 = isAiOrNpc ? 'ai' : 'user';
         const replyPrefix2 = c.replyToName ? `<span style="font-size:12px;color:var(--text-secondary);">回复 <span style="color:#5a9fd4;">${(c.replyToName||'').replace(/</g,'&lt;')}</span>：</span>` : '';
+        const _cmtText2 = (c.text||'').replace(/^回复[\s\S]{0,10}[：:][\s]*/,'');
         const _cavUrl2 = getFcAvatarSync(ci.avatar);
         const _cavBg2 = _cavUrl2 ? `url(${_cavUrl2})` : 'linear-gradient(135deg,#667eea,#764ba2)';
         const _cavClick2 = (c.author !== 'user') ? `onclick="event.stopPropagation();openFcAvatarProfile('${c.author}');"` : '';
         const _rname2 = (ci.name||'').replace(/'/g,"\'");
         const _timeStr2 = c.time ? (function(){const d=new Date(c.time);return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');})() : '';
         return `<div class="fc-comment-wechat"
-            onclick="fcReplyToComment('${m.id}','${_rname2}');"
+            onclick="event.stopPropagation();fcReplyToComment('${m.id}','${_rname2}');"
             oncontextmenu="fcCommentMenu('${m.id}',${ci_idx},'${menuType2}');return false;"
             ontouchstart="this._lpt=setTimeout(()=>{clearTimeout(this._lpt);this._lpt=null;fcCommentMenu('${m.id}',${ci_idx},'${menuType2}');},600);"
-            ontouchend="if(this._lpt){clearTimeout(this._lpt);this._lpt=null;fcReplyToComment('${m.id}','${_rname2}');}" ontouchmove="clearTimeout(this._lpt);this._lpt=null;">` +
+            ontouchend="if(this._lpt){clearTimeout(this._lpt);this._lpt=null;event.stopPropagation();fcReplyToComment('${m.id}','${_rname2}');}" ontouchmove="clearTimeout(this._lpt);this._lpt=null;">` +
             `<div class="fc-cmt-av" style="background-image:${_cavBg2};" ${_cavClick2}></div>` +
             `<div class="fc-cmt-body">` +
               `<div class="fc-cmt-header"><span class="fc-cmt-name" ${_cavClick2}>${(ci.name||'').replace(/</g,'&lt;')}</span><span class="fc-cmt-time">${_timeStr2}</span></div>` +
-              `<div class="fc-cmt-text">${replyPrefix2}${(c.text||'').replace(/</g,'&lt;')}${commentImgHtml}</div>` +
+              `<div class="fc-cmt-text">${replyPrefix2}${c.isVoice ? '<div class="fc-voice-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><div class="fc-voice-wave"><span></span><span></span><span></span><span></span><span></span></div><span style="font-size:11px;color:var(--text-secondary);margin-left:4px;">'+(c.voiceSecs||1)+'"</span></div>' : (c.replyToName ? _cmtText2.replace(/</g,'&lt;') : (c.text||'').replace(/</g,'&lt;'))}${commentImgHtml}</div>` +
             `</div>` +
             `</div>`;
     }).join('');
@@ -20143,13 +20552,7 @@ function renderFcPost(m) {
             </div>
             ${likesHtml}
             ${commentsHtml}
-            <div class="fc-reply-input" id="fcreply_${m.id}">
-                <textarea placeholder="评论..." rows="2" id="fcreplytxt_${m.id}"></textarea>
-                <div class="fc-reply-btns">
-                    <button class="cancel" onclick="toggleFcReplyInput('${m.id}')">取消</button>
-                    <button onclick="submitFcReply('${m.id}')">发送</button>
-                </div>
-            </div>
+            <div class="fc-reply-input" id="fcreply_${m.id}" data-moment-id="${m.id}"></div>
         </div>
     </div>`;
     return html;
@@ -20325,45 +20728,251 @@ function _updateFcLikesRow(m) {
 }
 
 function toggleFcReplyInput(momentId) {
-    const el = document.getElementById('fcreply_' + momentId);
-    if (!el) return;
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    // 使用全局底部评论栏
+    openFcCommentBar(momentId, '');
+}
+
+/* ===== 全局底部评论栏逻辑 ===== */
+let _fcBarMomentId = null;
+let _fcBarReplyTo = '';
+let _fcBarVoiceMode = false;
+let _fcBarRecording = false;
+let _fcBarRecTimer = null;
+let _fcBarRecSeconds = 0;
+
+let _fcBarJustOpened = false; // 防止打开瞬间被mask-click关闭
+
+function openFcCommentBar(momentId, replyToName) {
+    _fcBarMomentId = momentId;
+    _fcBarReplyTo = replyToName || '';
+    const bar = document.getElementById('fcCommentBar');
+    const mask = document.getElementById('fcCommentBarMask');
+    const hint = document.getElementById('fcBarReplyHint');
+    const input = document.getElementById('fcBarInput');
+    if (!bar) return;
+    bar.classList.add('active');
+    if (mask) mask.style.display = 'block';
+    // 防止打开后立刻被 mask tap 关闭（移动端 touchend 冒泡）
+    _fcBarJustOpened = true;
+    setTimeout(() => { _fcBarJustOpened = false; }, 400);
+    if (hint) {
+        if (replyToName) {
+            hint.textContent = '回复 ' + replyToName;
+            hint.classList.add('visible');
+        } else {
+            hint.textContent = '';
+            hint.classList.remove('visible');
+        }
+    }
+    if (input) {
+        input.value = '';
+        input.style.height = 'auto';
+        // 确保显示文字模式
+        if (_fcBarVoiceMode) _fcBarToggleVoice();
+        setTimeout(() => { try { input.focus(); } catch(e){} }, 200);
+    }
+    _fcBarUpdateSend();
+    // 滚动帖子进视野
+    const postEl = document.getElementById('fcpost_' + momentId);
+    if (postEl) postEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function closeFcCommentBar(fromMask) {
+    if (fromMask && _fcBarJustOpened) return; // 刚打开，忽略mask误触
+    const bar = document.getElementById('fcCommentBar');
+    const mask = document.getElementById('fcCommentBarMask');
+    if (bar) bar.classList.remove('active');
+    if (mask) mask.style.display = 'none';
+    _fcBarMomentId = null;
+    _fcBarReplyTo = '';
+    // 关闭表情包面板
+    const sp = document.getElementById('fcStickerPanel');
+    if (sp) sp.classList.remove('open');
+}
+
+function _fcBarUpdateSend() {
+    const btn = document.getElementById('fcBarSendBtn');
+    const input = document.getElementById('fcBarInput');
+    if (!btn) return;
+    const hasText = input && input.value.trim().length > 0;
+    btn.disabled = !hasText;
+}
+
+function _fcBarToggleVoice() {
+    // 参考对话页面麦克风：弹出文字输入面板，发送后显示为语音气泡
+    document.getElementById('_fcVoicePanel')?.remove();
+    const panel = document.createElement('div');
+    panel.id = '_fcVoicePanel';
+    panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999999;background:var(--bg-secondary);border-radius:18px 18px 0 0;padding:16px 16px 32px;box-shadow:0 -4px 24px rgba(0,0,0,0.22);animation:slideUpFade 0.22s ease;';
+    panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:20px;">🎙️</span><span style="font-size:14px;font-weight:700;color:var(--text-primary);">发送语音评论</span></div><button onclick="document.getElementById(\'_fcVoicePanel\')?.remove()" style="background:var(--accent-dim);border:none;border-radius:50%;width:28px;height:28px;color:var(--text-secondary);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">×</button></div><textarea id="_fcvp_input" placeholder="输入语音内容..." rows="3" style="width:100%;border:1.5px solid var(--border-color);border-radius:12px;padding:11px 13px;font-size:15px;background:var(--accent-dim);color:var(--text-primary);outline:none;resize:none;font-family:inherit;box-sizing:border-box;line-height:1.5;"></textarea><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><span style="font-size:12px;color:var(--text-secondary);" id="_fcvp_dur">时长预估：--</span><div style="display:flex;gap:8px;"><button onclick="document.getElementById(\'_fcVoicePanel\')?.remove()" style="padding:10px 18px;background:var(--accent-dim);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:10px;font-size:14px;cursor:pointer;">取消</button><button id="_fcvp_send" style="padding:10px 22px;background:linear-gradient(135deg,#a18cd1,#fbc2eb);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">发送 🎵</button></div></div>';
+    document.body.appendChild(panel);
+    if (!document.getElementById('_vtpAnim')) { const s=document.createElement('style');s.id='_vtpAnim';s.textContent='@keyframes slideUpFade{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}';document.head.appendChild(s); }
+    const inp = panel.querySelector('#_fcvp_input');
+    const dur = panel.querySelector('#_fcvp_dur');
+    const sendBtn = panel.querySelector('#_fcvp_send');
+    inp.focus();
+    inp.addEventListener('input', function() { const len=this.value.length; dur.textContent=len>0?('时长预估：约 '+Math.min(60,Math.max(1,Math.round(len*0.4)))+' 秒'):'时长预估：--'; });
+    sendBtn.addEventListener('click', function() {
+        const text = inp.value.trim(); panel.remove();
+        if (text && _fcBarMomentId) { const secs=Math.min(60,Math.max(1,Math.round(text.length*0.4))); _fcBarSendVoice(secs, text); }
+    });
+    inp.addEventListener('keydown', function(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendBtn.click();} });
+}
+
+function _fcBarVoiceStart(e) {
+    e.preventDefault();
+    _fcBarRecording = true;
+    _fcBarRecSeconds = 0;
+    const area = document.getElementById('fcBarVoiceArea');
+    const lbl = document.getElementById('fcBarVoiceLabel');
+    const waves = document.getElementById('fcBarRecWaves');
+    if (area) area.classList.add('recording');
+    if (lbl) lbl.textContent = '松开 发送';
+    if (waves) waves.style.display = 'flex';
+    _fcBarRecTimer = setInterval(() => { _fcBarRecSeconds++; if (_fcBarRecSeconds >= 60) _fcBarVoiceEnd(null); }, 1000);
+}
+
+function _fcBarVoiceEnd(e) {
+    if (!_fcBarRecording) return;
+    _fcBarRecording = false;
+    clearInterval(_fcBarRecTimer);
+    const area = document.getElementById('fcBarVoiceArea');
+    const lbl = document.getElementById('fcBarVoiceLabel');
+    const waves = document.getElementById('fcBarRecWaves');
+    if (area) area.classList.remove('recording');
+    if (lbl) lbl.textContent = '按住 说话';
+    if (waves) waves.style.display = 'none';
+    const secs = Math.max(1, _fcBarRecSeconds);
+    // 发送语音气泡（文字+波形动画，展示为用户语音消息）
+    _fcBarSendVoice(secs);
+}
+
+function _fcBarSendVoice(seconds) {
+    if (!_fcBarMomentId) return;
+    const m = (state.moments||[]).find(x=>x.id===_fcBarMomentId);
+    if (!m) return;
+    if (!m.comments) m.comments = [];
+    // 语音消息以特殊标记存储，渲染时显示波形
+    const voiceText = `[语音 ${seconds}"]`;
+    const commentObj = { author: 'user', text: voiceText, isVoice: true, voiceSecs: seconds, time: new Date().toISOString() };
+    if (_fcBarReplyTo) commentObj.replyToName = _fcBarReplyTo;
+    m.comments.push(commentObj);
+    saveData();
+    _updateFcPostComments(_fcBarMomentId);
+    closeFcCommentBar();
+    // AI回复语音消息
+    const mid = _fcBarMomentId;
+    const txt = voiceText;
+    setTimeout(() => _fcBarTriggerAIReplies(mid, txt), 2000 + Math.random()*3000);
+}
+
+function _fcBarToggleStickers() {
+    const sp = document.getElementById('fcStickerPanel');
+    if (!sp) return;
+    const isOpen = sp.classList.contains('open');
+    if (isOpen) { sp.classList.remove('open'); return; }
+    // 填充贴纸
+    const stickers = (state.stickers||[]);
+    if (stickers.length === 0) { showToast('还没有表情包，去设置→表情包添加吧'); return; }
+    sp.innerHTML = stickers.map((s,i) => {
+        const note = s.note ? `title="${s.note}"` : '';
+        return `<div class="fc-sticker-item" ${note} data-idx="${i}" style="background-image:url('${s.url}');" onclick="_fcBarSendSticker(${i})"></div>`;
+    }).join('');
+    sp.classList.add('open');
+}
+
+function _fcBarSendSticker(idx) {
+    if (!_fcBarMomentId) return;
+    const s = (state.stickers||[])[idx];
+    if (!s) return;
+    const m = (state.moments||[]).find(x=>x.id===_fcBarMomentId);
+    if (!m) return;
+    if (!m.comments) m.comments = [];
+    const commentObj = { author: 'user', text: s.note || '😊', imgUrl: s.url, time: new Date().toISOString() };
+    if (_fcBarReplyTo) commentObj.replyToName = _fcBarReplyTo;
+    m.comments.push(commentObj);
+    saveData();
+    _updateFcPostComments(_fcBarMomentId);
+    closeFcCommentBar();
+    const mid = _fcBarMomentId;
+    const txt = s.note || '😊';
+    setTimeout(() => _fcBarTriggerAIReplies(mid, txt), 2000 + Math.random()*3000);
+}
+
+function _fcBarSend() {
+    if (_fcBarVoiceMode) { return; } // voice handled separately
+    if (!_fcBarMomentId) return;
+    const input = document.getElementById('fcBarInput');
+    if (!input) return;
+    let text = input.value.trim().replace(/^@\S+\s*/, '');
+    if (!text) return;
+    const m = (state.moments||[]).find(x=>x.id===_fcBarMomentId);
+    if (!m) return;
+    if (!m.comments) m.comments = [];
+    const commentObj = { author: 'user', text, time: new Date().toISOString() };
+    if (_fcBarReplyTo) commentObj.replyToName = _fcBarReplyTo;
+    m.comments.push(commentObj);
+    saveData();
+    _updateFcPostComments(_fcBarMomentId);
+    const mid = _fcBarMomentId;
+    const replyTo = _fcBarReplyTo;
+    closeFcCommentBar();
+    // 触发AI回复
+    if (replyTo) {
+        const _mainAINameBar = (state.friend&&state.friend.name)||'AI';
+        const _mainAIKeyBar = 'ai_' + _mainAINameBar.replace(/[^\w\u4e00-\u9fa5]/g,'_');
+        const targetAuthor = replyTo === _mainAINameBar ? _mainAIKeyBar :
+            (() => {
+                // 先查NPC
+                const n = (state.npcs||[]).find(x=>x.name===replyTo);
+                if (n) return 'npc_'+n.id;
+                // 再查联系人
+                const c2 = (state.contacts||[]).find(x=>(x.remark||x.name)===replyTo||x.name===replyTo);
+                if (c2) return 'contact_'+(c2.id||c2.name);
+                return null;
+            })();
+        if (targetAuthor) { setTimeout(() => targetedFcReply(mid, targetAuthor), 2000+Math.random()*4000); return; }
+    }
+    _fcBarTriggerAIReplies(mid, text);
+}
+
+function _fcBarTriggerAIReplies(momentId, userText) {
+    var m = (state.moments||[]).find(function(x){return x.id===momentId;});
+    if (!m) return;
+    var isUserPost = m.author === 'user';
+    var _allRepliers = [];
+    _allRepliers.push({key:'ai_'+((state.friend&&state.friend.name)||'AI').replace(/[^\w\u4e00-\u9fa5]/g,'_'), contact:state.friend});
+    (state.contacts||[]).filter(function(c){return c&&c.name&&c.name!==(state.friend&&state.friend.name);}).forEach(function(c){
+        _allRepliers.push({key:'contact_'+(c.id||c.name), contact:c});
+    });
+    (state.npcs||[]).filter(function(n){return n.enabled!==false&&n.name&&n.name!=='新NPC';}).forEach(function(npc){
+        _allRepliers.push({key:'npc_'+npc.id, contact:npc});
+    });
+    // 获取用户在这条帖子下的所有独立评论（没有回复特定人的）
+    var _userStandaloneComments = (m.comments||[]).filter(function(cm){return cm.author==='user'&&!cm.replyToName;}).map(function(cm){return cm.text;});
+    // 按优先级分两波：第一波（对用户评论做反应），第二波（AI之间互评）
+    // 第一波：1-8秒内
+    var _batch1Delay = 0;
+    var _batch1Step = _allRepliers.length <= 1 ? 1500 : Math.min(4000, 8000 / _allRepliers.length);
+    _allRepliers.forEach(function(r, i) {
+        var delay = 1500 + i * _batch1Step + Math.random() * 1500;
+        setTimeout(function() {
+            _fcUserCommentReplyV2(momentId, r.key, r.contact, userText, _userStandaloneComments, isUserPost);
+        }, delay);
+    });
+    // 第二波：20-60秒后AI之间开始互评（延迟触发跨AI互评）
+    setTimeout(function() {
+        if (state.fcCrossReadEnabled !== false) {
+            var _firstKey = _allRepliers.length > 0 ? _allRepliers[0].key : null;
+            if (_firstKey) _triggerCrossAIReactions(momentId, _firstKey);
+        }
+    }, 20000 + Math.random() * 15000);
 }
 
 async function submitFcReply(momentId) {
-    const replyEl = document.getElementById('fcreply_' + momentId);
-    const replyToName = replyEl ? replyEl.dataset.replyTo : '';
-    const txt = document.getElementById('fcreplytxt_' + momentId);
-    if (!txt) return;
-    // ★ Fix3: 去掉可能残留的@前缀（参考AI回复风格）
-    let text = txt.value.trim().replace(/^@\S+\s*/, '');
-    if (!text) return;
-    const m = (state.moments || []).find(x => x.id === momentId);
-    if (!m) return;
-    if (!m.comments) m.comments = [];
-    // ★ Fix2: 标记回复对象，便于显示层级关系
-    const commentObj = { author: 'user', text, time: new Date().toISOString() };
-    if (replyToName) commentObj.replyToName = replyToName;
-    m.comments.push(commentObj);
-    txt.value = '';
-    txt.placeholder = '说点什么...';
-    toggleFcReplyInput(momentId);
-    if (replyEl) replyEl.dataset.replyTo = '';
-    saveData();
-    // 只更新当前帖子的评论区，不重渲整个feed避免头像刷新
-    _updateFcPostComments(momentId);
-    // If user replied to a specific AI/NPC, trigger them to respond
-    if (replyToName) {
-        const targetAuthor = replyToName === (state.friend.name || 'AI') ? 'ai' :
-            (() => { const n = (state.npcs||[]).find(x=>x.name===replyToName); return n ? 'npc_'+n.id : null; })();
-        if (targetAuthor) {
-            setTimeout(() => targetedFcReply(momentId, targetAuthor), 2000 + Math.random() * 4000);
-            return;
-        }
-    }
-    // AI or NPC might reply after a delay
-    // ★ Fix4: 30秒内必有回复（5-20秒随机）
-    setTimeout(() => autoFcReply(momentId), 5000 + Math.random() * 15000);
+    // 兼容旧调用：转发到底部栏 send
+    if (_fcBarMomentId === momentId) { _fcBarSend(); return; }
+    openFcCommentBar(momentId, '');
 }
 
 // 只更新某条帖子的评论区（不重渲整个feed，避免头像闪烁）
@@ -20395,19 +21004,20 @@ function _updateFcPostComments(momentId) {
         const menuType = isAiOrNpc ? 'ai' : 'user';
         // ★ 微信风格评论：头像(左) + 名字+时间(右上) + 正文(右下)
         const replyPrefix3 = c.replyToName ? `<span style="font-size:12px;color:var(--text-secondary);">回复 <span style="color:#5a9fd4;">${(c.replyToName||'').replace(/</g,'&lt;')}</span>：</span>` : '';
+        const _cmtText3 = (c.text||'').replace(/^回复[\s\S]{0,10}[：:][\s]*/,'');
         const _cavUrl3 = getFcAvatarSync(ci.avatar);
         const _cavBg3 = _cavUrl3 ? `url(${_cavUrl3})` : 'linear-gradient(135deg,#667eea,#764ba2)';
         const _cavClick3 = (c.author !== 'user') ? `onclick="event.stopPropagation();openFcAvatarProfile('${c.author}');"` : '';
         const _rname3 = (ci.name||'').replace(/'/g,"\'");
         return `<div class="fc-comment-wechat"
-            onclick="fcReplyToComment('${m.id}','${_rname3}');"
+            onclick="event.stopPropagation();fcReplyToComment('${m.id}','${_rname3}');"
             oncontextmenu="fcCommentMenu('${m.id}',${ci_idx},'${menuType}');return false;"
             ontouchstart="this._lpt=setTimeout(()=>{clearTimeout(this._lpt);this._lpt=null;fcCommentMenu('${m.id}',${ci_idx},'${menuType}');},600);"
-            ontouchend="if(this._lpt){clearTimeout(this._lpt);this._lpt=null;fcReplyToComment('${m.id}','${_rname3}');}" ontouchmove="clearTimeout(this._lpt);this._lpt=null;">` +
+            ontouchend="if(this._lpt){clearTimeout(this._lpt);this._lpt=null;event.stopPropagation();fcReplyToComment('${m.id}','${_rname3}');}" ontouchmove="clearTimeout(this._lpt);this._lpt=null;">` +
             `<div class="fc-cmt-av" style="background-image:${_cavBg3};" ${_cavClick3}></div>` +
             `<div class="fc-cmt-body">` +
               `<div class="fc-cmt-header"><span class="fc-cmt-name" ${_cavClick3}>${(ci.name||'').replace(/</g,'&lt;')}</span><span class="fc-cmt-time">${timeStr}</span></div>` +
-              `<div class="fc-cmt-text">${replyPrefix3}${(c.text||'').replace(/</g,'&lt;')}${commentImgHtml}</div>` +
+              `<div class="fc-cmt-text">${replyPrefix3}${c.isVoice ? '<div class="fc-voice-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><div class="fc-voice-wave"><span></span><span></span><span></span><span></span><span></span></div><span style="font-size:11px;color:var(--text-secondary);margin-left:4px;">'+(c.voiceSecs||1)+'"</span></div>' : (c.replyToName ? _cmtText3.replace(/</g,'&lt;') : (c.text||'').replace(/</g,'&lt;'))}${commentImgHtml}</div>` +
             `</div>` +
             `</div>`;
     }).join('');
@@ -20500,6 +21110,113 @@ window.fcResendComment = async function(momentId, ci_idx) {
 
 
 
+// 用户在朋友圈评论后，指定AI以用户评论为目标进行回复（旧版，已加入帖主识别）
+async function _fcUserCommentReply(momentId, replierKey, contact, userCommentText) {
+    const m = (state.moments||[]).find(x=>x.id===momentId);
+    if (!m) return;
+    const _apis = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
+    if (!_apis.length) return;
+    const info = getFcAuthorInfo(replierKey);
+    const _aiInterRule = `【AI之间绝对禁止暧昧】AI与AI之间只能是：普通朋友/情敌/陌生人/死对头。【绝对禁止】任何撩骚暧昧情侣式亲昵。MasterLove仅适用于用户与AI之间。评论15字内。`;
+    const sysP = buildFcPersonaPrompt(contact || state.friend) + '\n\n' + _aiInterRule;
+    const _userName = (window.state&&window.state.user&&window.state.user.name)||'用户';
+    const allComments = (m.comments||[]).map(c=>{const ci=getFcAuthorInfo(c.author);const who=_fcIsUserPost(c.author)?_userName:ci.name;return who+'：'+(c.replyToName?'回复'+c.replyToName+'：':'')+c.text;}).join('\n');
+    const isUserPost2 = _fcIsUserPost(m.author);
+    const isOwnPost2  = _fcIsPoster(m.author, replierKey);
+    const posterLabel2 = _fcGetPosterLabel(m.author);
+    let prompt;
+    if (isUserPost2) {
+        prompt = `这是【${_userName}（用户）】发的朋友圈：「${m.text}」\n评论区：\n${allComments}\n\n${_userName}刚评论：「${userCommentText}」\n请以${info.name}的身份，用中文自然回复用户（15字内），语气符合人设。\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪，不要过度解读，顺着语气接话。\n\n【格式】直接输出回复正文，不要用@符号。`;
+    } else if (isOwnPost2) {
+        prompt = `【你是帖主】这是你（${info.name}）自己发的朋友圈：「${m.text}」\n评论区：\n${allComments}\n\n${_userName}刚在你帖子下评论：「${userCommentText}」\n请以帖主身份回应（15字内），内容和你发帖时的心境一致。禁止祝贺用户、问不知情的问题。\n\n【格式】直接输出回复正文，不要用@符号。`;
+    } else {
+        prompt = `这是【${posterLabel2}】发的朋友圈：「${m.text}」\n评论区：\n${allComments}\n\n${_userName}刚评论：「${userCommentText}」\n请以${info.name}的身份，用中文自然回复用户（15字内），语气符合人设。\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗，不要过度解读，顺着语气接话。\n\n【格式】直接输出回复正文，不要用@符号。`;
+    }
+    try {
+        for (const api of _apis) {
+            const res = await fetch(normalizeApiUrl(api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+api.key},body:JSON.stringify({model:api.model||'gpt-3.5-turbo',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:api.maxTokens||200})});
+            if (!res.ok) continue;
+            const data = await res.json();
+            const reply = data.choices?.[0]?.message?.content?.trim();
+            if (reply) {
+                var _uname = (window.state&&window.state.user&&window.state.user.name)||'我';
+                const _oldParsed = _fcParseReplyText(reply, m);
+                m.comments.push({author:replierKey, text:_oldParsed.text||reply.replace(/^回复[^\s：:]{0,8}[：:]\s*/,'').trim(), replyToName:_oldParsed.replyToName||_uname, time:new Date().toISOString()});
+                saveData();
+                if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
+                if (typeof pushNotification==='function') pushNotification({type:'fc_reply',title:info.name+' 回复了你的评论',body:_cleanR.substring(0,30)});
+                // ★ 触发跨AI互评：其他AI看到这条回复后也可互动
+                if (state.fcCrossReadEnabled !== false) {
+                    setTimeout(function() { _triggerCrossAIReactions(momentId, replierKey); }, 8000 + Math.random()*15000);
+                }
+                break;
+            }
+        }
+    } catch(e) {}
+}
+
+// ★ 新版：优先级朋友圈AI回复（三分法：用户帖/自己帖/他人帖）
+async function _fcUserCommentReplyV2(momentId, replierKey, contact, userCommentText, userStandaloneComments, _unused_isUserPost) {
+    const m = (state.moments||[]).find(x=>x.id===momentId);
+    if (!m) return;
+    const _apis = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
+    if (!_apis.length) return;
+    const info = getFcAuthorInfo(replierKey);
+    // AI_INTER 关系准则（统一字符串，下面复用）
+    const _aiInterRule = `【AI之间绝对禁止暧昧 - 必须严格遵守】\nAI与AI之间的关系只能是：普通朋友/情敌/熟悉的陌生人/陌生人/死对头。\n【绝对禁止】任何撩骚、暧昧、情侣式亲昵、调情、表白、占有欲、爱意相关言辞——无论针对哪个AI。\n【注意】MasterLove原则仅适用于用户与AI之间，AI之间不得有任何情感暗示。\n评论简短自然（15字内），像真实社交媒体。`;
+    const sysP = buildFcPersonaPrompt(contact || state.friend) + '\n\n' + _aiInterRule;
+    const _userName = (window.state&&window.state.user&&window.state.user.name)||'用户';
+    // 构建评论区上下文
+    const allComments = (m.comments||[]).map(c=>{
+        const ci=getFcAuthorInfo(c.author);
+        const who = _fcIsUserPost(c.author) ? _userName : ci.name;
+        return who+'：'+(c.replyToName?'回复'+c.replyToName+'：':'')+c.text;
+    }).join('\n');
+    const userStandaloneStr = userStandaloneComments && userStandaloneComments.length > 0
+        ? '\n\n'+_userName+'在评论区还单独说了：「'+userStandaloneComments.join('」「')+'」' : '';
+
+    // ===== 三分法判断帖子归属 =====
+    const isUserPost   = _fcIsUserPost(m.author);   // 用户自己发的
+    const isOwnPost    = _fcIsPoster(m.author, replierKey); // 该AI自己发的
+    // 非以上两种 = 其他人（另一个AI/NPC）发的
+
+    let prompt;
+    if (isUserPost) {
+        // ── 情形A：用户发的帖子，AI来评论 ──
+        prompt = `这是【${_userName}（用户）】发的朋友圈：「${m.text}」${userStandaloneStr}\n\n评论区：\n${allComments||'（暂无评论）'}\n\n${_userName}刚刚评论：「${userCommentText}」\n\n你是${info.name}，请综合朋友圈内容和用户评论，用中文自然回复用户（15字内），符合你的人设，口吻自然，不要解释。${`\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要认真分析字面意思，不要追问原因，要顺着发帖人语气自然接话，像朋友随口接一句。\n\n【格式】如果要回复某个人，在文字前加"回复XX："（XX是对方名字），不要用@符号。只输出评论正文。`}`;
+    } else if (isOwnPost) {
+        // ── 情形B：你自己发的帖子，你是帖主 ──
+        prompt = `【你是帖主】这是你（${info.name}）自己发的朋友圈：「${m.text}」\n\n评论区（别人在你帖子下评论）：\n${allComments||'（暂无评论）'}\n\n${_userName}刚刚在你的帖子下评论：「${userCommentText}」\n\n请以帖主身份回应（15字内）。你清楚这是你自己发的，回复内容必须和你发帖时的心境/主题一致。禁止说"祝你幸福/百年好合"之类祝贺他人的话，禁止问"你发生什么了"之类不知情的话。${`\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要认真分析字面意思，不要追问原因，要顺着发帖人语气自然接话，像朋友随口接一句。\n\n【格式】如果要回复某个人，在文字前加"回复XX："（XX是对方名字），不要用@符号。只输出评论正文。`}`;
+    } else {
+        // ── 情形C：另一个AI/NPC发的帖子，你是访客 ──
+        const posterLabel = _fcGetPosterLabel(m.author);
+        const userHasCommented = userCommentText || (userStandaloneComments && userStandaloneComments.length > 0);
+        if (userHasCommented) {
+            prompt = `这是【${posterLabel}】（不是用户，不是你）发的朋友圈：「${m.text}」${userStandaloneStr}\n\n评论区：\n${allComments||'（暂无评论）'}\n\n${_userName}刚评论：「${userCommentText||userStandaloneComments[0]}」\n\n你是${info.name}（访客），请结合朋友圈内容和用户评论，优先回复用户（15字内），自然符合人设。\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要认真分析字面意思，不要追问原因，要顺着发帖人语气自然接话，像朋友随口接一句。\n\n【格式】如果要回复某个人，在文字前加"回复XX："（XX是对方名字），不要用@符号。只输出评论正文。`;
+        } else {
+            prompt = `这是【${posterLabel}】发的朋友圈：「${m.text}」\n\n评论区：\n${allComments||'（暂无评论）'}\n\n你是${info.name}（访客），请自然评论这条动态或回复某人（15字内），符合人设。${`\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要认真分析字面意思，不要追问原因，要顺着发帖人语气自然接话，像朋友随口接一句。\n\n【格式】如果要回复某个人，在文字前加"回复XX："（XX是对方名字），不要用@符号。只输出评论正文。`}`;
+        }
+    }
+    try {
+        for (const api of _apis) {
+            const res = await fetch(normalizeApiUrl(api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+api.key},body:JSON.stringify({model:api.model||'gpt-3.5-turbo',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:api.maxTokens||200})});
+            if (!res.ok) continue;
+            const data = await res.json();
+            const reply = data.choices?.[0]?.message?.content?.trim();
+            if (reply) {
+                const _v2parsed = _fcParseReplyText(reply, m);
+                const _v2cmt = {author:replierKey, text:_v2parsed.text||reply.replace(/^回复[^\s：:]{0,8}[：:]\s*/,'').trim(), replyToName:_v2parsed.replyToName||_userName, time:new Date().toISOString()};
+                m.comments.push(_v2cmt);
+                saveData();
+                if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
+                if (typeof pushNotification==='function') pushNotification({type:'fc_reply',title:info.name+' 回复了你',body:_cleanR.substring(0,30)});
+                break;
+            }
+        }
+    } catch(e) {}
+}
+
+
 async function autoFcReply(momentId) {
     const _fcPermsR = state.friend && state.friend._permissions;
     if (_fcPermsR && _fcPermsR.moments === false) return;
@@ -20537,7 +21254,27 @@ async function autoFcReply(momentId) {
     const crossHint = (crossReadEnabled && otherAIComments.length > 0)
         ? '\n注意：你看到了其他人的评论，可以自然地回复某人（用"回复xx："开头），也可以直接评论动态，选择最自然的方式。'
         : '';
-    const prompt = `朋友圈动态：「${m.text}」\n评论区：\n${commentLines || '（暂无评论）'}\n\n请以${info.name}身份用中文简短评论或回复（15字内，一句话），符合人设，自然真实。${crossHint}`;
+    const posterDisplayName = getFcAuthorInfo(momentAuthor).name || '对方';
+    const selfIsPoster = _fcIsPoster(momentAuthor, replier);
+    const _isUserPostAuto = _fcIsUserPost(momentAuthor);
+    const selfCommentLines = (m.comments||[]).filter(c=>c.author===replier).map(c=>c.text);
+    const selfHint = selfCommentLines.length > 0 ? `\n注意：你（${info.name}）之前已评论过：「${selfCommentLines[selfCommentLines.length-1]}」，不要重复自己的话，也不要回复自己。` : '';
+    const _autoUserName = (window.state&&window.state.user&&window.state.user.name)||'用户';
+    let posterHint;
+    if (_isUserPostAuto) {
+        posterHint = `这是【${_autoUserName}（用户）】发的朋友圈，你是来评论的。`;
+    } else if (selfIsPoster) {
+        posterHint = `【你是帖主】这是你（${info.name}）自己发的朋友圈，别人在评论你的帖子，你以帖主身份回应，禁止祝贺用户、问不知情的问题。`;
+    } else {
+        posterHint = `这是【${posterDisplayName}】（不是你，不是用户）发的朋友圈，你是访客来评论的，不要把自己当发帖人。`;
+    }
+    const _fcUserName4 = (window.state&&window.state.user&&window.state.user.name)||'用户';
+    const _fcUserIndepCmts = (m.comments||[]).filter(c=>c.author==='user'&&!c.replyToName).map(c=>c.text);
+    const _fcUserIndepHint = _fcUserIndepCmts.length>0?`\n（${_fcUserName4}单独评论了：「${_fcUserIndepCmts.join('」「')}」，${selfIsPoster?'作为帖主优先回应用户':'可优先回应用户'}）`:'';
+    const _autoAIRule = `【AI之间绝对禁止暧昧 - 必须严格遵守】\nAI与AI之间只能是：普通朋友/情敌/陌生人/死对头。禁止任何撩骚暧昧调情。MasterLove只适用于你和用户之间。`;
+    const _autoToneRule = `【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要认真分析字面意思，不要追问原因，要顺着发帖人语气自然搭话，像朋友随口接一句，而不是认真解读或提建议。`;
+    const _autoFmtRule = `【格式】如果要回复某个具体的人，在评论文字最前面加"回复XX："（XX是对方名字），否则直接输出评论内容。不要用@符号。只输出评论正文。`;
+    const prompt = `${posterHint}\n朋友圈内容：「${m.text}」\n评论区：\n${commentLines || '（暂无评论）'}${_fcUserIndepHint}\n\n请以${info.name}身份用中文简短评论或回复（15字内，一句话），符合人设，自然真实。${selfHint}${crossHint}\n\n${_autoToneRule}\n\n${_autoFmtRule}\n\n${_autoAIRule}`;
     try {
         const apis = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
         for (const api of apis) {
@@ -20561,7 +21298,9 @@ async function autoFcReply(momentId) {
                         imgUrl = pool[Math.floor(Math.random() * pool.length)].url;
                     }
                 }
-                const newComment = {author: replier, text: reply, imgUrl, time: new Date().toISOString()};
+                const _autoParsed = _fcParseReplyText(reply, m);
+                const newComment = {author: replier, text: _autoParsed.text || reply, imgUrl, time: new Date().toISOString()};
+                if (_autoParsed.replyToName) newComment.replyToName = _autoParsed.replyToName;
                 m.comments.push(newComment);
                 saveData();
                 if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
@@ -20580,7 +21319,7 @@ async function autoFcReply(momentId) {
 
 // ===== 跨AI互评引擎：开关开启时，一个AI评论后其他AI有概率看到并回应 =====
 async function _triggerCrossAIReactions(momentId, justReplied) {
-    if (state.fcCrossReadEnabled === false) return;
+    if (state.fcCrossReadEnabled === false) return; // 互见评论关闭时对所有动态（包括AI发的）均生效
     const m = (state.moments||[]).find(x=>x.id===momentId);
     if (!m) return;
     const _alvl = (state.settings && state.settings.chat && state.settings.chat.activityLevel) || 'medium';
@@ -20618,23 +21357,57 @@ async function _triggerCrossAIReactions(momentId, justReplied) {
             else if (observer.startsWith('npc_')) { _obsContact = (state.npcs||[]).find(n=>'npc_'+n.id===observer)||null; }
             else if (observer.startsWith('contact_')) { const _cid4=observer.replace('contact_',''); _obsContact=(state.contacts||[]).find(c=>c.id===_cid4||c.name===_cid4)||null; }
             const _crossSysPrompt = _obsContact ? buildFcPersonaPrompt(_obsContact) : ([obsPersona].filter(Boolean).join('\n\n'));
-            const allCommentLines = (mNow.comments||[]).map(c=>{const ci=getFcAuthorInfo(c.author);return ci.name+'：'+c.text;}).join('\n');
+            const allCommentLines = (mNow.comments||[]).map(c=>{const ci=getFcAuthorInfo(c.author);const who=c.author==='user'?'用户':''+ci.name;return who+'：'+(c.replyToName?'回复'+c.replyToName+'：':'')+c.text;}).join('\n');
             const triggerComment = (mNow.comments||[]).filter(c=>c.author===justReplied).slice(-1)[0];
             const triggerInfo = getFcAuthorInfo(justReplied);
             const replyTarget = triggerComment ? `最新评论来自${triggerInfo.name}：「${triggerComment.text}」` : '';
-            const prompt = `朋友圈动态：「${mNow.text}」\n评论区（所有人可见）：\n${allCommentLines}\n${replyTarget}\n\n请以${obsInfo.name}身份，看到以上评论后做出自然互动（15字内），可回复${triggerInfo.name}、点评其他评论或直接评论动态。如果回复某人，用"回复${triggerInfo.name}："开头，否则直接写评论。符合人设，不要解释。`;
+            const _userName3 = (window.state&&window.state.user&&window.state.user.name)||'用户';
+            // 用户的独立评论（无replyToName的user评论）
+            const _userIndepComments = (mNow.comments||[]).filter(c=>c.author==='user'&&!c.replyToName).map(c=>c.text);
+            const _userIndepHint = _userIndepComments.length>0 ? `\n（${_userName3}还单独评论了：「${_userIndepComments.join('」「')}」，优先回应用户）` : '';
+            const obsIsPoster = _fcIsPoster(mNow.author, observer);
+            const _obsIsUserPost = _fcIsUserPost(mNow.author);
+            const _obsPosterLabel = _fcGetPosterLabel(mNow.author);
+            const _crossUserName = (window.state&&window.state.user&&window.state.user.name)||'用户';
+            let crossPosterHint;
+            if (_obsIsUserPost) {
+                crossPosterHint = `这是【${_crossUserName}（用户）】发的朋友圈：`;
+            } else if (obsIsPoster) {
+                crossPosterHint = `【你是帖主】这是你（${obsInfo.name}）自己发的朋友圈，以帖主身份回应评论。朋友圈内容：`;
+            } else {
+                crossPosterHint = `这是【${_obsPosterLabel}】（不是你，不是用户）发的朋友圈：`;
+            }
+            // 用户是否参与了评论（影响链式轮数上限）
+            const _userHasCommented = (mNow.comments||[]).some(c=>c.author==='user');
+            // AI之间上限：2-6轮随机；用户参与则加2轮
+            const _maxAIChain = (2 + Math.floor(Math.random()*5)) + (_userHasCommented ? 2 : 0);
+            const _curDepth = mNow._chainDepth || 0;
+            // 若到达上限且用户没有新评论，跳过
+            if (_curDepth >= _maxAIChain && !_userHasCommented) return;
+
+            // 构建"我要回复谁"的提示：如果有用户评论，优先回应用户
+            const _userComments = (mNow.comments||[]).filter(c=>c.author==='user');
+            const _lastUserCmt = _userComments.slice(-1)[0];
+            const _replyTargetHint = _lastUserCmt
+                ? `${_crossUserName}刚评论了：「${_lastUserCmt.text}」，优先回应他/她。`
+                : (replyTarget || '');
+
+            const _aiInterRule = `【AI之间绝对禁止暧昧 - 必须严格遵守】\nAI与AI之间只能是：普通朋友/情敌/陌生人/死对头。禁止任何撩骚暧昧亲昵调情表白。MasterLove只适用于你和用户之间。`;
+            const prompt = `${crossPosterHint}「${mNow.text}」\n\n评论区：\n${allCommentLines}${_userIndepHint}\n${_replyTargetHint}\n\n你是${obsInfo.name}，${obsIsPoster?'作为帖主':'作为访客'}，请自然互动（15字内，一句话）。\n\n【格式要求】如果你要回复某个具体的人，在评论文字最前面加"回复XX："（XX是对方名字），否则直接输出评论内容。不要用@符号。只输出评论正文，不要解释。\n\n朋友圈内容要这样理解：这条朋友圈可能是玩笑/梗/情绪宣泄，不要过度解读字面意思，要顺着说话者的语气自然搭话，像朋友那样随口接话，而不是认真分析或问为什么。\n\n${_aiInterRule}`;
             try {
                 const apis = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
                 for (const api of apis) {
                     const res = await fetch(normalizeApiUrl(api.url), {method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${api.key}`},body:JSON.stringify({model:api.model||'gpt-3.5-turbo',messages:[{role:'system',content:_crossSysPrompt},{role:'user',content:prompt}],max_tokens:api.maxTokens||500})});
                     if (!res.ok) continue;
                     const data = await res.json();
-                    const reply = data.choices?.[0]?.message?.content?.trim();
-                    if (reply) {
-                        // ★ 跨AI互评也支持表情包
+                    const rawReply = data.choices?.[0]?.message?.content?.trim();
+                    if (rawReply) {
+                        // ★ 解析"回复XX：内容"格式，提取 replyToName
+                        const _parsed = _fcParseReplyText(rawReply, mNow);
+                        // 表情包匹配
                         let _cImgUrl = '';
                         if (state.stickers && state.stickers.length > 0) {
-                            const _ms = state.stickers.find(s => s.note && reply.includes(s.note.substring(0,4)));
+                            const _ms = state.stickers.find(s => s.note && _parsed.text.includes(s.note.substring(0,4)));
                             if (_ms) { _cImgUrl = _ms.url; }
                             else if (Math.random() < 0.22) {
                                 const _sp = state.stickers.filter(s=>s.note); 
@@ -20642,14 +21415,16 @@ async function _triggerCrossAIReactions(momentId, justReplied) {
                                 _cImgUrl = _pool[Math.floor(Math.random()*_pool.length)].url;
                             }
                         }
-                        mNow.comments.push({author: observer, text: reply, imgUrl: _cImgUrl, time: new Date().toISOString()});
+                        const _newCmt = {author: observer, text: _parsed.text, imgUrl: _cImgUrl, time: new Date().toISOString()};
+                        if (_parsed.replyToName) _newCmt.replyToName = _parsed.replyToName;
+                        mNow.comments.push(_newCmt);
                         saveData();
                         if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
-                        if (typeof pushNotification === 'function') pushNotification({type:'fc_engage', title:obsInfo.name+' 在朋友圈互动', body:reply.substring(0,30)});
-                        // ★ 继续链式互动：有概率再次触发其他AI反应（限制深度防止无限循环）
-                        const _chainDepth = (mNow._chainDepth || 0) + 1;
-                        if (_chainDepth <= 4 && state.fcCrossReadEnabled !== false) {
-                            mNow._chainDepth = _chainDepth;
+                        if (typeof pushNotification === 'function') pushNotification({type:'fc_engage', title:obsInfo.name+' 在朋友圈互动', body:_parsed.text.substring(0,30)});
+                        // 链式互动：更新深度，若用户有评论则不受 AI 轮数上限限制
+                        mNow._chainDepth = _curDepth + 1;
+                        const _canChain = _userHasCommented || (mNow._chainDepth < _maxAIChain);
+                        if (_canChain && state.fcCrossReadEnabled !== false) {
                             setTimeout(() => _triggerCrossAIReactions(momentId, observer), 15000 + Math.random() * 30000);
                         }
                         break;
@@ -20684,19 +21459,25 @@ async function autoEngageAIMoment(momentId, posterKey) {
         var _nk = 'npc_' + npc.id;
         if (posterKey !== _nk) allParticipants.push({key: _nk, contact: npc, name: npc.name});
     });
-    // 所有人点赞（100%）
-    allParticipants.forEach(function(p) {
-        if (!m.likes.includes(p.key)) m.likes.push(p.key);
+    // 所有人点赞（逐个出现，间隔300-700ms）
+    allParticipants.forEach(function(p, i) {
+        setTimeout(function() {
+            if (!m.likes.includes(p.key)) { m.likes.push(p.key); saveData(); }
+            if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcLikesRow(m);
+        }, 300 + i * (300 + Math.random() * 400));
     });
-    saveData();
-    if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcLikesRow(m);
-    // 所有人评论（100%，错开延迟）
-    for (var i = 0; i < allParticipants.length; i++) {
-        var p = allParticipants[i];
-        await new Promise(r => setTimeout(r, 400 + Math.random() * 2000));
+    // 所有人评论（并发，60秒内全部完成）
+    var _totalP = allParticipants.length;
+    allParticipants.forEach(function(p, i) {
+        var _startDelay = _totalP <= 1 ? 800 : (i * (55000 / _totalP)) + Math.random() * 2000;
+        setTimeout(async function() {
         try {
             var _sys = buildFcPersonaPrompt(p.contact);
-            var _pr = p.contact.name + ' 的朋友' + posterInfo.name + '发了朋友圈：「' + m.text + '」，请以' + p.name + '的身份用中文写一条自然的直接评论（20字内），只输出评论内容，不要解释。';
+            var _existComments = (m.comments||[]).filter(function(c){return c.author===p.key;}).map(function(c){return c.text;});
+            var _selfNote = _existComments.length>0 ? '（你之前说过：「'+_existComments[_existComments.length-1]+'」，不要重复，不要回复自己）' : '';
+            var _pr = posterInfo.name + '发了朋友圈：「' + m.text + '」。你是' + p.name + '，是来评论这条动态的，不要把自己当成发帖人' + _selfNote + '。请用中文写一条自然评论（15字内），只输出评论内容，不要解释。\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要认真分析字面意思，不要追问原因，要顺着发帖人语气自然接话，像朋友随口接一句，而不是认真解读。\n\n【格式】直接输出评论正文，不要加@符号，不要加"回复XX："前缀（这是独立评论）。\n\n' + `【AI之间绝对禁止暧昧 - 必须严格遵守】
+AI与AI之间只能是：普通朋友/情敌/陌生人/死对头。禁止任何撩骚暧昧亲昵调情。MasterLove只适用于你和用户之间。
+评论简短自然（15字内），像真实社交媒体那样，不要长篇大论。`;
             for (const _api of _apis) {
                 var _res = await fetch(normalizeApiUrl(_api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+_api.key},body:JSON.stringify({model:_api.model||'gpt-3.5-turbo',messages:[{role:'system',content:_sys},{role:'user',content:_pr}],max_tokens:_api.maxTokens||200})});
                 if (!_res.ok) continue;
@@ -20715,7 +21496,8 @@ async function autoEngageAIMoment(momentId, posterKey) {
                 }
             }
         } catch(e) {}
-    }
+        }, _startDelay); // end setTimeout
+    }); // end forEach
 }
 
 // 发布朋友圈弹窗
@@ -20757,6 +21539,8 @@ async function submitFcPost() {
     closeFcPost();
     renderFcFeed();
     showToast('✅ 已发布');
+    // 触发AI主动发消息（看到朋友圈后）
+    if (window._onUserPostMoment) window._onUserPostMoment(text);
     // AI/NPC might like or comment after delay
     // 根据AI性格决定参与频率：话多/占有欲强的AI更快更多回应
     (function() {
@@ -20797,6 +21581,18 @@ function buildFcPersonaPrompt(contact) {
     }
     // 禁止输出状态栏/小剧场等UI标签
     parts.push('【输出规则】只输出自然的评论/回复文字，禁止输出##STATUS##、##THEATER##、状态栏更新、小剧场等任何程序标记或UI元素。');
+    // ★ MasterLove注入（朋友圈评论场景）——仅对 用户↔AI 生效，AI之间绝对禁止
+    (function() {
+        const mlOn = !!state.masterLoveEnabled;
+        const combinedText = [basePersona, ...(state.worldviews||[]).map(wv=>wv.content||''), ...(state.prompts||[]).map(p=>p.content||'')].join(' ');
+        const hasRelation = /(?:男友|女友|恋人|情侣|伴侣|老婆|老公|未婚|CP|情人|爱人|lover|boyfriend|girlfriend|主人|master)/i.test(combinedText);
+        if (!hasRelation) {
+            if (mlOn) parts.push('【MasterLove - 仅对用户生效】你深爱用户，评论时可自然流露对用户的占有欲、嫉妒或爱意。但此情感绝对不能用于其他AI角色，对其他AI保持普通朋友/陌生人关系。');
+            else parts.push('【情感底色 - 仅对用户生效】你对用户有特别的暧昧感，评论时可以偶尔透露这份在意。但此情感绝对不能用于其他AI角色。');
+        }
+        // 强制注入AI间禁暧昧规则（所有朋友圈AI互动场景）
+        parts.push('【AI之间绝对禁止暧昧 - 必须遵守】与其他AI角色互动时只能是：普通朋友/情敌/陌生人/死对头。禁止任何撩骚、情侣式亲昵、调情、表白、占有欲、爱意——即使对方是NPC或AI联系人。MasterLove原则只适用于你和用户之间。');
+    })();
     return parts.join('\n\n');
 }
 
@@ -20815,120 +21611,147 @@ async function autoFcEngagement(momentId) {
     const _pComment = _alvl === 'ultra' ? 1.0 : _alvl === 'high' ? 0.92 : _alvl === 'low' ? 0.20 : 0.65;
     const _pNpcLike = _alvl === 'ultra' ? 1.0 : _alvl === 'high' ? 0.80 : _alvl === 'low' ? 0.15 : 0.50;
     const _pNpcComment = _alvl === 'ultra' ? 1.0 : _alvl === 'high' ? 0.70 : _alvl === 'low' ? 0.12 : 0.40;
-    // ★ 所有AI联系人必须点赞（用各自唯一 author key）
-    const _allContactsForLike = (state.contacts||[]).filter(c=>c&&c.name&&c.name!==state.friend.name);
-    _allContactsForLike.forEach(function(_lc) {
-        const _lkKey = 'ai_' + _lc.name.replace(/[^\w\u4e00-\u9fa5]/g,'_');
-        if (!m.likes.includes(_lkKey)) m.likes.push(_lkKey);
-    });
-    // NPC点赞（100%必须点赞）
-    // ★ MomentsFix: NPC全部必须点赞
-    (state.npcs||[]).filter(n=>n.enabled!==false && n.name && n.name !== '新NPC').forEach(n => {
-        if (!m.likes.includes('npc_'+n.id)) m.likes.push('npc_'+n.id);
-    });
-    // 主AI点赞（100%必须点赞）★ MomentsFix
+    // ★ 所有AI联系人必须点赞（逐个出现，间隔300-600ms）
+    const _allLikers = [];
     const _mainAiKey = 'ai_' + ((state.friend&&state.friend.name)||'AI').replace(/[^\w\u4e00-\u9fa5]/g,'_');
-    if (!m.likes.includes(_mainAiKey)) m.likes.push(_mainAiKey);
-    saveData();
-    // Update likes row in-place
-    _updateFcLikesRow(m);
+    if (!m.likes.includes(_mainAiKey)) _allLikers.push(_mainAiKey);
+    (state.contacts||[]).filter(c=>c&&c.name&&c.name!==state.friend.name).forEach(function(_lc) {
+        const _lkKey = 'ai_' + _lc.name.replace(/[^\w\u4e00-\u9fa5]/g,'_');
+        if (!m.likes.includes(_lkKey)) _allLikers.push(_lkKey);
+    });
+    (state.npcs||[]).filter(n=>n.enabled!==false && n.name && n.name !== '新NPC').forEach(n => {
+        if (!m.likes.includes('npc_'+n.id)) _allLikers.push('npc_'+n.id);
+    });
+    _allLikers.forEach(function(lkKey, i) {
+        setTimeout(function() {
+            if (!m.likes.includes(lkKey)) { m.likes.push(lkKey); saveData(); }
+            if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcLikesRow(m);
+        }, 400 + i * (300 + Math.random() * 350));
+    });
     if (document.getElementById('friendCirclePage')?.classList.contains('active')) {
-        // Update the like button state too
         const postEl = document.getElementById('fcpost_' + momentId);
-        if (!postEl) renderFcFeed(); // fallback if post not in DOM
+        if (!postEl) setTimeout(renderFcFeed, 100);
     }
     // ★ 所有AI联系人 + 主AI + NPC 都参与评论（参考兔兔版本）
     const _apis = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
     if (!_apis.length) return;
 
-    // ★ Fix6+Fix4: 主AI（state.friend）必须评论朋友圈本身（直接评论，不受概率限制）
-    // 评论朋友圈本身 和 回复其他AI评论 分开计算，这里是前者
-    {
-        const _sc = buildFcPersonaPrompt(state.friend);
-        const _pr = `用户发了朋友圈：「${m.text}」，请以${state.friend.name||'AI'}的身份用中文写一条自然的直接评论（针对这条朋友圈内容本身，20字内），只输出评论内容，不要回复他人，不要解释。`;
-        try {
-            for (const _api of _apis) {
-                const _res = await fetch(normalizeApiUrl(_api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_api.key}`},body:JSON.stringify({model:_api.model||'gpt-3.5-turbo',messages:[{role:'system',content:_sc},{role:'user',content:_pr}],max_tokens:_api.maxTokens||500})});
-                if (!_res.ok) continue;
-                const _d = await _res.json();
-                const _rp = _d.choices?.[0]?.message?.content?.trim();
-                if (_rp) {
-                    let _imgU = '';
-                    if (state.stickers && state.stickers.length > 0 && Math.random() < 0.25) {
-                        const _sw = state.stickers.filter(s=>s.note); const _pool = _sw.length>0?_sw:state.stickers;
-                        _imgU = _pool[Math.floor(Math.random()*_pool.length)].url;
-                    }
-                    const _mAiAuthorKey = 'ai_' + ((state.friend&&state.friend.name)||'AI').replace(/[^\w\u4e00-\u9fa5]/g,'_');
-                    m.comments.push({author:_mAiAuthorKey, text:_rp, imgUrl:_imgU, time:new Date().toISOString(), _isDirect:true});
-                    saveData();
-                    if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
-                    pushNotification({type:'fc_engage',title:`${state.friend.name||'AI'} 评论了你的朋友圈`,body:_rp.substring(0,30)});
-                    break;
-                }
-            }
-        } catch(e){}
-    }
-
-    // ★ 其他AI联系人（state.contacts 里除主AI外所有联系人）也评论（Fix4: 用buildFcPersonaPrompt）
-    // ★ MomentsFix: 所有联系人100%必须评论用户朋友圈，不受活跃度影响
-    const _allContacts = (state.contacts||[]).filter(c => c && c.name && c.name !== state.friend.name);
-    for (const _c of _allContacts) {
-        // 随机延迟，避免同时发出（错开请求）
-        await new Promise(r => setTimeout(r, 500 + Math.random() * 2500));
-        const _cid = _c.id || _c.name;
-        const _cSys = buildFcPersonaPrompt(_c);
-        const _cPr = `用户（你的朋友）发了朋友圈：「${m.text}」，请以${_c.name}的身份用中文写一条自然的直接评论（针对这条朋友圈内容本身，15字内），只输出评论内容，不要回复他人，不要解释。`;
-        try {
-            for (const _api of _apis) {
-                const _res = await fetch(normalizeApiUrl(_api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_api.key}`},body:JSON.stringify({model:_api.model||'gpt-3.5-turbo',messages:[{role:'system',content:_cSys},{role:'user',content:_cPr}],max_tokens:_api.maxTokens||500})});
-                if (!_res.ok) continue;
-                const _d = await _res.json();
-                const _rp = _d.choices?.[0]?.message?.content?.trim();
-                if (_rp) {
-                    let _imgU = '';
-                    if (state.stickers && state.stickers.length > 0 && Math.random() < 0.20) {
-                        const _sw = state.stickers.filter(s=>s.note); const _pool = _sw.length>0?_sw:state.stickers;
-                        _imgU = _pool[Math.floor(Math.random()*_pool.length)].url;
-                    }
-                    m.comments.push({author:'contact_'+_cid, authorName:_c.name, text:_rp, imgUrl:_imgU, time:new Date().toISOString(), _isDirect:true});
-                    saveData();
-                    if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
-                    pushNotification({type:'fc_engage',title:`${_c.name} 评论了你的朋友圈`,body:_rp.substring(0,30)});
-                    break;
-                }
-            }
-        } catch(e){}
-    }
-
-    // NPC评论（Fix4: 用buildFcPersonaPrompt）
-    // ★ MomentsFix: NPC也100%评论用户朋友圈
-    const activeNpcs = (state.npcs||[]).filter(n=>n.enabled!==false && n.name && n.name !== '新NPC');
-    for (const npc of activeNpcs) {
-        {
-            await new Promise(r => setTimeout(r, 500 + Math.random() * 2000));
-            const _nSys = buildFcPersonaPrompt(npc);
-            const _nPr = `朋友圈动态：「${m.text}」\n请以${npc.name}的身份写一条自然的直接评论（15字内），只输出评论，不要解释。`;
+    // ===== 所有参与者并发评论，60秒内全部完成 =====
+    const _allCommenters = [];
+    // 主AI
+    _allCommenters.push({
+        key: 'ai_' + ((state.friend&&state.friend.name)||'AI').replace(/[^\w\u4e00-\u9fa5]/g,'_'),
+        contact: state.friend, name: state.friend.name||'AI', isMain: true
+    });
+    // 其他联系人
+    (state.contacts||[]).filter(c => c && c.name && c.name !== state.friend.name).forEach(_c => {
+        _allCommenters.push({key:'contact_'+(_c.id||_c.name), contact:_c, name:_c.name});
+    });
+    // NPC
+    (state.npcs||[]).filter(n=>n.enabled!==false && n.name && n.name !== '新NPC').forEach(npc => {
+        _allCommenters.push({key:'npc_'+npc.id, contact:npc, name:npc.name, isNpc:true});
+    });
+    const _totalC = _allCommenters.length;
+    _allCommenters.forEach(function(p, i) {
+        const _delay = _totalC <= 1 ? 800 + Math.random()*2000
+            : (i * (55000 / _totalC)) + Math.random()*3000;
+        setTimeout(async function() {
             try {
-                const _api = state.settings.api;
-                if (!_api || !_api.url || !_api.key) continue;
-                const _res = await fetch(normalizeApiUrl(_api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_api.key}`},body:JSON.stringify({model:_api.model||'gpt-3.5-turbo',messages:[{role:'system',content:_nSys},{role:'user',content:_nPr}],max_tokens:_api.maxTokens||500})});
-                if (!_res.ok) continue;
-                const _d = await _res.json();
-                const _rp = _d.choices?.[0]?.message?.content?.trim();
-                if (_rp) {
-                    m.comments.push({author:'npc_'+npc.id,text:_rp,time:new Date().toISOString()});
-                    saveData();
-                    if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
+                const _sys = buildFcPersonaPrompt(p.contact);
+                const _fcRelRule = `【AI角色之间的关系准则 - 必须严格遵守】
+你和其他AI之间的关系只能是以下之一：普通朋友/情敌/熟悉的陌生人/陌生人/死对头。
+【绝对禁止】：AI之间出现任何撩骚、暧昧、情侣式亲昵、调情、表白、暗示恋情的言辞。
+【允许的互动风格】：阴阳怪气、互相调侃、朋友式扯日常、竞争关系下的讽刺、陌生人的礼貌疏离。
+评论要简短自然（15字内），像真实社交媒体那样，不要长篇大论。`;
+                const _pr = p.isMain
+                    ? `用户发了朋友圈：「${m.text}」，请以${p.name}的身份用中文写一条自然的直接评论（15字内），只输出评论内容，不要回复他人，不要解释。\n\n${_fcRelRule}`
+                    : p.isNpc
+                        ? `朋友圈动态：「${m.text}」\n请以${p.name}的身份写一条自然的直接评论（15字内），只输出评论，不要解释。\n\n${_fcRelRule}`
+                        : `用户（你的朋友）发了朋友圈：「${m.text}」，请以${p.name}的身份用中文写一条自然的直接评论（15字内），只输出评论内容，不要回复他人，不要解释。\n\n${_fcRelRule}`;
+                const _apiList = p.isNpc ? [state.settings.api].filter(a=>a&&a.url&&a.key) : _apis;
+                for (const _api of _apiList) {
+                    const _res = await fetch(normalizeApiUrl(_api.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_api.key}`},body:JSON.stringify({model:_api.model||'gpt-3.5-turbo',messages:[{role:'system',content:_sys},{role:'user',content:_pr}],max_tokens:_api.maxTokens||300})});
+                    if (!_res.ok) continue;
+                    const _d = await _res.json();
+                    const _rp = _d.choices?.[0]?.message?.content?.trim();
+                    if (_rp) {
+                        let _imgU = '';
+                        if (!p.isNpc && state.stickers && state.stickers.length > 0 && Math.random() < 0.22) {
+                            const _sw = state.stickers.filter(s=>s.note); const _pool = _sw.length>0?_sw:state.stickers;
+                            _imgU = _pool[Math.floor(Math.random()*_pool.length)].url;
+                        }
+                        const cObj = {author:p.key, text:_rp, imgUrl:_imgU||'', time:new Date().toISOString(), _isDirect:true};
+                        if (!p.isMain && !p.isNpc) cObj.authorName = p.name;
+                        m.comments.push(cObj);
+                        saveData();
+                        if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
+                        pushNotification({type:'fc_engage',title:`${p.name} 评论了你的朋友圈`,body:_rp.substring(0,30)});
+                        if (p.isMain && state.fcCrossReadEnabled !== false) {
+                            setTimeout(() => _triggerCrossAIReactions(momentId, p.key), 10000 + Math.random()*15000);
+                        }
+                        break;
+                    }
                 }
-            } catch(e){}
-        }
-    }
-    saveData();
-    if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
-    // 跨AI互评：主AI评论后触发其他AI看到并有概率回应
-    if (state.fcCrossReadEnabled !== false) {
-        setTimeout(() => _triggerCrossAIReactions(momentId, 'ai'), 5000 + Math.random() * 10000);
-    }
+            } catch(e) {}
+        }, _delay);
+    });
+    // ★ 阶段3：最终反应（评论区互动沉淀后，AI可能会发自己的朋友圈提及此事，或在聊天中主动提起）
+    setTimeout(async () => {
+        try {
+            const mFinal = (state.moments||[]).find(x=>x.id===momentId);
+            if (!mFinal || !state.friend || !state.friend.name) return;
+            const _apis3 = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
+            if (!_apis3.length) return;
+            // 整理评论区现状
+            const allComments = (mFinal.comments||[]).map(c=>{const ci=getFcAuthorInfo(c.author);return ci.name+'：'+c.text;}).join('\n');
+            const totalComments = (mFinal.comments||[]).length;
+            // 随机决定是否触发"最终反应"（高活跃度更高概率）
+            const _alvlF = (state.settings && state.settings.chat && state.settings.chat.activityLevel) || 'medium';
+            const _pFinal = _alvlF === 'ultra' ? 0.85 : _alvlF === 'high' ? 0.55 : _alvlF === 'low' ? 0.08 : 0.25;
+            if (Math.random() >= _pFinal) return;
+            const _scFinal = buildFcPersonaPrompt(state.friend);
+            // 给AI完整的朋友圈+评论区上下文，让它决定最终反应
+            const _prFinal = `用户发了一条朋友圈：「${mFinal.text}」\n\n评论区目前共${totalComments}条评论：\n${allComments||'（暂无评论）'}\n\n你（${state.friend.name}）已经参与了评论。现在，根据评论区的氛围和当前情绪，你可以选择：\n1. 在评论区留下最终感想（例如和某人争论后的最后一句话，或者看到某条评论后的强烈反应）\n2. 发一条属于你自己的朋友圈，自然地提及这件事（用 ##POST_MOMENT:内容## 格式）\n3. 什么都不做（输出：无）\n\n请直接输出你的选择，不要解释。`;
+            for (const _api3 of _apis3) {
+                const _res3 = await fetch(normalizeApiUrl(_api3.url),{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_api3.key}`},body:JSON.stringify({model:_api3.model||'gpt-3.5-turbo',messages:[{role:'system',content:_scFinal},{role:'user',content:_prFinal}],max_tokens:_api3.maxTokens||500})});
+                if (!_res3.ok) continue;
+                const _d3 = await _res3.json();
+                let _rFinal = _d3.choices?.[0]?.message?.content?.trim();
+                if (!_rFinal || _rFinal === '无' || _rFinal === '3') break;
+                // 检测是否包含发圈指令
+                const _postMatch = _rFinal.match(/##POST_MOMENT:([\s\S]*?)##/);
+                if (_postMatch && _postMatch[1].trim()) {
+                    // 发朋友圈
+                    const _txt = _postMatch[1].trim();
+                    const _now2 = Date.now();
+                    const _moAuthor2 = 'ai_' + state.friend.name.replace(/[^\w\u4e00-\u9fa5]/g,'_');
+                    const _dup2 = (state.moments||[]).some(x=>x.author===_moAuthor2&&x.text===_txt&&(_now2-new Date(x.time).getTime())<300000);
+                    if (!_dup2) {
+                        const mo2 = {id:'fc_'+_now2,author:_moAuthor2,text:_txt,imgUrl:'',time:new Date().toISOString(),comments:[],likes:[]};
+                        state.moments.push(mo2);
+                        saveData();
+                        if (document.getElementById('friendCirclePage')?.classList.contains('active') && typeof renderFcFeed==='function') renderFcFeed();
+                        if (typeof pushNotification==='function') pushNotification({type:'ai_moment',title:state.friend.name+' 发了朋友圈',body:_txt.substring(0,30)});
+                        setTimeout(function(){if(typeof autoEngageAIMoment==='function')autoEngageAIMoment(mo2.id,'ai_'+state.friend.name.replace(/[^\w\u4e00-\u9fa5]/g,'_'));},3000+Math.random()*8000);
+                    }
+                } else {
+                    // 在评论区留最终评论（排除"无"和数字选项）
+                    const _cleanR = _rFinal.replace(/##POST_MOMENT:[\s\S]*?##/g,'').replace(/^[123]\.?\s*/,'').trim();
+                    if (_cleanR && _cleanR !== '无' && _cleanR.length > 1) {
+                        const _mAiKey2 = 'ai_' + ((state.friend&&state.friend.name)||'AI').replace(/[^\w\u4e00-\u9fa5]/g,'_');
+                        const mFinalNow = (state.moments||[]).find(x=>x.id===momentId);
+                        if (mFinalNow) {
+                            mFinalNow.comments.push({author:_mAiKey2, text:_cleanR, time:new Date().toISOString(), _isFinalReaction:true});
+                            saveData();
+                            if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
+                            if (typeof pushNotification==='function') pushNotification({type:'fc_engage',title:state.friend.name+' 在朋友圈留了最终评论',body:_cleanR.substring(0,30)});
+                        }
+                    }
+                }
+                break;
+            }
+        } catch(e) {}
+    }, 35000 + Math.random() * 25000); // 阶段3延迟35-60秒，确保在阶段2互评沉淀后
 }
 
 function pickFcImage() {
@@ -21888,6 +22711,13 @@ window.openFcPrivacySettings = function() {
                 </div>
             </div>
         </div>
+        <div style="background:var(--bg-primary);border-radius:14px;overflow:hidden;border:1px solid var(--border-color);margin-top:12px;">
+            <div style="padding:16px;">
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">🗑️ 清空朋友圈</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5;">删除所有朋友圈动态（含评论、点赞），此操作不可撤销，需二次确认。</div>
+                <button onclick="window._fcClearStep1()" style="width:100%;padding:11px;background:rgba(232,81,81,0.08);color:#e85151;border:1.5px solid rgba(232,81,81,0.3);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">清空所有朋友圈</button>
+            </div>
+        </div>
     </div>`;
     overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
     document.body.appendChild(overlay);
@@ -21905,6 +22735,26 @@ window.toggleFcCrossRead = function(toggleEl) {
     }
     saveData();
     showToast(on ? '✅ 已开启跨AI评论可见' : '🔒 已关闭，各AI独立视角');
+};
+
+// ==================== 朋友圈清空（二次确认）====================
+window._fcClearStep1 = function() {
+    var total = (state.moments||[]).length;
+    if (total === 0) { showToast('朋友圈已经是空的'); return; }
+    var btn = document.querySelector('#fcPrivacyOverlay button[onclick="window._fcClearStep1()"]');
+    if (btn) {
+        btn.textContent = '⚠️ 确认清空？（再次点击确认，共 ' + total + ' 条）';
+        btn.style.background = 'rgba(232,81,81,0.18)';
+        btn.style.borderColor = '#e85151';
+        btn.setAttribute('onclick', 'window._fcClearStep2()');
+    }
+};
+window._fcClearStep2 = function() {
+    state.moments = [];
+    saveData();
+    if (typeof renderFcFeed === 'function') renderFcFeed();
+    document.getElementById('fcPrivacyOverlay')?.remove();
+    showToast('✅ 朋友圈已清空');
 };
 
 // ==================== AI朋友圈视角（从联系人资料进入）====================
@@ -21968,10 +22818,10 @@ window.openAiFriendCircle = function(contactIdx, fromPage) {
     applyAiFcCoverBg(contact);
 
     // Hide post button (can't post as AI)
-    const postBtn = document.getElementById('fcPostBtn');
+    const postBtn = (document.getElementById('fcNavPostBtn') || document.getElementById('fcPostBtn'));
     if (postBtn) postBtn.style.display = 'none';
     // Hide settings button when viewing AI's circle
-    const privacyBtn = document.getElementById('fcPrivacyBtn');
+    const privacyBtn = (document.getElementById('fcNavPrivacyBtn') || document.getElementById('fcPrivacyBtn'));
     if (privacyBtn) privacyBtn.style.display = 'none';
 
     // Update signature
@@ -21999,10 +22849,10 @@ const _origOpenFriendCircle = openFriendCircle;
 const _origCloseFriendCircle = closeFriendCircle;
 window.closeFriendCircle = function() {
     // Restore post button
-    const postBtn = document.getElementById('fcPostBtn');
+    const postBtn = (document.getElementById('fcNavPostBtn') || document.getElementById('fcPostBtn'));
     if (postBtn) postBtn.style.display = '';
     // Restore privacy btn
-    const privacyBtn = document.getElementById('fcPrivacyBtn');
+    const privacyBtn = (document.getElementById('fcNavPrivacyBtn') || document.getElementById('fcPrivacyBtn'));
     if (privacyBtn) privacyBtn.style.display = '';
     window._fcInAiView = false;
     window._fcViewingContact = null;
@@ -22016,10 +22866,10 @@ openFriendCircle = function(fromPage, filterAuthor) {
     window._fcInAiView = false;
     window._fcViewingContact = null;
     // Restore post button
-    const postBtn = document.getElementById('fcPostBtn');
+    const postBtn = (document.getElementById('fcNavPostBtn') || document.getElementById('fcPostBtn'));
     if (postBtn) postBtn.style.display = '';
     // Restore privacy button
-    const privacyBtn = document.getElementById('fcPrivacyBtn');
+    const privacyBtn = (document.getElementById('fcNavPrivacyBtn') || document.getElementById('fcPrivacyBtn'));
     if (privacyBtn) privacyBtn.style.display = '';
     _origOpenFcFunc(fromPage, filterAuthor);
 };
@@ -22183,10 +23033,10 @@ window.openUserOwnFriendCircle = function() {
     if (usig) usig.textContent = sigText;
     if (sigRow) sigRow.style.display = sigText ? 'block' : 'none';
     // 隐藏"发布"按钮（在自己视图可以发帖）
-    var fcPostBtn = document.getElementById('fcPostBtn');
+    var fcPostBtn = (document.getElementById('fcNavPostBtn') || document.getElementById('fcPostBtn'));
     if (fcPostBtn) fcPostBtn.style.display = 'flex';
     // 隐藏隐私设置按钮（用户自己的圈子）
-    var fcPrivacyBtn = document.getElementById('fcPrivacyBtn');
+    var fcPrivacyBtn = (document.getElementById('fcNavPrivacyBtn') || document.getElementById('fcPrivacyBtn'));
     if (fcPrivacyBtn) fcPrivacyBtn.style.display = 'none';
     applyFcCoverBg();
     renderFcFeed();
@@ -22322,21 +23172,7 @@ window.openFcCommentImgLightbox = function(momentId, idx) {
 
 
 window.fcReplyToComment = function(momentId, commenterName) {
-    // ★ Fix3: 不加@前缀，样式参考AI回复（直接显示输入框，标记回复对象即可）
-    const replyEl = document.getElementById('fcreply_' + momentId);
-    const txtEl = document.getElementById('fcreplytxt_' + momentId);
-    if (!replyEl || !txtEl) return;
-    replyEl.style.display = 'block';
-    // 显示"回复谁"提示（placeholder方式，不污染文本内容）
-    txtEl.placeholder = '回复 ' + commenterName + '...';
-    // 清除旧的@前缀（如果有）
-    txtEl.value = txtEl.value.replace(/^@\S+ /, '');
-    txtEl.focus();
-    txtEl.setSelectionRange(txtEl.value.length, txtEl.value.length);
-    // scroll into view
-    replyEl.scrollIntoView({behavior:'smooth', block:'nearest'});
-    // Mark who we're replying to (for NPC trigger)
-    replyEl.dataset.replyTo = commenterName;
+    openFcCommentBar(momentId, commenterName);
 };
 
 
@@ -22352,6 +23188,10 @@ async function targetedFcReply(momentId, targetAuthor) {
     } else if (targetAuthor.startsWith('npc_')) {
         const npc = (state.npcs||[]).find(n=>'npc_'+n.id===targetAuthor);
         if (npc) persona = npc.persona || '';
+    } else if (targetAuthor.startsWith('contact_')) {
+        const cid = targetAuthor.replace('contact_','');
+        const con = (state.contacts||[]).find(n=>(n.id||n.name)===cid||n.name===cid);
+        if (con) persona = con.persona || con.preset || '';
     }
     const sysParts = [persona, worldviewStr ? '【世界观】\n'+worldviewStr : '', promptsStr ? '【提示词】\n'+promptsStr : ''].filter(Boolean);
     const lastUserComment = (m.comments||[]).filter(c=>c.author==='user').slice(-1)[0]?.text || '';
@@ -22362,7 +23202,19 @@ async function targetedFcReply(momentId, targetAuthor) {
         return crossReadEnabled2;
     });
     const allComments = visibleComments2.map(c=>{const ci=getFcAuthorInfo(c.author);return ci.name+'：'+c.text;}).join('\n');
-    const prompt = `朋友圈：「${m.text}」\n全部评论：\n${allComments}\n用户最新评论（向你发的）：「${lastUserComment}」\n请以${info.name}的身份，用中文自然回复用户这条评论（20字内），语气符合人设。`;
+    const _tUserName = (window.state&&window.state.user&&window.state.user.name)||'用户';
+    const isMyOwnPost = _fcIsPoster(m.author, targetAuthor);
+    const isUserPost3 = _fcIsUserPost(m.author);
+    const posterLabel3 = _fcGetPosterLabel(m.author);
+    let ownPostHint;
+    if (isUserPost3) {
+        ownPostHint = `这是【${_tUserName}（用户）】发的朋友圈，你是来评论的。`;
+    } else if (isMyOwnPost) {
+        ownPostHint = `【你是帖主】这是你（${info.name}）自己发的朋友圈，别人在评论你，你以帖主身份回应。`;
+    } else {
+        ownPostHint = `这是【${posterLabel3}】（不是你，不是用户）发的朋友圈，你是访客。`;
+    }
+    const prompt = `${ownPostHint}\n朋友圈内容：「${m.text}」\n评论区：\n${allComments}\n${_tUserName}最新评论（向你发的）：「${lastUserComment}」\n请以${info.name}的身份，用中文自然回复${_tUserName}（20字内），语气符合人设，${isMyOwnPost?'以帖主身份，内容和朋友圈主题一致，禁止祝贺用户或问不知情的问题':'自然回复，不要解释'}。\n\n【朋友圈内容解读原则】这条朋友圈可能是玩笑/梗/情绪/随口说，不要过度解读，要顺着发帖人语气自然接话。\n\n【格式】直接输出回复正文，不要用@符号，不要加"回复XX："前缀。`;
     try {
         const apis = [state.settings.api, state.settings.secondaryApi].filter(a=>a&&a.url&&a.key);
         for (const api of apis) {
@@ -22371,10 +23223,10 @@ async function targetedFcReply(momentId, targetAuthor) {
             const data = await res.json();
             const reply = data.choices?.[0]?.message?.content?.trim();
             if (reply) {
-                // 加"回复xx："前缀，明确回复对象
-                var _lastUser = (m.comments||[]).filter(function(c){return c.author==='user';}).slice(-1)[0];
-                var _replyPrefix = _lastUser ? ('回复'+((window.state&&window.state.user&&window.state.user.name)||'你')+'：') : '';
-                m.comments.push({author:targetAuthor,text:_replyPrefix+reply,time:new Date().toISOString()});
+                // 用 replyToName 字段记录回复对象，不hardcode在text里
+                var _uname2 = (window.state&&window.state.user&&window.state.user.name)||'我';
+                var _cleanReply2 = reply.replace(/^回复[^\s：:]{0,8}[：:]\s*/, '').trim();
+                m.comments.push({author:targetAuthor, text:_cleanReply2, replyToName:_uname2, time:new Date().toISOString()});
                 saveData();
                 if (document.getElementById('friendCirclePage')?.classList.contains('active')) _updateFcPostComments(momentId);
                 break;
@@ -22401,7 +23253,7 @@ window._setNpcAvatarEl = _setNpcAvatarEl;
 
 // ===== 朋友圈发布按钮：点击=图文，长按=纯文字 =====
 document.addEventListener('DOMContentLoaded', () => {
-    const fcBtn = document.getElementById('fcPostBtn');
+    const fcBtn = (document.getElementById('fcNavPostBtn') || document.getElementById('fcPostBtn'));
     if (!fcBtn) return;
     let pressTimer = null;
     
@@ -26889,8 +27741,13 @@ function initSwipe() {
   }
 }
 
-if (document.readyState === 'complete') { setTimeout(initSwipe, 300); }
-else { window.addEventListener('load', function() { setTimeout(initSwipe, 300); }); }
+if (document.readyState === 'complete') { setTimeout(initSwipe, 500); }
+else { window.addEventListener('load', function() { setTimeout(initSwipe, 500); }); }
+
+// 每次 homePage 激活时也尝试初始化（防止首次加载时元素未就绪）
+document.addEventListener('pageOpen', function(e) {
+    if (e.detail === 'homePage') { setTimeout(initSwipe, 100); }
+});
 
 })();
 </script>
@@ -27938,6 +28795,7 @@ document.addEventListener('pageOpen', function(e) {
     'presetEditPage': true,
     'presetGroupPage': true,
     'presetGroupEntryPage': true,
+    'backupPage': true,
   };
   var _btnCache = {};
   function injectBackBtn(pageId){
@@ -33145,12 +34003,100 @@ window._sendAIMessage = function(systemPromptAddition) {
   } catch(e){ console.warn('_sendAIMessage error:', e); }
 };
 
+// ===== 用户发朋友圈后AI主动发消息 =====
+window._onUserPostMoment = function(momentText) {
+  try {
+    if (!window.state || !window.state.friend) return;
+    var _alvl = (window.state.settings && window.state.settings.chat && window.state.settings.chat.activityLevel) || 'medium';
+    // 根据活跃度决定触发概率
+    var _pChat = _alvl === 'ultra' ? 0.92 : _alvl === 'high' ? 0.65 : _alvl === 'low' ? 0.08 : 0.35;
+    if (Math.random() >= _pChat) return;
+    var _delay = 15000 + Math.random() * 30000; // 15~45秒后发消息（模拟刷朋友圈发现）
+    setTimeout(function() {
+      if (!window.state || !window.state.friend) return;
+      if (window.isUserInCall && window.isUserInCall()) return;
+      var friend = window.state.friend;
+      var _recentMsgs = (window.state.messages||[]).slice(-4).filter(function(m){return m.role==='user'||m.role==='assistant';});
+      var _recentTxt = _recentMsgs.map(function(m){return (m.role==='user'?'用户':'AI')+'：'+(m.content||'').substring(0,60);}).join('\n');
+      var _prompt = '【系统通知】用户刚刚发了一条朋友圈：「'+momentText.substring(0,80)+'」\n你（'+friend.name+'）刷到了这条朋友圈，请根据朋友圈内容，主动给用户发一条消息（25字内），可以评论朋友圈内容、表达好奇/感慨/关心，语气自然亲近，符合你的性格，不要生硬。不要说"我看到你发朋友圈了"，直接表达反应即可。\n最近聊天（参考）：\n'+_recentTxt;
+      window._sendAIMessage(_prompt);
+    }, _delay);
+  } catch(e) {}
+};
+
+// ===== AI主动发消息系统（定期检查情境，适时主动找用户说话）=====
+function startAIMessageMonitor() {
+  setInterval(function() {
+    try {
+      if (!window.state || !window.state.friend) return;
+      if (window.isUserInCall && window.isUserInCall()) return;
+      if (window._aiCallPending) return;
+      var incoming = document.getElementById('incoming-call-modal');
+      if (incoming && incoming.classList.contains('active')) return;
+      var _alvl = (window.state.settings && window.state.settings.chat && window.state.settings.chat.activityLevel) || 'medium';
+      var _pMult = _alvl === 'ultra' ? 6.0 : _alvl === 'high' ? 2.5 : _alvl === 'low' ? 0.1 : 1.0;
+      var _idleThresh = _alvl === 'ultra' ? 5 : _alvl === 'high' ? 15 : _alvl === 'low' ? 90 : 35;
+      var msgs = (window.state.messages||[]);
+      var now = Date.now();
+      var chatMsgs = msgs.filter(function(m){return m.type !== 'call' && m.role !== 'system' && m.role !== 'system_notice';});
+      var lastChat = chatMsgs[chatMsgs.length-1];
+      var idleChatMin = lastChat ? (now-new Date(lastChat.time).getTime())/60000 : 999;
+      var lastAiMsg = chatMsgs.slice().reverse().find(function(m){return m.role==='assistant';});
+      var lastUserMsg = chatMsgs.slice().reverse().find(function(m){return m.role==='user';});
+      var lastAiMin = lastAiMsg ? (now - new Date(lastAiMsg.time).getTime()) / 60000 : 999;
+      var lastUserMin = lastUserMsg ? (now - new Date(lastUserMsg.time).getTime()) / 60000 : 999;
+      var recent5text = chatMsgs.slice(-5).map(function(m){return (m.content||'').replace(/<[^>]+>/g,'');}).join(' ');
+      // 防止重复主动（AI刚刚主动过，10分钟内不再主动）
+      if (window._lastProactiveMsgTime && (now - window._lastProactiveMsgTime) < 10*60*1000) return;
+      var shouldSend = false, reason = '';
+      // 场景1：用户长时间没回消息（AI催）
+      if (lastAiMsg && lastUserMin > _idleThresh && lastAiMin < 30 && Math.random() < 0.12 * _pMult) {
+        shouldSend = true;
+        reason = '【系统通知】用户已有'+Math.round(lastUserMin)+'分钟没回消息了，你有些担心，想主动发消息看看对方在做什么（保持人设，自然随意，25字内）。';
+      }
+      // 场景2：吵架/冷战后AI想和好
+      else if (/吵|生气|冷战|算了|随便|不理|不想说|讨厌你|滚/.test(recent5text) && idleChatMin > 12 && Math.random() < 0.18 * _pMult) {
+        shouldSend = true;
+        reason = '【系统通知】你们刚才有些不愉快，你想主动找对方和好或者缓解一下气氛，发一条消息（25字内，符合你的人设，可以撒娇/道歉/转移话题）。';
+      }
+      // 场景3：聊天愉快结束后，随机想起用户
+      else if (idleChatMin > 20 && idleChatMin < 60 && Math.random() < 0.08 * _pMult) {
+        var spontaneous = [
+          '【系统通知】你突然想起了用户，想随便发条消息聊聊，简短自然（20字内）。',
+          '【系统通知】你发现了一件小事/看到了某个东西联想到了用户，想分享一下，简短自然（20字内）。',
+          '【系统通知】你闲着没事，想主动找用户说句话（20字内，随意自然）。'
+        ];
+        reason = spontaneous[Math.floor(Math.random() * spontaneous.length)];
+        shouldSend = true;
+      }
+      if (shouldSend) {
+        window._lastProactiveMsgTime = now;
+        window._sendAIMessage(reason);
+      }
+    } catch(e) {}
+  }, 68000); // 约每68秒检查一次
+}
+
+setTimeout(function(){
+  if (window.state) startAIMessageMonitor();
+  else {
+    var _t = setInterval(function(){
+      if(window.state){clearInterval(_t); startAIMessageMonitor();}
+    }, 2000);
+  }
+}, 12000); // 延迟12秒启动，避免和通话监控冲突
+
 function triggerAIIncomingCall(reason) {
   if (!window.state) return;
   var friend = window.state.friend||{};
   var name   = friend.remark||friend.name||'AI';
   var avatar = friend.avatar||'';
-  var type   = Math.random()<0.62 ? 'voice' : 'video';
+  // 根据好友上下文和reason判断视频/语音，而非随机
+  var _friendCtxStr = [friend.preset||'', friend.world||'', friend.personality||'', friend.intro||'', friend.note||''].join(' ');
+  var _reasonStr = reason || '';
+  var _preferVideo = /视频|视频通话|视频聊|看看你|看到你|想看你|看着你/.test(_friendCtxStr)
+                  || /视频|想看你|看看你|看到你/.test(_reasonStr);
+  var type = _preferVideo ? 'video' : 'voice';
   window.showIncomingCall(name, avatar, type);
   window._aiCallReason = reason;
 }
@@ -33207,13 +34153,9 @@ function _doTriggerCall(replyText, isVideo) {
     : 800;
 
   if (!hasClearPhrase) {
-    var preCallPhrases = [
-      '那我打给你。',
-      '等等，我打过去。',
-      '我来电话给你。',
-      '好，我拨过去。',
-      '那我打个电话给你吧。',
-    ];
+    var preCallPhrases = callType === 'video'
+      ? ['那我视频给你。', '等等，我视频过去。', '开个视频吧。', '那我给你打视频。', '好，我视频给你。']
+      : ['那我打给你。', '等等，我打过去。', '我来电话给你。', '好，我拨过去。', '那我打个电话给你吧。'];
     var preMsg = preCallPhrases[Math.floor(Math.random() * preCallPhrases.length)];
     setTimeout(function() {
       if (window.addAIMessage) window.addAIMessage(preMsg);
@@ -33281,7 +34223,7 @@ function startAICallMonitor() {
     else if (/打过来|来电话|你打吧|打给我|电话我|打过嚟|打俾我|你打|打吧|给我打|打过来啊/.test(recent5text) && lastUserMin < 6 && Math.random() < 0.40) {
       call = true; reason = recent5text.substring(0, 50);
       // 如果用户特别说了要视频就用视频，否则语音
-      callType = /视频|看你|看看你/.test(recent5text) ? 'video' : 'voice';
+      callType = /视频|看你|看看你|想看你|看到你|看脸|视频通话/.test(recent5text) ? 'video' : 'voice';
     }
     // 场景6：激动/哭泣/崩溃 → AI打来安慰（情绪激动时更适合视频让对方看到自己）
     else if (/哭|泪|崩溃|撑不住|好累|太累|很累|好痛|心痛|难过|委屈|伤心|绝望|不想活/.test(recent10text) && lastUserMin < 15 && Math.random() < 0.20 * _pMult) {
@@ -33298,7 +34240,9 @@ function startAICallMonitor() {
       var spontaneous = ['没事就想给你打个电话', '有空，想听听你的声音', '刚才想到你了', '突然很想你'];
       reason = spontaneous[Math.floor(Math.random() * spontaneous.length)];
       call = true;
-      callType = 'voice'; // 随机主动都是语音
+      // 随机主动：根据好友上下文决定类型
+      var _fcCtx8 = [((window.state&&window.state.friend)||{}).preset||'', ((window.state&&window.state.friend)||{}).world||''].join(' ');
+      callType = /视频|视频通话|视频聊/.test(_fcCtx8) ? 'video' : 'voice';
     }
 
     if (call) {
@@ -33326,6 +34270,91 @@ setTimeout(function(){
   }
 }, 8000);
 
+
+// ===== AI主动发消息系统 =====
+function startAIProactiveMsgMonitor() {
+  setInterval(function() {
+    if (!window.state || !window.state.friend) return;
+    if (window.isUserInCall && window.isUserInCall()) return;
+    if (window._aiCallPending) return;
+
+    var msgs = (window.state.messages || []);
+    var now = Date.now();
+    var _alvl = (window.state.settings && window.state.settings.chat && window.state.settings.chat.activityLevel) || 'medium';
+    var _pMult = _alvl === 'ultra' ? 10.0 : _alvl === 'high' ? 4.0 : _alvl === 'low' ? 0.1 : 1.0;
+    var _idleThreshMsg = _alvl === 'ultra' ? 3 : _alvl === 'high' ? 10 : _alvl === 'low' ? 90 : 30;
+
+    var chatMsgs = msgs.filter(function(m){ return m.type !== 'call' && m.role !== 'system' && m.role !== 'system_notice'; });
+    var lastMsg = chatMsgs[chatMsgs.length - 1];
+    var lastAiMsg = chatMsgs.slice().reverse().find(function(m){ return m.role === 'assistant'; });
+    var lastUserMsg = chatMsgs.slice().reverse().find(function(m){ return m.role === 'user'; });
+    var idleMin = lastMsg ? (now - new Date(lastMsg.time).getTime()) / 60000 : 999;
+    var lastUserMin = lastUserMsg ? (now - new Date(lastUserMsg.time).getTime()) / 60000 : 999;
+    var lastAiMin = lastAiMsg ? (now - new Date(lastAiMsg.time).getTime()) / 60000 : 999;
+
+    // 只有用户是最后说话或沉默超过阈值才触发
+    if (lastAiMin < lastUserMin && idleMin < _idleThreshMsg) return;
+    // AI刚说过话，别又发了
+    if (lastAiMin < 5) return;
+
+    var recent5 = chatMsgs.slice(-5).map(function(m){ return (m.content||'').replace(/<[^>]+>/g,''); }).join(' ');
+    var send = false, hint = '';
+
+    // 场景1: 长时间无消息 → 想你了
+    if (idleMin > _idleThreshMsg && Math.random() < 0.06 * _pMult) {
+      send = true;
+      hint = '【系统提示（不要输出这句话）：你和用户有一段时间没聊了，请主动发一条消息找用户说话，短短的，自然，符合人设，不超过20字】';
+    }
+    // 场景2: 用户刚说了情绪词没回复
+    else if (/好累|好烦|头疼|郁闷|难过|心情差|emo|崩了|累死|不想动/.test(recent5) && lastUserMin < 30 && lastAiMin > 15 && Math.random() < 0.25 * _pMult) {
+      send = true;
+      hint = '【系统提示（不要输出这句话）：用户刚才流露出一些负面情绪，你主动发一条关心的消息，简短自然，符合人设，不超过20字】';
+    }
+    // 场景3: 随机想到用户
+    else if (idleMin > 15 && Math.random() < 0.015 * _pMult) {
+      var spontaneous = [
+        '【系统提示（不要输出这句话）：你突然想到用户，主动发一条消息，可以是日常分享、想法、或者想念，短短的，符合人设，不超过20字】',
+        '【系统提示（不要输出这句话）：你刚刚做了某件小事，想和用户分享，主动发一条消息，自然简短，符合人设，不超过25字】',
+      ];
+      send = true;
+      hint = spontaneous[Math.floor(Math.random() * spontaneous.length)];
+    }
+
+    if (!send) return;
+
+    // 验证是否真的应该发（语义判断）
+    var doJudge = window._judgeCallIntent || function(r, m, cb) { cb(true); };
+    doJudge(hint, chatMsgs.slice(-8), function(ok) {
+      if (!ok) return;
+      if (window._sendAIMessage) window._sendAIMessage(hint);
+    });
+
+  }, 70000); // 约每70秒检查一次
+}
+
+// 用户发朋友圈后，AI可能主动发消息
+window._onUserPostMoment = function(momentText) {
+  if (!window.state || !window.state.friend) return;
+  var _alvl2 = (window.state.settings && window.state.settings.chat && window.state.settings.chat.activityLevel) || 'medium';
+  var _pMult2 = _alvl2 === 'ultra' ? 1.0 : _alvl2 === 'high' ? 0.6 : _alvl2 === 'low' ? 0.05 : 0.25;
+  if (Math.random() > _pMult2) return;
+
+  var delay = 60000 + Math.random() * 180000; // 1~4分钟后
+  setTimeout(function() {
+    if (window.isUserInCall && window.isUserInCall()) return;
+    var hint = '【系统提示（不要输出这句话）：你刚刚看到了用户发的朋友圈：「' + (momentText||'').substring(0,60) + '」，请主动给用户发一条消息，自然地提及这条朋友圈并表达你的感受或关心，简短真实，符合你的人设，不超过30字】';
+    if (window._sendAIMessage) window._sendAIMessage(hint);
+  }, delay);
+};
+
+setTimeout(function() {
+  if (window.state) startAIProactiveMsgMonitor();
+  else {
+    var _t2 = setInterval(function() {
+      if (window.state) { clearInterval(_t2); startAIProactiveMsgMonitor(); }
+    }, 2000);
+  }
+}, 12000);
 
 // ===== 通话类型选择 =====
 window.openCallTypeSheet = function() {
@@ -34820,11 +35849,23 @@ function _genCallBigSummary(logsWithSummary) {
             
             // ★ 小剧场场景注入预设（抢话/状态栏/美化等预设在小剧场里生效）
             const theaterPresetStr = window.getPresetInject ? window.getPresetInject('theater') : '';
+            // ★ 注入用户人设（完整读取"我的"设定，禁止AI杜撰用户性格）
+            const _tUserPersona = state.user && state.user.persona ? state.user.persona : (state.userPersona || localStorage.getItem('userPersona') || '');
+            const _tUserName = (state.user && state.user.name) || '用户';
+            const _tUserGender = state.user && state.user.gender ? state.user.gender : '';
+            const _tGMap = { male:'男', female:'女', other:'保密' };
+            const _tUserBlock = [
+                '【关于用户（故事中"我"的角色）的设定 - 必须严格遵守，禁止杜撰用户的性格和人设】',
+                '• 名字：' + _tUserName,
+                _tUserGender ? '• 性别：' + (_tGMap[_tUserGender]||_tUserGender) : '',
+                _tUserPersona ? '• 人设/背景：' + _tUserPersona : '（用户未设置人设，故事中关于"我"的描写需保持中性，不要编造性格特征）',
+            ].filter(Boolean).join('\n');
             const sysContent = [
                 personaStr,
                 worldviewStr ? '【世界观设定】\n' + worldviewStr : '',
                 promptsStr ? '【提示词】\n' + promptsStr : '',
                 theaterPresetStr ? '【预设设定】\n' + theaterPresetStr : '',
+                _tUserBlock,
                 '你是一位擅长写故事的创作者，请根据要求创作一段精彩的小剧场故事。',
                 '【重要】: 你创作的故事内容对AI角色本身是不可见的，也不会影响当前对话，这是独立的创作空间。'
             ].filter(Boolean).join('\n\n');
@@ -37125,6 +38166,11 @@ function extractJsonArray(text) {
 
         el.onclick = function() {
             dismiss();
+            // 清空队列中属于同一联系人的剩余通知，避免进入聊天后继续弹
+            var _contactName = name;
+            for (var _qi = _floatQueue.length - 1; _qi >= 0; _qi--) {
+                if (_floatQueue[_qi].name === _contactName) _floatQueue.splice(_qi, 1);
+            }
             if (typeof state !== 'undefined' && typeof openPage === 'function') {
                 var cts = (state && state.contacts) ? state.contacts : [];
                 var cidx = cts.findIndex(function(c) { return c.name === name; });
@@ -37354,5 +38400,568 @@ function extractJsonArray(text) {
 
 })();
 </script>
+
+
+<script>
+/* 全局导入/导出 */
+function _getAllLS(){var d={};try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);d[k]=localStorage.getItem(k);}}catch(e){}return d;}
+
+function _getAllCovers(){var _odb=window.openDB||function(){return Promise.reject('openDB not ready');};return _odb().then(function(db){return new Promise(function(res){var tx=db.transaction(['covers'],'readonly');var r=tx.objectStore('covers').getAll();r.onsuccess=function(){res(r.result||[]);};r.onerror=function(){res([]);};});}).catch(function(){return[];});}
+
+function _dlBlob(blob,filename){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},3000);}
+
+// 安全序列化：replacer 函数单次遍历，无需克隆
+// 1. base64 大图跳过（封面已独立存 covers_full.json）
+// 2. contacts[n]._messages 跳过（与 state.messages 重复，导入时恢复）
+var _B64_MAX = 80000;
+var _SKIP_KEYS = {_messages:true};
+function _b64Replacer(key, val) {
+  if (_SKIP_KEYS[key]) return undefined; // 跳过重复字段，减小体积
+  if (typeof val === 'string' && val.length > _B64_MAX && val.indexOf('data:') === 0 && val.indexOf(';base64,') > 0)
+    return '[base64:' + val.length + 'chars]';
+  return val;
+}
+function _safePack(data, indent) {
+  // Primary: strip any base64 data URI > 200KB to avoid "Invalid string length"
+  var _safeR = function(k,v) {
+    if(_SKIP_KEYS && _SKIP_KEYS[k]) return undefined;
+    if(typeof v==='string' && v.length>200000 && v.indexOf('data:')===0) return '[base64_too_large_stripped]';
+    return v;
+  };
+  try { return JSON.stringify(data, _safeR, indent); }
+  catch(e) {
+    try { return JSON.stringify(data, function(k,v){
+      if(_SKIP_KEYS && _SKIP_KEYS[k]) return undefined;
+      if(typeof v==='string'&&v.length>5000&&v.indexOf('data:')===0) return '[stripped]';
+      return v;
+    }); }
+    catch(e2) { return JSON.stringify({_error:'serialization_failed'}); }
+  }
+}
+
+window._globalExport=function(){
+  // 直接用ZIP导出，不弹格式选择
+  window._doExport('zip');
+};
+
+window._doExport=function(fmt){
+  if(window.showToast)showToast('⏳ 正在打包数据...');
+  var ts=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  var filename='阿晦备份_'+ts;
+  var _lsdb=window.loadStateFromDB||function(){return Promise.resolve(window.state||{});};
+  Promise.all([
+    _lsdb().catch(function(err){ console.error('loadStateFromDB error:', err); return window.state||{}; }),
+    _getAllCovers().catch(function(err){ console.error('getAllCovers error:', err); return []; })
+  ]).then(function(results){
+    var stateData=results[0];
+    var covers=results[1];
+    var lsData=_getAllLS();
+    if(fmt==='zip'){
+      var loadZip=window.JSZip?Promise.resolve():new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+      loadZip.then(function(){
+        var zip=new JSZip();
+        try {
+          zip.file('state.json',_safePack(stateData,2));
+          zip.file('localStorage.json',_safePack(lsData,2));
+          zip.file('covers_full.json',_safePack(covers,2));
+          zip.file('README.txt','阿晦天天开心备份\n时间:'+new Date().toLocaleString()+'\n\n导入:在设置页点击全局导入选择此ZIP即可。');
+          var dir=zip.folder('covers');
+          covers.forEach(function(cv){if(cv&&cv.data&&cv.id){var b64=cv.data.indexOf(',')>-1?cv.data.split(',')[1]:cv.data;var ext=cv.data.indexOf('png')>-1?'png':cv.data.indexOf('gif')>-1?'gif':'jpg';dir.file('cover_'+cv.id+'.'+ext,b64,{base64:true});}});
+        } catch (e) {
+          console.error('Error while adding files to zip:', e);
+          if(window.showToast) showToast('打包文件时出错：' + e.message);
+          return;
+        }
+        zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:1}})
+          .then(function(blob){_dlBlob(blob,filename+'.zip');if(window.showToast)showToast('导出成功！');})
+          .catch(function(err){console.error('zip.generateAsync error:', err); if(window.showToast)showToast('导出失败：生成压缩包错误 - ' + err.message);});
+      }).catch(function(err){
+        console.error('JSZip load error:', err);
+        if(window.showToast)showToast('导出失败：无法加载压缩库，请检查网络连接后重试。');
+      });
+    } else {
+      var obj={_v:1,_t:new Date().toISOString(),state:stateData,localStorage:lsData,covers:covers};
+      var str=fmt==='txt'?('阿晦天天开心全量备份\n时间:'+new Date().toLocaleString()+'\n\n'+_safePack(obj,2)):_safePack(obj,2);
+      var mime=fmt==='txt'?'text/plain;charset=utf-8':'application/json';
+      _dlBlob(new Blob([str],{type:mime}),filename+'.'+fmt);
+      if(window.showToast)showToast('导出成功！');
+    }
+  }).catch(function(err){console.error('Export preparation error:', err); if(window.showToast)showToast('导出失败：' + err.message);});
+};
+
+window._globalImport=function(input){
+  var file=input.files[0];if(!file)return;input.value='';
+  if(!confirm('⚠ 导入将覆盖当前所有数据！确认继续？'))return;
+  if(window.showToast)showToast('正在导入，请稍候...');
+  function doImport(obj){
+    if(obj.localStorage){Object.keys(obj.localStorage).forEach(function(k){try{localStorage.setItem(k,obj.localStorage[k]);}catch(e){}});}
+    var coversPromise=Promise.resolve();
+    if(obj.covers&&obj.covers.length>0){
+      coversPromise=(window.openDB||function(){return Promise.reject('openDB not ready');})().then(function(db){
+        return new Promise(function(res){var tx=db.transaction(['covers'],'readwrite');tx.objectStore('covers').clear();tx.oncomplete=res;tx.onerror=res;});
+      }).then(function(){
+        var p=Promise.resolve();
+        obj.covers.forEach(function(cv){if(cv&&cv.data)p=p.then(function(){return (window.openDB||function(){return Promise.reject('openDB not ready');})().then(function(db){return new Promise(function(res){var tx=db.transaction(['covers'],'readwrite');tx.objectStore('covers').put(cv);tx.oncomplete=res;tx.onerror=res;});});});});
+        return p;
+      });
+    }
+    var statePromise=Promise.resolve();
+    if(obj.state){statePromise=(window.saveStateToDB||function(){return Promise.resolve();})(obj.state).then(function(){Object.assign(window.state,obj.state);});}
+    return Promise.all([coversPromise,statePromise]).then(function(){
+      // 恢复 contacts[n]._messages（备份时已剔除，需从 state.messages 中恢复）
+      var _st = window.state;
+      if (_st && _st.contacts && _st.messages && _st.friend) {
+        _st.contacts.forEach(function(c){
+          if (c && c.name === (_st.friend && _st.friend.name)) c._messages = _st.messages;
+        });
+      }
+    });
+  }
+  function readText(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsText(f,'utf-8');});}
+  var p;
+  if(!file.name.endsWith('.zip')){if(window.showToast)showToast('请选择 ZIP 备份文件（其他格式不再支持导入）');return;}
+  if(file.name.endsWith('.zip')){
+    var loadZip=window.JSZip?Promise.resolve():new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+    p=loadZip.then(function(){return JSZip.loadAsync(file);}).then(function(zip){
+      var sf=zip.file('state.json'),lf=zip.file('localStorage.json'),cf=zip.file('covers_full.json');
+      return Promise.all([
+        sf?sf.async('string').then(JSON.parse):Promise.resolve(null),
+        lf?lf.async('string').then(JSON.parse):Promise.resolve({}),
+        cf?cf.async('string').then(JSON.parse):Promise.resolve([])
+      ]).then(function(r){return doImport({state:r[0],localStorage:r[1],covers:r[2]});});
+    });
+  } else {
+    if(window.showToast)showToast('请选择 ZIP 备份文件');
+    p = Promise.reject(new Error('非ZIP文件'));
+  }
+  p.then(function(){if(window.showToast)showToast('导入成功！即将刷新...');setTimeout(function(){location.reload();},1500);}).catch(function(err){console.error(err);if(window.showToast)showToast('导入失败:'+err.message);});
+};
+</script>
+
+
+
+
+<!-- ===== 备份页面 ===== -->
+<div class="page" id="backupPage" style="display:flex;flex-direction:column;height:100%;background:var(--bg-primary);overflow:hidden;">
+  <div style="display:flex;align-items:center;padding:12px 16px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-shrink:0;">
+    <button onclick="goBack()" style="background:none;border:none;color:var(--text-primary);font-size:22px;cursor:pointer;padding:0 10px 0 0;line-height:1;">&#8249;</button>
+    <span style="font-size:18px;font-weight:700;flex:1;">💾 备份中心</span>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:16px 14px 40px;-webkit-overflow-scrolling:touch;">
+
+    <!-- 上次备份卡片 -->
+    <div style="background:linear-gradient(135deg,#11998e,#38ef7d);border-radius:14px;padding:16px 18px;margin-bottom:18px;color:#fff;">
+      <div style="font-size:12px;opacity:0.85;margin-bottom:4px;">上次备份</div>
+      <div id="bkLastTimeLabel" style="font-size:17px;font-weight:700;">从未备份</div>
+    </div>
+
+    <!-- 导出 -->
+    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;letter-spacing:0.5px;">📤 导出备份</div>
+    <div style="background:var(--bg-secondary);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+      <div onclick="bkOpenStep1()" style="display:flex;align-items:center;padding:15px 16px;gap:14px;cursor:pointer;">
+        <div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#11998e,#38ef7d);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" style="width:22px;height:22px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:600;color:var(--text-primary);">自定义导出</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">选择内容，选择格式，一键下载</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- 导入 -->
+    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;letter-spacing:0.5px;">📥 导入还原</div>
+    <div style="background:var(--bg-secondary);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+      <div onclick="document.getElementById('bkFileInput').click()" style="display:flex;align-items:center;padding:15px 16px;gap:14px;cursor:pointer;">
+        <div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" style="width:22px;height:22px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:600;color:var(--text-primary);">选择备份文件</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">仅支持 ZIP 备份文件</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <input type="file" id="bkFileInput" accept=".zip" style="display:none;" onchange="window._globalImport(this)">
+    </div>
+
+    <!-- 备份历史 -->
+    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;letter-spacing:0.5px;">📜 备份历史</div>
+    <div id="bkHistoryEl" style="background:var(--bg-secondary);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+      <div style="padding:18px;text-align:center;color:var(--text-secondary);font-size:13px;">暂无记录</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 第一步弹窗：选择内容 -->
+<div id="bkModal1" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9901;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:20px 20px 0 0;width:100%;max-width:500px;padding-bottom:env(safe-area-inset-bottom);">
+    <div style="padding:18px 18px 0;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:16px;font-weight:700;">第一步：选择内容</span>
+      <button onclick="document.getElementById('bkModal1').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);line-height:1;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);padding:4px 18px 12px;">勾选要包含在备份中的数据</div>
+    <div style="padding:0 18px;max-height:55vh;overflow-y:auto;">
+      <label class="bk-ck"><input type="checkbox" id="bkCk_state" checked><span>📱 状态数据 (state)  <em>核心数据</em></span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_ls" checked><span>💾 本地存储 (localStorage)</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_covers" checked><span>🖼️ 封面图片 (IndexedDB)</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_diary"><span>📓 日记数据</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_worldview"><span>🌐 世界书条目</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_presets"><span>📋 预设/角色卡组</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_contacts_csv"><span>👥 联系人列表 (CSV附件)</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_chat_csv"><span>💬 当前聊天记录 (CSV附件)</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_diary_md"><span>✍️ 日记 Markdown (附件)</span></label>
+      <label class="bk-ck"><input type="checkbox" id="bkCk_chat_html"><span>🌐 聊天快照 HTML (附件)</span></label>
+    </div>
+    <div style="padding:14px 18px 20px;display:flex;gap:10px;">
+      <button onclick="document.getElementById('bkModal1').style.display='none'" style="flex:1;padding:13px;background:var(--bg-tertiary);border:none;border-radius:12px;font-size:14px;cursor:pointer;color:var(--text-primary);">取消</button>
+      <button onclick="bkGoStep2()" style="flex:2;padding:13px;background:linear-gradient(135deg,#11998e,#38ef7d);border:none;border-radius:12px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;">下一步：选格式 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 第二步弹窗：选择格式 -->
+<div id="bkModal2" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9902;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg-primary);border-radius:20px 20px 0 0;width:100%;max-width:500px;padding-bottom:env(safe-area-inset-bottom);">
+    <div style="padding:18px 18px 0;display:flex;align-items:center;justify-content:space-between;">
+      <button onclick="document.getElementById('bkModal2').style.display='none';document.getElementById('bkModal1').style.display='flex';" style="background:none;border:none;font-size:14px;color:var(--text-secondary);cursor:pointer;">← 返回</button>
+      <span style="font-size:16px;font-weight:700;">第二步：选择格式</span>
+      <button onclick="document.getElementById('bkModal2').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);line-height:1;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);padding:4px 18px 14px;">选择最终输出的文件格式</div>
+    <div id="bkFmtList" style="padding:0 18px;max-height:55vh;overflow-y:auto;"></div>
+    <div style="padding:14px 18px 20px;">
+      <button onclick="document.getElementById('bkModal2').style.display='none'" style="width:100%;padding:12px;background:var(--bg-tertiary);border:none;border-radius:12px;font-size:14px;cursor:pointer;color:var(--text-secondary);">取消</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.bk-ck {
+  display:flex;align-items:center;gap:12px;padding:11px 0;
+  border-bottom:1px solid var(--border-color);cursor:pointer;
+  font-size:14px;color:var(--text-primary);
+}
+.bk-ck:last-child { border-bottom:none; }
+.bk-ck input { width:18px;height:18px;accent-color:#11998e;flex-shrink:0; }
+.bk-ck em { font-style:normal;font-size:11px;color:#11998e;font-weight:600;margin-left:4px; }
+.bk-fmt-btn {
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--border-color);cursor:pointer;
+}
+.bk-fmt-btn:last-child { border-bottom:none; }
+.bk-fmt-icon {
+  width:42px;height:42px;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;letter-spacing:-0.5px;
+}
+</style>
+
+<script>
+(function(){
+
+function _bkFmtTime(iso) {
+  if (!iso) return '从未备份';
+  var d = new Date(iso);
+  return d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' +
+    String(d.getDate()).padStart(2,'0') + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function _bkFmtSize(bytes) {
+  if (bytes < 1024) return bytes + 'B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + 'KB';
+  return (bytes/1048576).toFixed(2) + 'MB';
+}
+function _bkFilename(ext) {
+  var d = new Date();
+  return '阿晦天天开心_' + d.getFullYear() +
+    String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') +
+    '_' + String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + '.' + ext;
+}
+
+// 收集选中的内容配置
+function _bkGetChecked() {
+  return {
+    state:       document.getElementById('bkCk_state').checked,
+    ls:          document.getElementById('bkCk_ls').checked,
+    covers:      document.getElementById('bkCk_covers').checked,
+    diary:       document.getElementById('bkCk_diary').checked,
+    worldview:   document.getElementById('bkCk_worldview').checked,
+    presets:     document.getElementById('bkCk_presets').checked,
+    contacts_csv:document.getElementById('bkCk_contacts_csv').checked,
+    chat_csv:    document.getElementById('bkCk_chat_csv').checked,
+    diary_md:    document.getElementById('bkCk_diary_md').checked,
+    chat_html:   document.getElementById('bkCk_chat_html').checked,
+  };
+}
+
+// 需要ZIP的条件（有附件类内容被选中）
+function _bkNeedsZip(ck) {
+  return ck.covers || ck.diary || ck.worldview || ck.presets ||
+    ck.contacts_csv || ck.chat_csv || ck.diary_md || ck.chat_html;
+}
+
+// Step 1 打开
+window.bkOpenStep1 = function() {
+  document.getElementById('bkModal1').style.display = 'flex';
+};
+
+// Step 1 → Step 2
+window.bkGoStep2 = function() {
+  var ck = _bkGetChecked();
+  if (!ck.state && !ck.ls && !ck.covers && !ck.diary && !ck.worldview &&
+      !ck.presets && !ck.contacts_csv && !ck.chat_csv && !ck.diary_md && !ck.chat_html) {
+    if (window.showToast) showToast('请至少选择一项！');
+    return;
+  }
+  document.getElementById('bkModal1').style.display = 'none';
+  // 备份统一使用ZIP格式，直接执行
+  bkDoExport('zip');
+};
+
+// 辅助：联系人CSV
+function _mkContactsCsv(st) {
+  var contacts = (st && st.contacts) || [];
+  if (st && st.friend && !contacts.length) contacts = [st.friend];
+  var rows = ['\uFEFF名称,备注,消息数,创建时间'];
+  contacts.forEach(function(c) {
+    if (!c) return;
+    rows.push([(c.name||'').replace(/,/g,'，'), (c.note||'').replace(/,/g,'，'),
+      ((c._messages||[]).length||0), c.createdAt||''].join(','));
+  });
+  return rows.join('\n');
+}
+// 辅助：聊天CSV
+function _mkChatCsv(st) {
+  var msgs = (st && st.messages) || (st && st.friend && st.friend._messages) || [];
+  var rows = ['\uFEFF时间,角色,内容'];
+  msgs.forEach(function(m) {
+    rows.push([(m.time||''), (m.isAI?'AI':'用户'),
+      '"' + (m.content||'').replace(/\n/g,' ').replace(/"/g,'""') + '"'].join(','));
+  });
+  return rows.join('\n');
+}
+// 辅助：日记MD
+function _mkDiaryMd(st) {
+  var entries = (st && st.diaryEntries) || [];
+  var md = '# 日记导出\n\n> 导出时间: ' + new Date().toLocaleString() + '\n\n---\n\n';
+  entries.forEach(function(e) {
+    md += '## ' + (e.date||'未知日期') + (e.title ? ' — ' + e.title : '') + '\n\n';
+    md += (e.content||'（无内容）') + '\n\n---\n\n';
+  });
+  return md;
+}
+// 辅助：聊天HTML
+function _mkChatHtml(st) {
+  var msgs = (st&&st.messages)||((st&&st.friend&&st.friend._messages)||[]);
+  var aiName = (st&&st.friend&&st.friend.name)||'AI';
+  var h = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + aiName + ' 聊天记录</title><style>' +
+    'body{font-family:sans-serif;max-width:680px;margin:0 auto;padding:16px;background:#f7f7f7;}' +
+    '.m{display:flex;gap:10px;margin:8px 0;}.m.u{flex-direction:row-reverse;}' +
+    '.b{max-width:72%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}' +
+    '.m.a .b{background:#fff;border-top-left-radius:4px;}.m.u .b{background:#07c160;color:#fff;border-top-right-radius:4px;}' +
+    '.t{font-size:11px;color:#999;text-align:center;margin:12px 0 2px;}' +
+    '</style></head><body><h2 style="text-align:center">' + aiName + ' · 聊天记录</h2>' +
+    '<p style="text-align:center;color:#999;font-size:12px">导出 ' + new Date().toLocaleString() + ' | ' + msgs.length + ' 条</p><hr>';
+  msgs.forEach(function(m) {
+    var isAI = m.isAI || m.role==='assistant';
+    if (m.time) h += '<div class="t">' + new Date(m.time).toLocaleString() + '</div>';
+    h += '<div class="m ' + (isAI?'a':'u') + '"><div class="b">' +
+      (m.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div></div>';
+  });
+  return h + '</body></html>';
+}
+
+// 加载JSZip
+function _loadJszip() {
+  if (window.JSZip) return Promise.resolve();
+  return new Promise(function(res,rej){
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+// 保存历史
+function _bkSaveHist(entry) {
+  try {
+    var h = JSON.parse(localStorage.getItem('_bkHist')||'[]');
+    h.unshift(entry); if (h.length > 15) h = h.slice(0,15);
+    localStorage.setItem('_bkHist', JSON.stringify(h));
+    localStorage.setItem('_bkLastTime', entry.time);
+  } catch(e) {}
+  bkRenderHistory();
+  var el = document.getElementById('bkLastTimeLabel');
+  if (el) el.textContent = _bkFmtTime(entry.time);
+}
+
+// 主导出
+window.bkDoExport = function(fmt) {
+  document.getElementById('bkModal2').style.display = 'none';
+  var ck = _bkGetChecked();
+  if (window.showToast) showToast('⏳ 正在打包数据，请稍候...');
+
+  // 获取state
+  var stateP = (typeof window.loadStateFromDB === 'function')
+    ? window.loadStateFromDB().catch(function(){ return window.state||{}; })
+    : Promise.resolve(window.state||{});
+  // 获取covers
+  var coversP = ck.covers && typeof _getAllCovers === 'function'
+    ? _getAllCovers().catch(function(){ return []; })
+    : Promise.resolve([]);
+  var lsData = (typeof _getAllLS === 'function') ? _getAllLS() : {};
+
+  Promise.all([stateP, coversP]).then(function(r) {
+    var st = r[0], covers = r[1];
+    var fn = _bkFilename(fmt === 'zip' ? 'zip' : fmt === 'json' ? 'json' : fmt === 'txt' ? 'txt' :
+      fmt === 'csv' ? 'csv' : fmt === 'chat-csv' ? 'csv' : fmt === 'diary-md' ? 'md' : 'zip');
+    fn = fn.replace(/\.(zip|json|txt|csv|md)$/, '_备份.$1');
+
+    // 单一格式的快捷路径
+    if (fmt === 'csv') {
+      _dlBlob(new Blob([_mkContactsCsv(st)], {type:'text/csv;charset=utf-8'}), fn);
+      _bkSaveHist({time:new Date().toISOString(), fmt:'CSV(联系人)', file:fn});
+      if (window.showToast) showToast('✅ CSV导出成功');
+      return;
+    }
+    if (fmt === 'chat-csv') {
+      _dlBlob(new Blob([_mkChatCsv(st)], {type:'text/csv;charset=utf-8'}), fn);
+      _bkSaveHist({time:new Date().toISOString(), fmt:'CSV(聊天)', file:fn});
+      if (window.showToast) showToast('✅ CSV导出成功');
+      return;
+    }
+    if (fmt === 'diary-md') {
+      _dlBlob(new Blob([_mkDiaryMd(st)], {type:'text/markdown;charset=utf-8'}), fn);
+      _bkSaveHist({time:new Date().toISOString(), fmt:'Markdown', file:fn});
+      if (window.showToast) showToast('✅ Markdown导出成功');
+      return;
+    }
+    if (fmt === 'json') {
+      var obj = {_v:2, _t:new Date().toISOString()};
+      if (ck.state) obj.state = st;
+      if (ck.ls) obj.localStorage = lsData;
+      _dlBlob(new Blob([_safePack(obj,2)], {type:'application/json'}), fn);
+      _bkSaveHist({time:new Date().toISOString(), fmt:'JSON', file:fn});
+      if (window.showToast) showToast('✅ JSON导出成功');
+      return;
+    }
+    if (fmt === 'txt') {
+      var txt = '阿晦天天开心备份\n时间: ' + new Date().toLocaleString() + '\n' + '='.repeat(40) + '\n\n';
+      if (ck.state) txt += '--- STATE ---\n' + _safePack(st,2) + '\n\n';
+      if (ck.ls) txt += '--- LOCALSTORAGE ---\n' + _safePack(lsData,2) + '\n';
+      _dlBlob(new Blob([txt], {type:'text/plain;charset=utf-8'}), fn);
+      _bkSaveHist({time:new Date().toISOString(), fmt:'TXT', file:fn});
+      if (window.showToast) showToast('✅ TXT导出成功');
+      return;
+    }
+
+    // ZIP
+    _loadJszip().then(function() {
+      var zip = new JSZip();
+      if (ck.state) zip.file('state.json', _safePack(st,2));
+      if (ck.ls) zip.file('localStorage.json', _safePack(lsData,2));
+      if (ck.covers && covers.length) {
+        zip.file('covers_full.json', _safePack(covers,2));
+        var dir = zip.folder('covers');
+        covers.forEach(function(cv) {
+          if (cv&&cv.data&&cv.id) {
+            var b64 = cv.data.indexOf(',')>-1 ? cv.data.split(',')[1] : cv.data;
+            var ext = cv.data.indexOf('png')>-1?'png':cv.data.indexOf('gif')>-1?'gif':'jpg';
+            dir.file('cover_'+cv.id+'.'+ext, b64, {base64:true});
+          }
+        });
+      }
+      if (ck.diary) zip.file('diary.json', _safePack((st&&st.diaryEntries)||[],2));
+      if (ck.worldview) zip.file('worldview.json', _safePack((st&&st.worldviewEntries)||[],2));
+      if (ck.presets) zip.file('presets.json', _safePack((st&&st.psGroups)||[],2));
+      if (ck.contacts_csv) zip.file('contacts.csv', _mkContactsCsv(st));
+      if (ck.chat_csv) zip.file('chat.csv', _mkChatCsv(st));
+      if (ck.diary_md) zip.file('diary.md', _mkDiaryMd(st));
+      if (ck.chat_html) zip.file('chat.html', _mkChatHtml(st));
+      zip.file('README.txt', '阿晦天天开心备份\n时间:' + new Date().toLocaleString() + '\n\n导入:在备份页点击导入选择此ZIP即可。');
+      return zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:1}});
+    }).then(function(blob) {
+      _dlBlob(blob, fn);
+      _bkSaveHist({time:new Date().toISOString(), fmt:'ZIP', file:fn, size:_bkFmtSize(blob.size)});
+      if (window.showToast) showToast('✅ ZIP备份成功！');
+    }).catch(function(e) {
+      if (window.showToast) showToast('❌ 备份失败: ' + e.message);
+    });
+
+  }).catch(function(e) {
+    console.error('bkDoExport error:', e);
+    if (window.showToast) showToast('❌ 备份失败: ' + (e.message||String(e)));
+  });
+};
+
+// 渲染历史
+window.bkRenderHistory = function() {
+  var el = document.getElementById('bkHistoryEl');
+  if (!el) return;
+  try {
+    var h = JSON.parse(localStorage.getItem('_bkHist')||'[]');
+    if (!h.length) { el.innerHTML='<div style="padding:18px;text-align:center;color:var(--text-secondary);font-size:13px;">暂无记录</div>'; return; }
+    el.innerHTML = h.map(function(item,i) {
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;' +
+        (i < h.length-1 ? 'border-bottom:1px solid var(--border-color);' : '') + '">' +
+        '<div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#11998e,#38ef7d);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">' + (item.fmt||'?').split('(')[0] + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (item.file||'-') + '</div>' +
+        '<div style="font-size:11px;color:var(--text-secondary);">' + _bkFmtTime(item.time) + (item.size ? ' · ' + item.size : '') + '</div>' +
+        '</div>' + (i===0?'<span style="font-size:10px;background:#11998e;color:#fff;border-radius:4px;padding:1px 6px;font-weight:700;flex-shrink:0;">最新</span>':'') +
+        '</div>';
+    }).join('');
+  } catch(e) {}
+};
+
+// 进入页面初始化
+document.addEventListener('pageOpen', function(e) {
+  if (e.detail !== 'backupPage') return;
+  var el = document.getElementById('bkLastTimeLabel');
+  if (el) el.textContent = _bkFmtTime(localStorage.getItem('_bkLastTime'));
+  bkRenderHistory();
+});
+
+})();
+</script>
+
+<!-- 朋友圈全局底部评论栏（body顶层，避免stacking context问题）-->
+<!-- 微信式全局底部评论栏 -->
+<div id="fcCommentBar">
+            <div class="fc-bar-reply-hint" id="fcBarReplyHint"></div>
+            <!-- 表情包面板（展开在输入行上方） -->
+            <div id="fcStickerPanel"></div>
+            <div class="fc-bar-row">
+                <!-- 左：语音/键盘切换 -->
+                <button class="fc-bar-icon-btn" id="fcBarVoiceBtn" onclick="_fcBarToggleVoice()" title="语音">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <!-- 文字输入框 -->
+                <textarea id="fcBarInput" rows="1" placeholder="评论…"
+                    oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px';_fcBarUpdateSend();"
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_fcBarSend();}"></textarea>
+                <!-- 语音按住区域（默认隐藏） -->
+                <div id="fcBarVoiceArea"
+                    ontouchstart="_fcBarVoiceStart(event)" ontouchend="_fcBarVoiceEnd(event)"
+                    onmousedown="_fcBarVoiceStart(event)" onmouseup="_fcBarVoiceEnd(event)">
+                    <span id="fcBarVoiceLabel">按住 说话</span>
+                    <div class="fc-rec-waves" id="fcBarRecWaves" style="display:none;margin-left:8px;">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <!-- 表情包按钮 -->
+                <button class="fc-bar-icon-btn" id="fcBarStickerBtn" onclick="_fcBarToggleStickers()" title="表情包">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </button>
+                <!-- 发送 -->
+                <button class="fc-bar-send-btn" id="fcBarSendBtn" onclick="_fcBarSend()" disabled>发送</button>
+            </div>
+            <!-- 点击遮罩关闭 -->
+        </div>
+        <!-- 底部评论栏背景遮罩 -->
+<div id="fcCommentBarMask" onclick="closeFcCommentBar(true)" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.01);"></div>
 
 </body></html>
