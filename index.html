@@ -5,9 +5,16 @@
     <meta name="referrer" content="no-referrer">
     <!-- 内嵌API配置（点击"写入文件"按钮后永久保存在此，无需依赖localStorage/IndexedDB） -->
     <script id="__api_cfg__" type="application/json">{}</script>
+    <!-- 永久嵌入数据（每次saveData自动写回此处并更新文件） -->
+    <script id="__embed_state__" type="application/json">null</script>
     <script>
     /* ── 在任何DOM修改前捕获原始HTML源码 ── */
     window._rawHtmlSnapshot = document.documentElement.outerHTML;
+    /* ── 读取嵌入state ── */
+    try {
+        var _embedEl = document.getElementById('__embed_state__');
+        window._embeddedState = _embedEl ? JSON.parse(_embedEl.textContent) : null;
+    } catch(e) { window._embeddedState = null; }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>阿晦天天开心</title>
@@ -2795,6 +2802,362 @@
   80%  { transform: scale(1.04,0.96); }
   100% { transform: scale(1,1); }
 }
+
+
+/* ==================== 查岗APP CSS START ==================== */
+#kkPage { background: var(--bg-primary); }
+
+/* loading */
+#kkLoading {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.6); flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+}
+#kkLoading.show { display: flex; }
+.kk-spin {
+    width: 42px; height: 42px;
+    border: 3px solid rgba(255,255,255,0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: kkSpin 0.75s linear infinite;
+}
+@keyframes kkSpin { to { transform: rotate(360deg); } }
+#kkLoadingText { color: #fff; font-size: 15px; font-weight: 500; }
+
+/* 角色选择 */
+#kkPage .kk-header {
+    display: flex; align-items: center;
+    padding: 14px 16px; gap: 10px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+#kkPage .kk-header .kk-back {
+    font-size: 26px; cursor: pointer;
+    color: var(--text-secondary); line-height: 1;
+    padding: 0 4px; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+#kkPage .kk-header .kk-title {
+    font-size: 17px; font-weight: 700;
+    color: var(--text-primary); flex: 1;
+}
+.kk-char-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg-secondary);
+    border-radius: 16px; margin: 0 12px 10px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    transition: opacity 0.15s, transform 0.12s;
+    -webkit-tap-highlight-color: transparent;
+}
+.kk-char-item:active { opacity: 0.7; transform: scale(0.98); }
+.kk-char-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+    background: var(--accent-dim);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.kk-char-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+
+/* 房屋/区域页（覆盖层） */
+.kk-scene-page {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.kk-scene-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+    background-size: cover; background-position: center;
+    transition: background-image 0.5s ease;
+}
+/* 背景暗化遮罩 */
+.kk-scene-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+        rgba(0,0,0,0.45) 0%,
+        rgba(0,0,0,0.15) 35%,
+        rgba(0,0,0,0.55) 65%,
+        rgba(0,0,0,0.82) 100%);
+}
+.kk-scene-header {
+    position: relative; z-index: 2;
+    display: flex; align-items: center;
+    padding: 16px 16px 12px; gap: 10px;
+    color: #fff;
+    flex-shrink: 0;
+}
+.kk-scene-header .kk-back {
+    font-size: 28px; cursor: pointer; line-height:1;
+    padding: 4px 8px; flex-shrink:0;
+    -webkit-tap-highlight-color:transparent;
+    opacity: 0.9;
+}
+.kk-scene-header .kk-title {
+    font-size: 17px; font-weight: 700; flex: 1;
+    letter-spacing: 0.3px;
+}
+.kk-scene-actions { display: flex; gap: 14px; align-items: center; }
+.kk-scene-actions span {
+    cursor: pointer; opacity: 0.85;
+    -webkit-tap-highlight-color:transparent;
+    padding: 4px;
+}
+.kk-scene-actions span:active { opacity: 0.5; }
+
+/* 房屋工具栏 */
+#kkSceneToolbar {
+    position: absolute; top: 72px; right: 14px;
+    z-index: 3; display: flex; flex-direction: column; gap: 10px;
+}
+.kk-tool-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #fff;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+.kk-tool-btn:active { background: rgba(255,255,255,0.3); transform: scale(0.93); }
+
+/* 房屋信息面板 */
+#kkHousePanel {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    padding: 28px 18px 28px;
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 60%, transparent 100%);
+    color: #fff;
+    max-height: 55vh;
+    display: flex; flex-direction: column; gap: 0;
+}
+#kkHouseLoc {
+    font-size: 17px; font-weight: 700; margin: 0 0 7px;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    letter-spacing: 0.3px;
+}
+#kkHouseDesc {
+    font-size: 13px; opacity: 0.82; margin: 0 0 16px;
+    line-height: 1.6; overflow-y: auto;
+    max-height: 80px;
+    flex-shrink: 0;
+}
+.kk-area-btns {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    overflow-y: auto; max-height: 120px;
+    padding-bottom: 2px;
+}
+.kk-area-btn {
+    background: rgba(255,255,255,0.16);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.38); color: #fff;
+    border-radius: 22px; padding: 8px 18px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+.kk-area-btn:active {
+    background: rgba(255,255,255,0.32);
+    transform: scale(0.95);
+}
+
+/* 区域物品面板 */
+#kkAreaPanel {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    padding: 22px 16px 28px;
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%);
+    color: #fff;
+    max-height: 55vh;
+    display: flex; flex-direction: column;
+}
+#kkAreaDesc {
+    font-size: 13px; opacity: 0.82;
+    margin: 0 0 8px; line-height: 1.6;
+    overflow-y: auto; max-height: 80px;
+    flex-shrink: 0;
+}
+.kk-area-hint {
+    font-size: 11px; opacity: 0.55;
+    margin: 0 0 10px; flex-shrink: 0;
+}
+.kk-item-btns {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    overflow-y: auto; max-height: 120px;
+}
+.kk-item-btn {
+    background: rgba(255,255,255,0.13);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.32); color: #fff;
+    border-radius: 18px; padding: 7px 15px; font-size: 12.5px;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+.kk-item-btn:active {
+    background: rgba(255,255,255,0.28);
+    transform: scale(0.95);
+}
+
+/* 监控 */
+#kkMonitorPage {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; flex-direction: column;
+    background: #0d0d0d;
+}
+#kkMonitorGrid {
+    flex: 1; overflow-y: auto; padding: 10px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    align-content: start;
+}
+.kk-monitor-cell {
+    border-radius: 12px; overflow: hidden;
+    background: #1a1a1a; background-size: cover; background-position: center;
+    min-height: 155px; position: relative;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+.kk-monitor-cell.here { outline: 2px solid #07C160; outline-offset: -2px; }
+.kk-mon-head {
+    background: rgba(0,0,0,0.65); padding: 5px 8px;
+    font-size: 11px; color: #ddd;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.kk-rec { width:6px; height:6px; border-radius:50%; background:#f00; animation:recBlink 1.2s infinite; }
+@keyframes recBlink { 0%,100%{opacity:1}50%{opacity:0.2} }
+.kk-mon-body {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px); padding: 8px;
+}
+.kk-mon-text { font-size: 11px; color: #ccc; line-height: 1.5; max-height: 60px; overflow: hidden; }
+.kk-mon-btns { display: flex; gap: 5px; margin-top: 6px; }
+.kk-mon-btn {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 7px; padding: 3px 10px;
+    font-size: 12px; color: #eee; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.kk-mon-btn:active { background: rgba(255,255,255,0.25); }
+
+/* 衣帽间 */
+#kkWardrobePage {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; flex-direction: column;
+    background: var(--bg-primary);
+}
+#kkWardrobePreview {
+    display: flex; gap: 10px; padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color); align-items: flex-start;
+}
+#kkWardrobeAvatar { width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--accent-dim); }
+.kk-wrd-bubble {
+    flex: 1; background: var(--bg-secondary); border-radius: 12px;
+    padding: 8px 12px; font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+}
+.kk-outfit-slots { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--border-color); }
+.kk-slot {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--accent-dim); border: 1.5px dashed var(--border-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--text-secondary); cursor: pointer; overflow: hidden;
+}
+.kk-slot.on { border-style: solid; border-color: #07C160; font-size: 20px; }
+.kk-slot img { width:100%; height:100%; object-fit:contain; }
+#kkWardrobeTabs { display: flex; padding: 8px 12px 0; gap: 4px; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+.kk-wtab {
+    padding: 6px 14px; border-radius: 16px 16px 0 0; font-size: 13px;
+    cursor: pointer; color: var(--text-secondary); white-space: nowrap;
+    border-bottom: 2px solid transparent; -webkit-tap-highlight-color: transparent;
+}
+.kk-wtab.on { color: var(--text-primary); font-weight: 700; border-bottom-color: #07C160; }
+#kkWardrobeGrid {
+    flex: 1; overflow-y: auto; display: grid;
+    grid-template-columns: repeat(3,1fr); gap: 10px; padding: 12px;
+}
+.kk-cloth {
+    background: var(--bg-secondary); border-radius: 12px;
+    padding: 10px 8px; display: flex; flex-direction: column;
+    align-items: center; gap: 4px; cursor: pointer;
+    border: 2px solid transparent; -webkit-tap-highlight-color: transparent;
+}
+.kk-cloth.on { border-color: #07C160; }
+.kk-cloth-icon { font-size: 30px; }
+.kk-cloth img { width:100%; height:66px; object-fit:contain; border-radius:4px; }
+.kk-cloth-name { font-size: 12px; font-weight: 600; color: var(--text-primary); text-align:center; }
+#kkTryOnBtn {
+    margin: 8px 14px; padding: 11px; border-radius: 22px;
+    background: #07C160; color: #fff; border: none;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+#kkTryOnBtn:disabled { background: var(--border-color); color: var(--text-secondary); cursor: not-allowed; }
+
+/* 通用弹窗底sheet */
+.kk-sheet-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9500;
+    background: rgba(0,0,0,0.5); align-items: flex-end; justify-content: center;
+}
+.kk-sheet-overlay.show { display: flex; }
+.kk-sheet {
+    width: 100%; max-width: 520px; border-radius: 18px 18px 0 0;
+    background: var(--bg-primary); display: flex; flex-direction: column;
+    max-height: 80vh; overflow: hidden;
+}
+.kk-sheet-head {
+    padding: 14px 16px; border-bottom: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+}
+.kk-sheet-head-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.kk-sheet-close { font-size: 24px; color: var(--text-secondary); cursor: pointer; line-height:1; }
+.kk-sheet-body { flex:1; overflow-y: auto; }
+.kk-sheet-foot { padding: 10px 14px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; flex-shrink:0; }
+.kk-btn-cancel { flex:1; padding:10px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:14px; cursor:pointer; }
+.kk-btn-ok { flex:1; padding:10px; border-radius:10px; border:none; background:#07C160; color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
+.kk-btn-share { flex:1; padding:10px; border-radius:10px; border:none; background:#ff9800; color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
+.kk-list-item {
+    padding: 13px 16px; border-bottom: 1px solid var(--border-color);
+    font-size: 14px; color: var(--text-primary); cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.kk-list-item:active { background: var(--accent-dim); }
+.kk-item-content { white-space: pre-wrap; background: var(--bg-secondary); padding: 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; color: var(--text-primary); }
+
+/* 查岗API设置页 */
+#kkApiPage { background: var(--bg-primary); }
+#kkApiPage .kk-header {
+    display: flex; align-items: center;
+    padding: 14px 16px; gap: 10px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+#kkApiPage .kk-header .kk-back {
+    font-size: 26px; cursor: pointer;
+    color: var(--text-secondary); line-height: 1;
+    padding: 4px 8px; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    display: flex; align-items: center;
+}
+#kkApiPage .kk-header .kk-title {
+    font-size: 17px; font-weight: 700;
+    color: var(--text-primary); flex: 1;
+}
+
+/* Steam卡片 */
+.kk-steam-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; background: var(--bg-secondary);
+    border-radius: 12px; margin: 0 12px 8px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.kk-steam-row:active { opacity: 0.7; }
+/* ==================== 查岗APP CSS END ==================== */
 </style>
     <style id="globalCssStyle"></style>
     
@@ -3097,6 +3460,12 @@ window.onerror = function(msg, src, line, col, err) {
                         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="width:28px;height:28px;"><polyline points="20 7 20 21 4 21 4 7"/><rect x="1" y="3" width="22" height="4"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
                     </div>
                     <span class="ios-app-label">备份</span>
+                </div>
+                <div class="ios-app-icon" onclick="openKkCheckin()">
+                    <div class="ios-app-icon-img" style="background:linear-gradient(135deg,#f7971e,#ffd200);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="width:28px;height:28px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <span class="ios-app-label">查岗</span>
                 </div>
               </div>
             </div><!-- /第二页 -->
@@ -6539,6 +6908,28 @@ window.onerror = function(msg, src, line, col, err) {
                 </div>
             </div>
             
+            <!-- 查岗API设置 -->
+            <div class="settings-section">
+                <div class="settings-section-title">🏠 查岗API设置</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5;">查岗功能专用API。不填则依次回退：副API2 → 副API1 → 主API。</div>
+                <div class="input-group">
+                    <label class="input-label">查岗API地址</label>
+                    <input type="text" class="input" id="kkApiUrl" placeholder="https://api.example.com/v1" oninput="saveKkApiSettings()">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">查岗API Key</label>
+                    <input type="password" class="input" id="kkApiKey" placeholder="sk-..." oninput="saveKkApiSettings()">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">查岗API模型</label>
+                    <input type="text" class="input" id="kkApiModel" placeholder="gpt-4o" oninput="saveKkApiSettings()">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">查岗API Max Tokens</label>
+                    <input type="number" class="input" id="kkApiMaxTokens" value="4000" min="1" max="32000" oninput="saveKkApiSettings()">
+                </div>
+            </div>
+
             <!-- 语音API设置 -->
             <div class="settings-section">
                 <div class="settings-section-title">语音API设置</div>
@@ -7288,7 +7679,7 @@ async function deleteCoverFromDB(id) {
     });
 }
 
-// 保存整个 state 到 IndexedDB
+// 保存整个 state 到 IndexedDB + localStorage + 自写回HTML文件
 async function saveStateToDB(state) {
     // 保存前强制把 state.messages 同步回 friend._messages 和 contacts 里对应的联系人
     if (state && state.friend && state.messages) {
@@ -7299,54 +7690,88 @@ async function saveStateToDB(state) {
             if (c) c._messages = state.messages;
         }
     }
-    // localStorage 备份：同步写入（确保关闭前已保存）
-    try {
-        const lsData = {
-            messages: (state.messages || []).map(function(m) {
-                if (!m.content || typeof m.content !== 'string' || !m.content.startsWith('data:')) return m;
-                return Object.assign({}, m, { content: '[base64]' });
-            }),
-            friend: { ...state.friend, avatar: (typeof state.friend.avatar === 'number' ? state.friend.avatar : (typeof state.friend.avatar === 'string' && state.friend.avatar.startsWith('data:') ? '' : state.friend.avatar)) },
-            user: { ...state.user, avatar: (typeof state.user.avatar === 'number' ? state.user.avatar : (typeof state.user.avatar === 'string' && state.user.avatar.startsWith('data:') ? '' : state.user.avatar)) },
-            contacts: (state.contacts || []).map(c => ({ ...c, avatar: (typeof c.avatar === 'number' ? c.avatar : (typeof c.avatar === 'string' && c.avatar.startsWith('data:') ? '' : c.avatar)), _messages: (c._messages||[]).map(function(m){ return (!m.content||!m.content.startsWith('data:'))?m:Object.assign({},m,{content:'[base64]'}); }) })),
-            // ★ 把大 base64 字段从 settings 里剥离，单独存专属 key，防止 localStorage 超限
-            settings: (function() {
-                var s = Object.assign({}, state.settings);
-                // appBg 存专属 IDB，不放入主JSON
-                s = Object.assign({}, s, { appBg: '' });
-                if (s.callBg) {
-                    var cb = Object.assign({}, s.callBg);
-                    Object.keys(cb).forEach(function(k){ if (typeof cb[k]==='string' && cb[k].startsWith('data:')) cb[k]='__cache__'; });
-                    s = Object.assign({}, s, { callBg: cb });
-                }
-                return s;
-            })(),
-            stickers: state.stickers,
-            diaries: state.diaries,
-            playlists: (state.playlists || []).map(p => ({ ...p, cover: (typeof p.cover === 'number' ? p.cover : '') })),
-            systemPrompt: state.systemPrompt,
-            globalCss: state.globalCss,
-            diaryCss: state.diaryCss || '',
-            diaryCssPresets: state.diaryCssPresets || [],
-            aiPresets: state.aiPresets || [],
-            aiPresetsActive: state.aiPresetsActive || [],
-            psGroups: state.psGroups || [],
-        };
-        localStorage.setItem('yunmuraData_v2', JSON.stringify(lsData));
-    } catch(e) { console.warn('localStorage备份失败:', e); }
-    // IndexedDB保存（IndexedDB 自身序列化不在主线程，不会卡）
+
+    // ── 序列化（剥离大base64，替换为IDB id引用）──
+    const lsData = {
+        messages: (state.messages || []).map(function(m) {
+            if (!m.content || typeof m.content !== 'string' || !m.content.startsWith('data:')) return m;
+            return Object.assign({}, m, { content: '[base64]' });
+        }),
+        friend: { ...state.friend, avatar: (typeof state.friend.avatar === 'number' ? state.friend.avatar : (typeof state.friend.avatar === 'string' && state.friend.avatar.startsWith('data:') ? '' : state.friend.avatar)) },
+        user: { ...state.user, avatar: (typeof state.user.avatar === 'number' ? state.user.avatar : (typeof state.user.avatar === 'string' && state.user.avatar.startsWith('data:') ? '' : state.user.avatar)) },
+        contacts: (state.contacts || []).map(c => ({ ...c, avatar: (typeof c.avatar === 'number' ? c.avatar : (typeof c.avatar === 'string' && c.avatar.startsWith('data:') ? '' : c.avatar)), _messages: (c._messages||[]).map(function(m){ return (!m.content||!m.content.startsWith('data:'))?m:Object.assign({},m,{content:'[base64]'}); }) })),
+        settings: (function() {
+            var s = Object.assign({}, state.settings);
+            s = Object.assign({}, s, { appBg: '' });
+            if (s.callBg) {
+                var cb = Object.assign({}, s.callBg);
+                Object.keys(cb).forEach(function(k){ if (typeof cb[k]==='string' && cb[k].startsWith('data:')) cb[k]='__cache__'; });
+                s = Object.assign({}, s, { callBg: cb });
+            }
+            return s;
+        })(),
+        stickers: state.stickers,
+        diaries: state.diaries,
+        playlists: (state.playlists || []).map(p => ({ ...p, cover: (typeof p.cover === 'number' ? p.cover : '') })),
+        systemPrompt: state.systemPrompt,
+        globalCss: state.globalCss,
+        diaryCss: state.diaryCss || '',
+        diaryCssPresets: state.diaryCssPresets || [],
+        aiPresets: state.aiPresets || [],
+        aiPresetsActive: state.aiPresetsActive || [],
+        psGroups: state.psGroups || [],
+        mood: state.mood || {},
+        memories: state.memories || [],
+        friendCirclePosts: state.friendCirclePosts || [],
+        callLog: state.callLog || [],
+        walletBalance: state.walletBalance,
+    };
+
+    // ── 1. localStorage（多key冗余，固定key不受域影响）──
+    const lsJson = JSON.stringify(lsData);
+    try { localStorage.setItem('yunmuraData_v2', lsJson); } catch(e) {}
+    try { localStorage.setItem('yunmuraData_embed', lsJson); } catch(e) {}
+
+    // ── 2. IndexedDB ──
     try {
         const db = await openDB();
-        return new Promise((resolve, reject) => {
+        await new Promise((resolve, reject) => {
             const transaction = db.transaction(['appState'], 'readwrite');
             const store = transaction.objectStore('appState');
             const request = store.put({ key: 'main', value: state });
             request.onsuccess = () => resolve();
             request.onerror = () => reject(request.error);
         });
-    } catch(e) {
-        console.warn('IndexedDB保存失败，已用localStorage备份:', e);
-    }
+    } catch(e) { console.warn('IndexedDB保存失败:', e); }
+
+    // ── 3. 自写回HTML文件（核心：数据永久嵌入文件本身）──
+    _autoSaveToFile(lsData);
+}
+
+// 防抖写文件定时器
+var _autoSaveTimer = null;
+function _autoSaveToFile(data) {
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = setTimeout(function() {
+        try {
+            var stateJson = JSON.stringify(data);
+            // 更新DOM中的标签（当前会话立即生效）
+            var embedEl = document.getElementById('__embed_state__');
+            if (embedEl) embedEl.textContent = stateJson;
+            // 同时更新API配置标签
+            var apiCfg = window._buildApiCfgFromState ? window._buildApiCfgFromState() : null;
+            var apiEl = document.getElementById('__api_cfg__');
+            if (apiEl && apiCfg) apiEl.textContent = JSON.stringify(apiCfg);
+            // 获取最新HTML源码
+            var html = document.documentElement.outerHTML;
+            if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<!doctype')) {
+                html = '<!DOCTYPE html>\n' + html;
+            }
+            // 更新快照（不自动触发下载，避免浏览器反复弹确认框）
+            // 数据已通过 localStorage + IndexedDB 双重持久化，文件写回由用户手动点"保存文件"触发
+            window._rawHtmlSnapshot = html;
+        } catch(e) { console.warn('[自写文件失败]', e); }
+    }, 2000); // 操作停止2秒后再写，避免频繁下载
 }
 
 // 从 IndexedDB 加载 state
@@ -7435,6 +7860,12 @@ async function clearStateFromDB() {
             maxTokens: 2000
         },
         theaterApi: {
+            url: '',
+            key: '',
+            model: '',
+            maxTokens: 4000
+        },
+        kkApi: {
             url: '',
             key: '',
             model: '',
@@ -8753,21 +9184,29 @@ function formatMessageTime(isoString) {
     
     async function loadData() {
     try {
-        // 1. 尝试从 IndexedDB 加载状态
+        // 0. 优先读取嵌入HTML文件本身的state（最可靠，不依赖任何浏览器存储）
         let data = null;
-        try { data = await loadStateFromDB(); } catch(e) { console.warn('IndexedDB读取失败:', e); }
+        if (window._embeddedState && typeof window._embeddedState === 'object') {
+            data = window._embeddedState;
+            console.log('[存储] 从嵌入HTML恢复数据 ✓');
+        }
+
+        // 1. 嵌入数据为空时，尝试从 IndexedDB 加载
+        if (!data) {
+            try { data = await loadStateFromDB(); if(data) console.log('[存储] 从IndexedDB恢复数据 ✓'); } catch(e) { console.warn('IndexedDB读取失败:', e); }
+        }
         
         if (data) {
             Object.assign(state, data);
         } else {
             // 2. 尝试从 localStorage v2 加载（新格式备份）
-            const savedV2 = localStorage.getItem('yunmuraData_v2');
+            const savedV2 = localStorage.getItem('yunmuraData_v2') || localStorage.getItem('yunmuraData_embed');
             if (savedV2) {
                 try {
                     data = JSON.parse(savedV2);
                     Object.assign(state, data);
-                    console.log('从localStorage v2恢复数据');
-                } catch(e) { console.warn('localStorage v2解析失败:', e); }
+                    console.log('[存储] 从localStorage恢复数据');
+                } catch(e) { console.warn('localStorage解析失败:', e); }
             }
             // 3. 最后尝试旧格式
             if (!data) {
@@ -8949,6 +9388,7 @@ function formatMessageTime(isoString) {
                     if (_savedAll.voiceApi) state.settings.voiceApi = Object.assign(state.settings.voiceApi || {}, _savedAll.voiceApi);
                     if (_savedAll.diaryApi) state.settings.diaryApi = Object.assign(state.settings.diaryApi || {}, _savedAll.diaryApi);
                     if (_savedAll.theaterApi) state.settings.theaterApi = Object.assign(state.settings.theaterApi || {}, _savedAll.theaterApi);
+                    if (_savedAll.kkApi) state.settings.kkApi = Object.assign(state.settings.kkApi || {}, _savedAll.kkApi);
                     console.log('[API] 从_globalApiAll恢复全量API设置 ✓');
                 } else {
                     // 兜底：旧格式
@@ -16896,6 +17336,7 @@ window.deleteApiPresetItem = function(target, idx) {
         if (!state.settings.voiceApi) state.settings.voiceApi = {};
         if (!state.settings.imageApi) state.settings.imageApi = {};
         if (!state.settings.diaryApi) state.settings.diaryApi = {};
+        if (!state.settings.kkApi) state.settings.kkApi = {};
 
         // 主API
         var url = r('apiUrl', state.settings.api.url || '');
@@ -16971,6 +17412,17 @@ window.deleteApiPresetItem = function(target, idx) {
         var tTok = parseInt((document.getElementById('theaterApiMaxTokens') || {}).value) || 0;
         if (tTok > 0) state.settings.theaterApi.maxTokens = tTok;
         else if (!state.settings.theaterApi.maxTokens) state.settings.theaterApi.maxTokens = 4000;
+
+        // 查岗API（读modal id 和 page id2，优先page）
+        var kkUrl = r('kkApiUrl', state.settings.kkApi.url || '');
+        if (kkUrl) state.settings.kkApi.url = kkUrl;
+        var kkKey = r('kkApiKey', state.settings.kkApi.key || '');
+        if (kkKey) state.settings.kkApi.key = kkKey;
+        var kkModel = r('kkApiModel', state.settings.kkApi.model || '');
+        if (kkModel) state.settings.kkApi.model = kkModel;
+        var kkTok = ri('kkApiMaxTokens', 0);
+        if (kkTok > 0) state.settings.kkApi.maxTokens = kkTok;
+        else if (!state.settings.kkApi.maxTokens) state.settings.kkApi.maxTokens = 4000;
     };
 
     /* ═══════════════════════════════════════════════════
@@ -17020,6 +17472,12 @@ window.deleteApiPresetItem = function(target, idx) {
                 key: (s.theaterApi && s.theaterApi.key) || '',
                 model: (s.theaterApi && s.theaterApi.model) || '',
                 maxTokens: (s.theaterApi && s.theaterApi.maxTokens) || 4000
+            },
+            kkApi: {
+                url: (s.kkApi && s.kkApi.url) || '',
+                key: (s.kkApi && s.kkApi.key) || '',
+                model: (s.kkApi && s.kkApi.model) || '',
+                maxTokens: (s.kkApi && s.kkApi.maxTokens) || 4000
             }
         };
     };
@@ -17070,7 +17528,11 @@ window.deleteApiPresetItem = function(target, idx) {
             ['diaryApiUrl',          (s.diaryApi && s.diaryApi.url) || ''],
             ['diaryApiKey',          (s.diaryApi && s.diaryApi.key) || ''],
             ['diaryApiModel',        (s.diaryApi && s.diaryApi.model) || ''],
-            ['diaryApiMaxTokens',    (s.diaryApi && s.diaryApi.maxTokens) || 2000]
+            ['diaryApiMaxTokens',    (s.diaryApi && s.diaryApi.maxTokens) || 2000],
+            ['kkApiUrl',             (s.kkApi && s.kkApi.url) || ''],
+            ['kkApiKey',             (s.kkApi && s.kkApi.key) || ''],
+            ['kkApiModel',           (s.kkApi && s.kkApi.model) || ''],
+            ['kkApiMaxTokens',       (s.kkApi && s.kkApi.maxTokens) || 4000]
         ];
         pairs.forEach(function(p) {
             [p[0], p[0] + '2', p[0] + '3'].forEach(function(eid) {
@@ -17097,7 +17559,9 @@ window.deleteApiPresetItem = function(target, idx) {
             ['diaryModelSelect',      (s.diaryApi && s.diaryApi.model) || ''],
             ['diaryModelSelect2',     (s.diaryApi && s.diaryApi.model) || ''],
             ['diaryModelSelect3',     (s.diaryApi && s.diaryApi.model) || ''],
-            ['theaterModelSelect',    (s.theaterApi && s.theaterApi.model) || '']
+            ['theaterModelSelect',    (s.theaterApi && s.theaterApi.model) || ''],
+            ['kkApiModelSel',         (s.kkApi && s.kkApi.model) || ''],
+            ['kkApiModelSel2',        (s.kkApi && s.kkApi.model) || '']
         ];
         modelSelects.forEach(function(ms) {
             var sel = document.getElementById(ms[0]);
@@ -33899,6 +34363,8 @@ document.addEventListener('pageOpen', function(e) {
     'presetGroupPage': true,
     'presetGroupEntryPage': true,
     'backupPage': true,
+    'kkPage': true,
+    'kkApiPage': true,
   };
   var _btnCache = {};
   function injectBackBtn(pageId){
@@ -34484,10 +34950,14 @@ window.renderWechatContactsList = function() {
             var domId = 'contacts-av-' + realIdx;
             var avatar = contact.avatar || '';
             var isIdb = !isNaN(avatar) && avatar !== '' && avatar !== null && avatar !== undefined;
-            var avatarBg = ['#576b95','#1aad19','#ff6b35','#e85151'][realIdx % 4];
-            var avatarStyle = (!isIdb && avatar) ? 'background-image:url(' + avatar + ');background-size:cover;background-position:center;' : 'background:' + avatarBg + ';';
+            var avatarBg = ['#576b95','#1aad19','#ff6b35','#e85151','#8b6baa','#2196f3','#ff9800','#009688'][realIdx % 8];
+            var avatarStyle = (!isIdb && avatar) ? 'background-image:url(' + avatar + ');background-size:cover;background-position:center;background-color:' + avatarBg + ';' : 'background:' + avatarBg + ';';
+            var firstLetter = (contact.remark || contact.name || '?').charAt(0);
+            var showLetter = (!avatar || isIdb);
             html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border-color);" onclick="openContactProfile(' + realIdx + ')">'
-                + '<div id="' + domId + '" style="width:44px;height:44px;border-radius:6px;' + avatarStyle + 'flex-shrink:0;background-size:cover;background-position:center;"></div>'
+                + '<div id="' + domId + '" style="position:relative;width:44px;height:44px;border-radius:6px;' + avatarStyle + 'flex-shrink:0;background-size:cover;background-position:center;">'
+                + (showLetter ? '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;color:#fff;pointer-events:none;">' + firstLetter + '</span>' : '')
+                + '</div>'
                 + '<div style="flex:1;">'
                 + '<div style="font-size:15px;color:var(--text-primary);">' + (contact.remark || contact.name || '未知角色') + '</div>'
                 + '</div>'
@@ -34532,7 +35002,13 @@ window.renderWechatContactsList = function() {
             window.getCoverFromDB(parseInt(job.av)).then(function(base64) {
                 if (!base64) return;
                 var avEl = document.getElementById(job.id);
-                if (avEl) { avEl.style.backgroundImage = 'url(' + base64 + ')'; avEl.style.backgroundSize = 'cover'; avEl.style.backgroundPosition = 'center'; }
+                if (avEl) {
+                    avEl.style.backgroundImage = 'url(' + base64 + ')';
+                    avEl.style.backgroundSize = 'cover';
+                    avEl.style.backgroundPosition = 'center';
+                    var sp = avEl.querySelector('span');
+                    if (sp) sp.style.display = 'none';
+                }
             }).catch(function() {});
         }
     });
@@ -37213,6 +37689,28 @@ window.importCharCardJson = function() {
             if (fnEl) fnEl.textContent = name;
             var faEl = document.getElementById('friendAvatar');
             if (faEl && avatar) { faEl.style.backgroundImage = 'url(' + avatar + ')'; faEl.style.backgroundSize = 'cover'; faEl.style.backgroundPosition = 'center'; }
+
+            // ★ 同步将角色加入 state.contacts，使其出现在微信聊天列表
+            if (!st.contacts) st.contacts = [];
+            var existingContact = st.contacts.find(function(c) { return c.name === name; });
+            if (!existingContact) {
+                st.contacts.push({
+                    name: name,
+                    description: desc || '',
+                    persona: systemPrompt || desc || '',
+                    avatar: avatar || '',
+                    personality: personality || '',
+                    scenario: scenario || '',
+                    firstMessage: firstMes || '',
+                    _messages: []
+                });
+            } else {
+                if (desc) existingContact.description = desc;
+                if (systemPrompt) existingContact.persona = systemPrompt;
+                if (avatar && (avatar.startsWith('http') || avatar.startsWith('data:'))) existingContact.avatar = avatar;
+                if (personality) existingContact.personality = personality;
+                if (scenario) existingContact.scenario = scenario;
+            }
         }
 
         // 分类ID（以角色名生成）
@@ -37305,6 +37803,11 @@ window.importCharCardJson = function() {
 
         if (window.saveData) window.saveData();
         document.getElementById('charCardUploadOverlay') && document.getElementById('charCardUploadOverlay').remove();
+
+        // ★ 导入后刷新微信聊天列表，使新角色对话条立即出现
+        if (typeof renderWechatChatList === 'function') {
+            setTimeout(function() { renderWechatChatList(); }, 100);
+        }
 
         var msg = choice ? '✅ 已导入角色「' + name + '」' : '✅ 已添加分类「' + name + '」';
         if (addedCount > 0) msg += '，新增 ' + addedCount + ' 条';
@@ -45219,6 +45722,7 @@ window._globalImport=function(input){
 </style>
 
 <script>
+
 (function(){
 
 function _bkFmtTime(iso) {
@@ -45331,6 +45835,901 @@ function _mkChatHtml(st) {
       (m.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div></div>';
   });
   return h + '</body></html>';
+}
+
+})();
+</script>
+<script>
+// ==================== 查岗APP JS START ====================
+
+// ── 当前激活的联系人key
+var _kkKey = null;
+// 衣帽间状态
+var _kkOutfit = {};
+var _kkWrdCat = '上装';
+
+// ── loading
+function kkLoad(txt) {
+    var el = document.getElementById('kkLoading');
+    var te = document.getElementById('kkLoadingText');
+    if (te) te.textContent = txt || '正在寻找中...';
+    if (el) el.classList.add('show');
+}
+function kkUnload() {
+    var el = document.getElementById('kkLoading');
+    if (el) el.classList.remove('show');
+}
+
+// ── 获取API列表（优先级：查岗专属 > 副2 > 副1 > 主）
+function kkApis() {
+    var s = window.state && window.state.settings;
+    if (!s) return [];
+    return [s.kkApi, s.secondaryApi2, s.secondaryApi, s.api]
+        .filter(function(a) { return a && a.url && a.key; });
+}
+
+// ── 调用API（自动fallback）
+async function kkCall(messages, maxTok) {
+    var apis = kkApis();
+    if (!apis.length) throw new Error('请先配置API（点右上角⚙设置）');
+    maxTok = maxTok || 4000;
+    var lastErr;
+    for (var i = 0; i < apis.length; i++) {
+        var api = apis[i];
+        try {
+            var res = await fetch(normalizeApiUrl(api.url), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + api.key },
+                body: JSON.stringify({
+                    model: api.model || 'gpt-4o',
+                    messages: messages,
+                    max_tokens: api.maxTokens || maxTok
+                })
+            });
+            if (!res.ok) { lastErr = new Error('HTTP ' + res.status); continue; }
+            var d = await res.json();
+            var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+            if (txt.trim()) return txt.trim();
+        } catch(e) { lastErr = e; }
+    }
+    throw lastErr || new Error('所有API均失败');
+}
+
+// ── 获取联系人对象
+function kkContact(key) {
+    if (!key) return null;
+    var st = window.state;
+    if (!st) return null;
+    if (key === 'main') return st.friend || null;
+    var cid = key.replace('contact_', '');
+    return (st.contacts || []).find(function(c) {
+        return c && (String(c.id) === cid || c.name === cid);
+    }) || null;
+}
+
+// ── 解析头像（同步，支持idb:异步加载）
+function kkAvatar(c) {
+    if (!c) return '';
+    var av = (c.settings && (c.settings.aiAvatar || c.settings.avatar)) ||
+             c.avatar || c.avatarUrl || c.aiAvatar || '';
+    return (av && av.startsWith('idb:')) ? '' : (av || '');
+}
+
+// ── 异步解析idb:头像
+async function kkAvatarAsync(c) {
+    var av = (c.settings && (c.settings.aiAvatar || c.settings.avatar)) ||
+             c.avatar || c.avatarUrl || c.aiAvatar || '';
+    if (!av) return '';
+    if (av.startsWith('idb:')) {
+        try {
+            if (window.loadCoverFromDB) return await loadCoverFromDB(av.slice(4)) || '';
+            if (window.getCoverFromDB)  return await getCoverFromDB(av.slice(4)) || '';
+        } catch(e) {}
+        return '';
+    }
+    return av;
+}
+
+// ── 人设
+function kkPersona(key) {
+    var c = kkContact(key);
+    if (!c) return '';
+    return (c.settings && (c.settings.aiPersona || c.settings.persona)) || c.persona || '';
+}
+
+// ── 近期聊天
+function kkChat(key, n) {
+    n = n || 15;
+    var c = kkContact(key);
+    if (!c) return '';
+    var h = c.chatHistory || c.history || c._messages || [];
+    var uname = (window.state && window.state.user && window.state.user.name) || '我';
+    var aname = (c.name) || 'AI';
+    return h.slice(-n).map(function(m) {
+        var who = (m.role === 'user' || m.isUser) ? uname : aname;
+        return who + '：' + (m.content || m.text || '');
+    }).join('\n');
+}
+
+// ── 住所数据存取
+function kkHouseData(key) {
+    var c = kkContact(key);
+    return c ? (c._kkHouse || null) : null;
+}
+function kkSetHouse(key, data) {
+    var c = kkContact(key);
+    if (c) { c._kkHouse = data; if (window.saveData) saveData(); }
+}
+
+// ── 安全转义HTML
+function kkEsc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ================================================================
+// 总入口
+// ================================================================
+window.openKkCheckin = async function() {
+    var listEl = document.getElementById('kkCharList');
+    if (!listEl) return;
+    listEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-secondary);font-size:14px;">加载中...</div>';
+    openPage('kkPage');
+
+    var st = window.state;
+    if (!st) { listEl.innerHTML = '<div style="padding:20px;color:var(--text-secondary);">未找到角色数据</div>'; return; }
+
+    var chars = [];
+    var mainName = st.friend && st.friend.name;
+
+    if (mainName) {
+        chars.push({ key: 'main', name: mainName, c: st.friend });
+    }
+    (st.contacts || []).forEach(function(c) {
+        if (!c || !c.name) return;
+        if (c.name === mainName) return; // 去重
+        chars.push({ key: 'contact_' + (c.id || c.name), name: c.name, c: c });
+    });
+
+    if (!chars.length) {
+        listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);">还没有可以查岗的角色</div>';
+        return;
+    }
+
+    listEl.innerHTML = '';
+    for (var i = 0; i < chars.length; i++) {
+        (function(ch) {
+            var item = document.createElement('div');
+            item.className = 'kk-char-item';
+            var img = document.createElement('img');
+            img.className = 'kk-char-avatar';
+            img.alt = ch.name;
+            img.src = ''; // 先空
+            img.onerror = function() { this.src = ''; this.style.background = 'var(--accent-dim)'; };
+
+            var nameEl = document.createElement('span');
+            nameEl.className = 'kk-char-name';
+            nameEl.textContent = ch.name;
+
+            item.appendChild(img);
+            item.appendChild(nameEl);
+            item.onclick = function() { kkOpenHouse(ch.key); };
+            listEl.appendChild(item);
+
+            // 异步加载头像
+            kkAvatarAsync(ch.c).then(function(url) {
+                if (url) img.src = url;
+            });
+        })(chars[i]);
+    }
+};
+
+// ── 加载API设置到UI
+function kkLoadApiUi() {
+    var cfg = window.state && window.state.settings && window.state.settings.kkApi;
+    if (!cfg) return;
+    var f = function(id, v) { var el = document.getElementById(id); if (el && el !== document.activeElement) el.value = v || ''; };
+    // 同步 modal 输入框 (id) 和 page 输入框 (id2)
+    f('kkApiUrl', cfg.url);    f('kkApiUrl2', cfg.url);
+    f('kkApiKey', cfg.key);    f('kkApiKey2', cfg.key);
+    f('kkApiModel', cfg.model); f('kkApiModel2', cfg.model);
+    var tok = cfg.maxTokens || 4000;
+    f('kkApiMaxTokens', tok);  f('kkApiMaxTokens2', tok);
+}
+
+window.kkSaveApi = async function() {
+    if (!window.state || !window.state.settings) return;
+    if (!window.state.settings.kkApi) window.state.settings.kkApi = {};
+    var g = function(id, id2) {
+        var el2 = document.getElementById(id2);
+        if (el2 && el2.value.trim()) return el2.value.trim();
+        var el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+    window.state.settings.kkApi = {
+        url: g('kkApiUrl', 'kkApiUrl2'),
+        key: g('kkApiKey', 'kkApiKey2'),
+        model: g('kkApiModel', 'kkApiModel2'),
+        maxTokens: parseInt((document.getElementById('kkApiMaxTokens2') || document.getElementById('kkApiMaxTokens') || {}).value) || 4000
+    };
+    if (window._persistApiToLocalStorage) window._persistApiToLocalStorage();
+    if (window.saveDataImmediately) await saveDataImmediately();
+    else if (window.saveData) saveData();
+    if (window._syncApiInputs) window._syncApiInputs();
+    if (window.showToast) showToast('✅ 查岗API已保存');
+    goBack();
+};
+
+// saveKkApiSettings：settings modal 的 oninput 实时保存
+window.saveKkApiSettings = function() {
+    if (!window.state || !window.state.settings) return;
+    if (!window.state.settings.kkApi) window.state.settings.kkApi = {};
+    var g = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    var url = g('kkApiUrl'); var key = g('kkApiKey'); var model = g('kkApiModel');
+    var tok = parseInt((document.getElementById('kkApiMaxTokens') || {}).value) || 4000;
+    if (url) window.state.settings.kkApi.url = url;
+    if (key) window.state.settings.kkApi.key = key;
+    if (model) window.state.settings.kkApi.model = model;
+    window.state.settings.kkApi.maxTokens = tok;
+    // 同步到 page 输入框
+    var f = function(id, v) { var el = document.getElementById(id); if (el && el !== document.activeElement) el.value = v || ''; };
+    f('kkApiUrl2', url); f('kkApiKey2', key); f('kkApiModel2', model); f('kkApiMaxTokens2', tok);
+    if (window.saveData) saveData();
+};
+
+document.addEventListener('pageOpen', function(e) {
+    if (e.detail === 'kkApiPage') setTimeout(kkLoadApiUi, 80);
+});
+
+// ================================================================
+// 房屋总览
+// ================================================================
+async function kkOpenHouse(key) {
+    _kkKey = key;
+    var c = kkContact(key);
+    if (!c) return;
+    var name = c.name || 'AI';
+
+    if (!kkHouseData(key)) {
+        var ok = confirm('要为 ' + name + ' 生成住所吗？\n（包含房间、物品详情）');
+        if (!ok) return;
+        var withPc = confirm('是否生成电脑内容？\n（浏览器历史、私人文件、Steam游戏）');
+        var data = await kkGenHouse(key, withPc);
+        if (!data) return;
+        kkSetHouse(key, data);
+    }
+
+    kkRenderHouse();
+    document.getElementById('kkHousePage').style.display = 'flex';
+}
+
+function kkRenderHouse() {
+    var data = kkHouseData(_kkKey);
+    if (!data) return;
+    var c = kkContact(_kkKey);
+    var name = c ? c.name : 'AI';
+
+    document.getElementById('kkHouseTitle').textContent = name + '的家';
+    document.getElementById('kkHouseLoc').textContent = data.location || '';
+    document.getElementById('kkHouseDesc').textContent = data.description || '';
+
+    var bg = document.getElementById('kkHouseBg');
+    if (bg) bg.style.backgroundImage = data.locationImageUrl ? 'url(' + data.locationImageUrl + ')' : '';
+
+    var btns = document.getElementById('kkAreaBtns');
+    if (btns) {
+        btns.innerHTML = '';
+        Object.keys(data.areas || {}).forEach(function(areaName) {
+            var btn = document.createElement('button');
+            btn.className = 'kk-area-btn';
+            btn.textContent = areaName;
+            btn.onclick = function() { kkOpenArea(areaName); };
+            btns.appendChild(btn);
+        });
+    }
+}
+
+window.kkCloseHouse = function() {
+    document.getElementById('kkHousePage').style.display = 'none';
+};
+
+window.kkResetHouse = async function() {
+    if (!_kkKey) return;
+    if (!confirm('确定重新生成住所？')) return;
+    var withPc = confirm('是否包含电脑内容？');
+    var data = await kkGenHouse(_kkKey, withPc);
+    if (data) { kkSetHouse(_kkKey, data); kkRenderHouse(); if(window.showToast)showToast('✅ 新住所已生成'); }
+};
+
+window.kkContinueSearch = async function() {
+    if (!_kkKey) return;
+    var data = kkHouseData(_kkKey);
+    if (!data) { if(window.showToast)showToast('请先生成住所'); return; }
+    kkLoad('深入搜查中...');
+    var c = kkContact(_kkKey);
+    var name = c ? c.name : 'AI';
+    var persona = kkPersona(_kkKey);
+    var existing = '';
+    for (var an in data.areas||{}) {
+        existing += an + '：' + (data.areas[an].items||[]).map(function(i){return i.name;}).join('、') + '\n';
+    }
+    var prompt = '角色"' + name + '"（人设：' + (persona||'普通人') + '）的住所已有：\n' + existing +
+        '\n为每个区域追加2-3个新翻找地点（不重复，content要有趣具体）。\n如有电脑也可追加新内容。\n\n纯JSON，键是区域名或"computer"：\n{"客厅":[{"name":"新地点","content":"发现了..."}]}';
+    try {
+        var raw = await kkCall([{role:'user',content:prompt}], 1500);
+        var obj = JSON.parse(raw.replace(/^```json\s*|```$/g,'').trim());
+        for (var k in obj) {
+            if (k === 'computer') {
+                if (!data.computer) data.computer = {};
+                for (var sk in obj.computer) {
+                    if (!data.computer[sk]) data.computer[sk] = [];
+                    if (Array.isArray(data.computer[sk]) && Array.isArray(obj.computer[sk]))
+                        data.computer[sk].push.apply(data.computer[sk], obj.computer[sk]);
+                }
+            } else if (data.areas[k]) {
+                data.areas[k].items.push.apply(data.areas[k].items, obj[k]);
+            }
+        }
+        kkSetHouse(_kkKey, data);
+        if(window.showToast)showToast('✅ 发现了更多东西！');
+    } catch(e) { if(window.showToast)showToast('搜查失败：'+e.message); }
+    finally { kkUnload(); }
+};
+
+// ================================================================
+// 区域探索
+// ================================================================
+function kkOpenArea(areaName) {
+    var data = kkHouseData(_kkKey);
+    if (!data) return;
+    var area = data.areas[areaName];
+    if (!area) return;
+
+    document.getElementById('kkAreaName').textContent = areaName;
+    document.getElementById('kkAreaDesc').textContent = area.description || '';
+    var bg = document.getElementById('kkAreaBg');
+    if (bg) bg.style.backgroundImage = area.imageUrl ? 'url(' + area.imageUrl + ')' : '';
+
+    var grid = document.getElementById('kkItemBtns');
+    if (grid) {
+        grid.innerHTML = '';
+        (area.items || []).forEach(function(item) {
+            var btn = document.createElement('button');
+            btn.className = 'kk-item-btn';
+            btn.textContent = item.name;
+            btn.onclick = function() { kkRummage(areaName, item.name); };
+            grid.appendChild(btn);
+        });
+    }
+    document.getElementById('kkAreaPage').style.display = 'flex';
+}
+
+window.kkCloseArea = function() {
+    document.getElementById('kkAreaPage').style.display = 'none';
+};
+
+function kkRummage(areaName, itemName) {
+    var lower = itemName.toLowerCase();
+    if (lower.includes('电脑') || lower.includes('computer') || lower.includes('笔记本')) {
+        var data = kkHouseData(_kkKey);
+        if (data && data.computer) { kkOpenComputer(); return; }
+        if(window.showToast)showToast('这台电脑没有生成内容');
+        return;
+    }
+    var data = kkHouseData(_kkKey);
+    var area = data && data.areas && data.areas[areaName];
+    var item = area && (area.items||[]).find(function(i){return i.name===itemName;});
+    if (item && item.content) {
+        kkShowSheet('在「' + itemName + '」里发现', item.content, [{
+            label: '📤 分享给Ta',
+            cls: 'kk-btn-share',
+            fn: function() { kkSendToChat(areaName, itemName, item.content); }
+        }]);
+    } else {
+        if(window.showToast)showToast('翻了翻，什么特别的都没找到...');
+    }
+}
+
+function kkSendToChat(area, item, content) {
+    var c = kkContact(_kkKey);
+    if (!c) return;
+    var name = c.name || 'AI';
+    var msg = '[在' + name + '家里找到] ' + area + '的「' + item + '」：' + content;
+    if (!c.chatHistory) c.chatHistory = [];
+    c.chatHistory.push({role:'user', content:msg, time:new Date().toISOString()});
+    if (window.saveData) saveData();
+    if(window.showToast)showToast('✅ 线索已发送');
+}
+
+// ================================================================
+// 生成住所
+// ================================================================
+async function kkGenHouse(key, withPc) {
+    kkLoad('正在努力寻找中...');
+    var c = kkContact(key);
+    var name = c ? (c.name||'AI') : 'AI';
+    var persona = kkPersona(key);
+    var chat = kkChat(key, 15);
+
+    var pcRule = withPc
+        ? '4. 必须包含"computer"对象：browser_history(3-5条完整搜索记录)、movies(2-3个文件名带后缀)、steam_games(3个含playtime)、local_files(2-4个含content具体内容的文件)、secret_folder(fileName+content，内容要具体私密)；并在卧室或客厅items里加一个name为"电脑"的物品。'
+        : '4. 不生成电脑数据，JSON中不含computer字段。';
+
+    var prompt = '你是场景设计师，为角色"' + name + '"设计住所并输出所有数据。\n\n角色人设：' + (persona||'普通人') + '\n近期聊天：\n' + (chat||'无') + '\n\n规则：\n1. 住所符合人设和聊天情景\n2. 至少有客厅和卧室，可加书房/厨房/阳台等\n3. 每个区域3-5个可翻找地点，每个必须有content（翻找结果，有趣具体，不要全说什么都没有）\n' + pcRule + '\n5. locationImagePrompt和各区域imagePrompt必须是纯英文，唯美动漫风，无人物\n\n只输出纯JSON：\n{"location":"地址","description":"整体氛围","locationImagePrompt":"english prompt","areas":{"客厅":{"description":"描述","imagePrompt":"english","items":[{"name":"沙发底下","content":"找到..."}]},"卧室":{...}}' + (withPc?',"computer":{...}':'') + '}';
+
+    try {
+        var raw = await kkCall([{role:'user',content:prompt}], 4000);
+        var data = JSON.parse(raw.replace(/^```json\s*|```$/g,'').trim());
+        // 异步生成图片
+        kkGenImages(key, data);
+        return data;
+    } catch(e) {
+        console.error('[查岗]', e);
+        if(window.showToast)showToast('生成失败：'+e.message);
+        return null;
+    } finally { kkUnload(); }
+}
+
+function kkPollinUrl(prompt) {
+    return 'https://image.pollinations.ai/prompt/' +
+        encodeURIComponent('beautiful anime art, cinematic, masterpiece, ' + prompt + ', no humans') +
+        '?width=768&height=512&nologo=true&seed=' + Math.floor(Math.random()*99999);
+}
+
+function kkGenImages(key, data) {
+    (async function() {
+        try {
+            if (data.locationImagePrompt) {
+                data.locationImageUrl = kkPollinUrl(data.locationImagePrompt);
+                kkSetHouse(key, data);
+                if (_kkKey === key) {
+                    var bg = document.getElementById('kkHouseBg');
+                    if (bg) bg.style.backgroundImage = 'url(' + data.locationImageUrl + ')';
+                }
+            }
+            for (var an in data.areas||{}) {
+                var area = data.areas[an];
+                if (area.imagePrompt) {
+                    area.imageUrl = kkPollinUrl(area.imagePrompt);
+                    kkSetHouse(key, data);
+                }
+            }
+        } catch(e) {}
+    })();
+}
+
+// ================================================================
+// 电脑
+// ================================================================
+function kkOpenComputer() {
+    var data = kkHouseData(_kkKey);
+    var c = kkContact(_kkKey);
+    var name = c ? c.name : 'AI';
+    var pc = (data && data.computer) || {};
+    var secret = (pc.secret_folder && pc.secret_folder.fileName) || '加密文件夹';
+
+    var body = '<div style="display:flex;flex-wrap:wrap;gap:16px;padding:16px;background:rgba(255,255,255,0.15);min-height:200px;">' +
+        kkPcIcon('🌐','浏览器', 'kkPcBrowser()') +
+        kkPcIcon('🎬','电影', 'kkPcMovies()') +
+        kkPcIcon('📁','私人文件', 'kkPcFiles()') +
+        kkPcIcon('🔒', kkEsc(secret), 'kkPcSecret()') +
+        kkPcIcon('🎮','Steam', 'kkPcSteam()') +
+        '</div>';
+
+    kkShowSheet(name + '的电脑', body, []);
+    // 使用innerHTML渲染
+    document.getElementById('kkSheetBody').innerHTML = body;
+}
+function kkPcIcon(emoji, label, fn) {
+    return '<div onclick="'+fn+'" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:70px;-webkit-tap-highlight-color:transparent;">' +
+        '<div style="width:52px;height:52px;border-radius:12px;background:rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;">'+emoji+'</div>' +
+        '<span style="font-size:11px;color:var(--text-primary);text-align:center;word-break:break-all;">'+label+'</span></div>';
+}
+window.kkPcBrowser = function() {
+    var data = kkHouseData(_kkKey);
+    var list = (data && data.computer && data.computer.browser_history) || [];
+    kkShowListSheet('浏览器历史', list.map(function(s){return {label:s};}), function(item) {
+        kkShowSheet('浏览器记录', '<div class="kk-item-content">'+kkEsc(item.label)+'</div>', [{
+            label:'📤 分享', cls:'kk-btn-share', fn:function(){kkSendToChat('电脑','浏览器历史',item.label);}
+        }]);
+    });
+};
+window.kkPcMovies = function() {
+    var data = kkHouseData(_kkKey);
+    var list = (data && data.computer && data.computer.movies) || [];
+    kkShowListSheet('电影文件', list.map(function(s){return {label:s};}), function(item) {
+        kkShowSheet('电影文件', '<div class="kk-item-content">'+kkEsc(item.label)+'</div>', [{
+            label:'📤 分享', cls:'kk-btn-share', fn:function(){kkSendToChat('电脑','电影',item.label);}
+        }]);
+    });
+};
+window.kkPcFiles = function() {
+    var data = kkHouseData(_kkKey);
+    var files = (data && data.computer && data.computer.local_files) || [];
+    kkShowListSheet('私人文件', files.map(function(f){return {label:f.fileName, extra:f.content};}), function(item) {
+        kkShowSheet(item.label, '<div class="kk-item-content">'+kkEsc(item.extra||'（空文件）')+'</div>', [{
+            label:'📤 分享', cls:'kk-btn-share', fn:function(){kkSendToChat('电脑','文件：'+item.label,item.extra||'');}
+        }]);
+    });
+};
+window.kkPcSecret = function() {
+    var data = kkHouseData(_kkKey);
+    var sf = data && data.computer && data.computer.secret_folder;
+    if (!sf) { if(window.showToast)showToast('文件夹是空的'); return; }
+    kkShowSheet('🔒 ' + kkEsc(sf.fileName||''), '<div class="kk-item-content">'+kkEsc(sf.content||'（内容加密）')+'</div>', [{
+        label:'📤 分享', cls:'kk-btn-share', fn:function(){kkSendToChat('电脑','隐秘文件夹',sf.content||'');}
+    }]);
+};
+window.kkPcSteam = function() {
+    var data = kkHouseData(_kkKey);
+    var games = ((data && data.computer && data.computer.steam_games) || []).slice().sort(function(a,b){
+        return (parseFloat(b.playtime)||0)-(parseFloat(a.playtime)||0);
+    });
+    kkShowListSheet('Steam 游戏库', games.map(function(g){return {label:g.name, extra:'游玩时长：'+g.playtime};}), function(item) {
+        kkShowSheet(item.label, '<div class="kk-item-content">'+kkEsc(item.extra)+'</div>', [{
+            label:'📤 分享', cls:'kk-btn-share', fn:function(){kkSendToChat('电脑','Steam：'+item.label,item.extra);}
+        }]);
+    });
+};
+
+// ── 通用Sheet弹窗
+window.kkShowSheet = function(title, bodyHtml, btns) {
+    document.getElementById('kkSheetTitle').textContent = title;
+    document.getElementById('kkSheetBody').innerHTML = bodyHtml;
+    var foot = document.getElementById('kkSheetFoot');
+    foot.innerHTML = '';
+    (btns||[]).forEach(function(b) {
+        var btn = document.createElement('button');
+        btn.className = b.cls || 'kk-btn-ok';
+        btn.textContent = b.label;
+        btn.onclick = function() { kkCloseSheet(); if(b.fn) b.fn(); };
+        foot.appendChild(btn);
+    });
+    if (!btns || !btns.length) foot.style.display = 'none';
+    else foot.style.display = 'flex';
+    document.getElementById('kkSheet').classList.add('show');
+};
+window.kkCloseSheet = function() {
+    document.getElementById('kkSheet').classList.remove('show');
+};
+
+function kkShowListSheet(title, items, onItem) {
+    var html = items.length ? '' : '<div style="text-align:center;padding:30px;color:var(--text-secondary);">空空如也</div>';
+    items.forEach(function(item) {
+        html += '<div class="kk-list-item" onclick="(function(){kkCloseSheet();setTimeout(function(){window._kkListCb && window._kkListCb('+JSON.stringify(item)+')},50);})()"><div style="font-size:14px;color:var(--text-primary);">' + kkEsc(item.label) + '</div>' +
+            (item.extra ? '<div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">'+kkEsc(item.extra.substring(0,40))+'...</div>' : '') + '</div>';
+    });
+    window._kkListCb = onItem;
+    kkShowSheet(title, html, []);
+}
+
+// ================================================================
+// 监控
+// ================================================================
+window.kkOpenMonitor = async function() {
+    if (!_kkKey) return;
+    var data = kkHouseData(_kkKey);
+    if (!data) { if(window.showToast)showToast('请先生成住所'); return; }
+    var c = kkContact(_kkKey);
+    var name = c ? c.name : 'AI';
+    document.getElementById('kkMonitorTitle').textContent = name + '的监控中心';
+    document.getElementById('kkMonitorPage').style.display = 'flex';
+
+    var fiveMin = 5*60*1000;
+    var sv = data.surveillanceData;
+    if (!sv || !sv.feeds || (Date.now()-(sv.timestamp||0)) > fiveMin) {
+        var newSv = await kkGenMonitor();
+        if (newSv) {
+            data.surveillanceData = {timestamp:Date.now(), characterLocation:newSv.characterLocation, feeds:newSv.feeds};
+            kkSetHouse(_kkKey, data);
+            kkRenderMonitor(data.surveillanceData);
+        }
+    } else {
+        kkRenderMonitor(sv);
+    }
+};
+
+window.kkRefreshMonitor = async function() {
+    var newSv = await kkGenMonitor();
+    if (newSv) {
+        var data = kkHouseData(_kkKey);
+        data.surveillanceData = {timestamp:Date.now(), characterLocation:newSv.characterLocation, feeds:newSv.feeds};
+        kkSetHouse(_kkKey, data);
+        kkRenderMonitor(data.surveillanceData);
+    }
+};
+
+async function kkGenMonitor() {
+    kkLoad('正在接入监控...');
+    var c = kkContact(_kkKey);
+    var name = c ? c.name : 'AI';
+    var persona = kkPersona(_kkKey);
+    var data = kkHouseData(_kkKey);
+    var areas = Object.keys((data && data.areas) || {}).join('、');
+    var chat = kkChat(_kkKey, 10);
+    var prompt = '监控AI，根据角色信息生成各房间实时监控描述。\n角色："'+name+'"\n人设：'+(persona||'普通人')+'\n近期聊天：\n'+(chat||'无')+'\n住所区域：'+areas+'\n\n规则：客观第三人称，指出角色当前所在区域，没有角色的区域描述静态环境。\n\n纯JSON：{"characterLocation":"区域名","feeds":{"客厅":{"description":"描述","isCharacterPresent":false},"卧室":{"description":"描述","isCharacterPresent":true}}}';
+    try {
+        var raw = await kkCall([{role:'user',content:prompt}], 1200);
+        return JSON.parse(raw.replace(/^```json\s*|```$/g,'').trim());
+    } catch(e) { if(window.showToast)showToast('监控生成失败：'+e.message); return null; }
+    finally { kkUnload(); }
+}
+
+function kkRenderMonitor(sv) {
+    var grid = document.getElementById('kkMonitorGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    var data = kkHouseData(_kkKey);
+    for (var an in sv.feeds||{}) {
+        var feed = sv.feeds[an];
+        var area = data && data.areas && data.areas[an];
+        var isHere = feed.isCharacterPresent;
+        var cell = document.createElement('div');
+        cell.className = 'kk-monitor-cell' + (an === sv.characterLocation ? ' here' : '');
+        if (area && area.imageUrl) cell.style.backgroundImage = 'url('+area.imageUrl+')';
+        var btnsHtml = isHere ? '<div class="kk-mon-btns"><button class="kk-mon-btn" onclick="kkMonReroll(\''+an+'\',this)">🔄</button><button class="kk-mon-btn" onclick="kkMonContinue(\''+an+'\',this)">▶</button><button class="kk-mon-btn" onclick="kkMonSpeak(\''+an+'\',this)">🎤</button></div>' : '';
+        cell.innerHTML = '<div class="kk-mon-head"><span>'+kkEsc(an)+'</span><div class="kk-rec"></div></div>' +
+            '<div class="kk-mon-body"><div class="kk-mon-text">'+kkEsc(feed.description||'')+'</div>'+btnsHtml+'</div>';
+        grid.appendChild(cell);
+    }
+}
+
+window.kkMonReroll = async function(area, btn) {
+    var tx = btn.closest('.kk-mon-body').querySelector('.kk-mon-text');
+    tx.innerHTML='<i>刷新中...</i>';
+    var c=kkContact(_kkKey); var persona=kkPersona(_kkKey);
+    var p='监控视角，角色"'+(c?c.name:'AI')+'"（'+persona+'）在【'+area+'】。重新生成一个随机状态（客观第三人称，50字内，纯文字）。';
+    try { tx.textContent = await kkCall([{role:'user',content:p}],150); }
+    catch(e){ tx.innerHTML='<i style="color:#f66">失败</i>'; }
+};
+window.kkMonContinue = async function(area, btn) {
+    var tx = btn.closest('.kk-mon-body').querySelector('.kk-mon-text');
+    var ctx = tx.textContent; tx.innerHTML='<i>继续中...</i>';
+    var c=kkContact(_kkKey); var persona=kkPersona(_kkKey);
+    var p='上一秒：「'+ctx+'」\n角色"'+(c?c.name:'AI')+'"（'+persona+'）在【'+area+'】。顺延时间线描述下一秒（客观，50字内，纯文字）。';
+    try { tx.textContent = await kkCall([{role:'user',content:p}],150); }
+    catch(e){ tx.innerHTML='<i style="color:#f66">失败</i>'; }
+};
+window.kkMonSpeak = async function(area, btn) {
+    var userInput = prompt('对【'+area+'】喊话：');
+    if (!userInput||!userInput.trim()) return;
+    var tx = btn.closest('.kk-mon-body').querySelector('.kk-mon-text');
+    var ctx = tx.textContent; tx.innerHTML='<i>等待回应...</i>';
+    var c=kkContact(_kkKey); var persona=kkPersona(_kkKey);
+    var uname=(window.state&&window.state.user&&window.state.user.name)||'我';
+    var p='你是"'+(c?c.name:'AI')+'"（人设：'+persona+'），在【'+area+'】，刚才的状态：「'+ctx+'」\n\n'+uname+'通过监控喇叭对你说："'+userInput+'"\n\n请以第一人称做出反应（动作/神态/说话，60字内，纯文字）。';
+    try {
+        var res = await kkCall([{role:'user',content:p}],200);
+        tx.innerHTML = '"'+kkEsc(userInput)+'" <i style="font-size:11px;opacity:0.7;">(你)</i><br><br>'+kkEsc(res);
+    } catch(e){ tx.innerHTML='<i style="color:#f66">通讯失败</i>'; }
+};
+
+// ================================================================
+// 衣帽间
+// ================================================================
+window.kkOpenWardrobe = async function() {
+    if (!_kkKey) return;
+    var data = kkHouseData(_kkKey);
+    if (!data) { if(window.showToast)showToast('请先生成住所'); return; }
+    var c = kkContact(_kkKey);
+    var name = c ? c.name : 'AI';
+
+    if (!data.wardrobe) {
+        if (!confirm('要生成 ' + name + ' 的衣柜吗？')) return;
+        await kkGenWardrobe();
+    }
+
+    _kkOutfit = {};
+    _kkWrdCat = '上装';
+    var avEl = document.getElementById('kkWardrobeAvatar');
+    if (avEl) {
+        avEl.src = '';
+        if (c) kkAvatarAsync(c).then(function(url){ if(url) avEl.src=url; });
+    }
+    var cm = document.getElementById('kkWrdComment');
+    if (cm) cm.textContent = '点击衣服看看Ta怎么说~';
+    var re = document.getElementById('kkWrdReaction');
+    if (re) re.style.display = 'none';
+    var tryBtn = document.getElementById('kkTryOnBtn');
+    if (tryBtn) { tryBtn.disabled=true; tryBtn.textContent='让Ta穿上'; }
+
+    kkRenderWardrobe();
+    document.getElementById('kkWardrobePage').style.display = 'flex';
+};
+
+function kkRenderWardrobe() {
+    var data = kkHouseData(_kkKey);
+    var items = (data && data.wardrobe) || [];
+
+    // 更新搭配槽
+    document.querySelectorAll('#kkOutfitSlots .kk-slot').forEach(function(slot) {
+        var t = slot.dataset.t;
+        var sel = _kkOutfit[t];
+        if (sel) {
+            slot.classList.add('on');
+            if (sel.imageUrl) {
+                slot.innerHTML = '<img src="'+kkEsc(sel.imageUrl)+'" onerror="this.style.display=\'none\'">';
+            } else {
+                slot.innerHTML = sel.icon || '👕';
+            }
+            slot.onclick = function() { kkSelectCloth(t, null); };
+        } else {
+            slot.classList.remove('on');
+            slot.innerHTML = '';
+            slot.onclick = null;
+        }
+    });
+
+    // 更新按钮状态
+    var hasAny = Object.values(_kkOutfit).some(function(v){return v!==null&&v!==undefined;});
+    var tryBtn = document.getElementById('kkTryOnBtn');
+    if (tryBtn) tryBtn.disabled = !hasAny;
+
+    // 标签页
+    var cats = ['头饰','上装','下装','鞋子','首饰','特殊'];
+    var tabs = document.getElementById('kkWardrobeTabs');
+    if (tabs) {
+        tabs.innerHTML = '';
+        cats.forEach(function(cat) {
+            var t = document.createElement('div');
+            t.className = 'kk-wtab' + (cat===_kkWrdCat?' on':'');
+            t.textContent = cat;
+            t.onclick = function() { _kkWrdCat=cat; kkRenderWardrobe(); };
+            tabs.appendChild(t);
+        });
+    }
+
+    // 衣服网格
+    var grid = document.getElementById('kkWardrobeGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    var filtered = items.filter(function(i){return i.category===_kkWrdCat;});
+    if (!filtered.length) {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:20px;">这个分类下没有衣服</p>';
+        return;
+    }
+    filtered.forEach(function(item) {
+        var card = document.createElement('div');
+        var isSel = _kkOutfit[item.category] && _kkOutfit[item.category].name===item.name;
+        card.className = 'kk-cloth' + (isSel?' on':'');
+        var visual = item.imageUrl
+            ? '<img src="'+kkEsc(item.imageUrl)+'" onerror="this.style.display=\'none\'">'
+            : '<div class="kk-cloth-icon">'+(item.icon||'👕')+'</div>';
+        card.innerHTML = visual + '<div class="kk-cloth-name">'+kkEsc(item.name)+'</div>';
+        card.onclick = function() {
+            if (_kkOutfit[item.category] && _kkOutfit[item.category].name===item.name)
+                kkSelectCloth(item.category, null);
+            else
+                kkSelectCloth(item.category, item);
+        };
+        grid.appendChild(card);
+    });
+}
+
+function kkSelectCloth(cat, item) {
+    _kkOutfit[cat] = item;
+    var cm = document.getElementById('kkWrdComment');
+    if (cm) {
+        cm.style.display = 'block';
+        cm.innerHTML = item ? '<strong>'+kkEsc(item.name)+'</strong><br><span style="color:var(--text-secondary);">"'+kkEsc(item.charComment||'……')+'"</span>' : '（取消了）';
+    }
+    var re = document.getElementById('kkWrdReaction');
+    if (re) re.style.display = 'none';
+    var tryBtn = document.getElementById('kkTryOnBtn');
+    if (tryBtn) tryBtn.textContent = '让Ta穿上';
+    kkRenderWardrobe();
+}
+
+window.kkTryOn = async function() {
+    var sels = Object.values(_kkOutfit).filter(function(v){return v;});
+    if (!sels.length) return;
+    var tryBtn = document.getElementById('kkTryOnBtn');
+    if (tryBtn) { tryBtn.disabled=true; tryBtn.textContent='换装中...'; }
+
+    var c = kkContact(_kkKey);
+    var persona = kkPersona(_kkKey);
+    var names = sels.map(function(i){return i.name;}).join(' + ');
+    var desc = sels.map(function(i){return '【'+i.category+'】'+i.name+'（'+i.description+'）';}).join(' + ');
+    var prompt = '场景：用户在你衣柜挑了衣服让你穿上。\n你的人设：'+persona+'\n选的衣服：'+desc+'\n\n请以第一人称做出穿上后的反应（含动作/神态/说话，30-60字，纯文字）。';
+    try {
+        var res = await kkCall([{role:'user',content:prompt}],200);
+        var re = document.getElementById('kkWrdReaction');
+        if (re) { re.textContent=res; re.style.display='block'; }
+        var cm = document.getElementById('kkWrdComment');
+        if (cm) cm.style.display='none';
+        if (tryBtn) { tryBtn.disabled=false; tryBtn.textContent='已换装'; }
+
+        // 保存历史
+        var data = kkHouseData(_kkKey);
+        if (data) {
+            if (!data.wardrobeHistory) data.wardrobeHistory=[];
+            data.wardrobeHistory.unshift({id:Date.now(),timestamp:Date.now(),summary:names,reaction:res});
+            if (data.wardrobeHistory.length>50) data.wardrobeHistory=data.wardrobeHistory.slice(0,50);
+            kkSetHouse(_kkKey, data);
+        }
+
+        if (confirm((c?c.name:'Ta')+'换上了【'+names+'】\n\n"'+res+'"\n\n发送到聊天？')) {
+            var cc = kkContact(_kkKey);
+            if (cc) {
+                if (!cc.chatHistory) cc.chatHistory=[];
+                cc.chatHistory.push({role:'assistant',content:res,time:new Date().toISOString()});
+                if(window.saveData)saveData();
+                if(window.showToast)showToast('✅ 已发送');
+            }
+        }
+    } catch(e) {
+        if (tryBtn){ tryBtn.disabled=false; tryBtn.textContent='让Ta穿上'; }
+        if(window.showToast)showToast('换装失败：'+e.message);
+    }
+};
+
+window.kkResetWardrobe = async function() {
+    if (!_kkKey) return;
+    if (!confirm('确定重置衣柜？')) return;
+    var data = kkHouseData(_kkKey);
+    if (data) { data.wardrobe=null; kkSetHouse(_kkKey,data); }
+    await kkGenWardrobe();
+    kkRenderWardrobe();
+};
+
+window.kkAddClothes = async function() {
+    if (!_kkKey) return;
+    kkLoad('去商场进货中...');
+    var c=kkContact(_kkKey); var persona=kkPersona(_kkKey);
+    var data=kkHouseData(_kkKey);
+    var existing = ((data&&data.wardrobe)||[]).map(function(i){return i.name;}).join('、');
+    var prompt='你是角色"'+(c?c.name:'AI')+'",人设：'+persona+'\n已有衣服：'+(existing||'无')+'\n\n请再添置3-5件新衣服（不重复，包含imagePrompt和charComment）。\n\n纯JSON：{"new_items":[{"category":"上装","name":"...","icon":"...","description":"...","imagePrompt":"english prompt","charComment":"..."}]}';
+    try {
+        var raw=await kkCall([{role:'user',content:prompt}],1000);
+        var res=JSON.parse(raw.replace(/^```json\s*|```$/g,'').trim());
+        if(res.new_items&&Array.isArray(res.new_items)){
+            if(!data.wardrobe)data.wardrobe=[];
+            data.wardrobe.push.apply(data.wardrobe,res.new_items);
+            kkSetHouse(_kkKey,data);
+            kkGenClothImages(_kkKey,res.new_items);
+            kkRenderWardrobe();
+            if(window.showToast)showToast('✅ 新增'+res.new_items.length+'件');
+        }
+    }catch(e){if(window.showToast)showToast('失败：'+e.message);}
+    finally{kkUnload();}
+};
+
+async function kkGenWardrobe() {
+    kkLoad('打开衣柜中...');
+    var c=kkContact(_kkKey); var persona=kkPersona(_kkKey);
+    var prompt='你是角色"'+(c?c.name:'AI')+'",人设：'+persona+'\n\n生成衣柜（10-15件，包含头饰/上装/下装/鞋子/首饰/特殊，各1-2件）。\ncategory必须是上述分类之一，charComment第一人称，imagePrompt英文白底产品图风格无人物。\n\n纯JSON：{"wardrobe":[{"category":"上装","name":"白色卫衣","icon":"👕","description":"简约风","imagePrompt":"white hoodie, product photography, white background","charComment":"平时最常穿..."}]}';
+    try {
+        var raw=await kkCall([{role:'user',content:prompt}],2000);
+        var res=JSON.parse(raw.replace(/^```json\s*|```$/g,'').trim());
+        if(res.wardrobe){
+            var data=kkHouseData(_kkKey);
+            if(data){data.wardrobe=res.wardrobe;kkSetHouse(_kkKey,data);}
+            kkGenClothImages(_kkKey,res.wardrobe);
+            if(window.showToast)showToast('✅ 衣柜生成完成');
+        }
+    }catch(e){if(window.showToast)showToast('生成衣柜失败：'+e.message);}
+    finally{kkUnload();}
+}
+
+function kkGenClothImages(key, items) {
+    (async function(){
+        for(var i=0;i<items.length;i++){
+            var item=items[i];
+            if(item.imagePrompt){
+                item.imageUrl='https://image.pollinations.ai/prompt/'+encodeURIComponent('clothing product photography, '+item.imagePrompt+', white background, flat lay, no human')+'?width=400&height=400&nologo=true&seed='+Math.floor(Math.random()*99999);
+                var d=kkHouseData(key);
+                if(d&&d.wardrobe){
+                    var idx=d.wardrobe.findIndex(function(x){return x.name===item.name;});
+                    if(idx>=0)d.wardrobe[idx].imageUrl=item.imageUrl;
+                    kkSetHouse(key,d);
+                }
+                if(_kkKey===key&&document.getElementById('kkWardrobePage').style.display!=='none')kkRenderWardrobe();
+                await new Promise(function(r){setTimeout(r,300);});
+            }
+        }
+    })();
+}
+
+// ==================== 查岗APP JS END ====================
+</script>
+</body></html>';
 }
 
 // 加载JSZip
@@ -46108,7 +47507,153 @@ window.addEventListener('beforeunload', function(){
   </div>
 </div>
 
-</body></html><script>
+<!-- ==================== 查岗APP HTML START ==================== -->
+
+<!-- loading遮罩 -->
+<div id="kkLoading"><div class="kk-spin"></div><div id="kkLoadingText">正在寻找中...</div></div>
+
+<!-- 角色选择页 -->
+<div class="page" id="kkPage" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+  <div class="kk-header">
+    <span class="kk-back" onclick="goBack()">‹</span>
+    <span class="kk-title">要查谁的岗？</span>
+    <span onclick="openPage('kkApiPage')" style="cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;padding:4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    </span>
+  </div>
+  <div id="kkCharList" style="flex:1;overflow-y:auto;padding:12px 0;"></div>
+</div>
+
+<!-- 房屋总览（fixed覆盖层） -->
+<div id="kkHousePage" class="kk-scene-page" style="display:none;">
+  <div class="kk-scene-bg" id="kkHouseBg"></div>
+  <div class="kk-scene-header">
+    <span class="kk-back" onclick="kkCloseHouse()">‹</span>
+    <span class="kk-title" id="kkHouseTitle"></span>
+    <div class="kk-scene-actions">
+      <span onclick="kkContinueSearch()" title="继续翻找">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <span onclick="kkResetHouse()" title="重新生成">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </span>
+    </div>
+  </div>
+  <div id="kkSceneToolbar">
+    <div class="kk-tool-btn" onclick="kkOpenWardrobe()" title="衣帽间">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+    </div>
+    <div class="kk-tool-btn" onclick="kkOpenMonitor()" title="监控">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    </div>
+  </div>
+  <div id="kkHousePanel">
+    <div id="kkHouseLoc"></div>
+    <div id="kkHouseDesc"></div>
+    <div class="kk-area-btns" id="kkAreaBtns"></div>
+  </div>
+</div>
+
+<!-- 区域探索（fixed覆盖层） -->
+<div id="kkAreaPage" class="kk-scene-page" style="display:none;">
+  <div class="kk-scene-bg" id="kkAreaBg"></div>
+  <div class="kk-scene-header">
+    <span class="kk-back" onclick="document.getElementById('kkAreaPage').style.display='none';document.getElementById('kkHousePage').style.display='flex';">‹</span>
+    <span class="kk-title" id="kkAreaName"></span>
+  </div>
+  <div id="kkAreaPanel">
+    <div id="kkAreaDesc"></div>
+    <div class="kk-area-hint">点击物品翻找：</div>
+    <div class="kk-item-btns" id="kkItemBtns"></div>
+  </div>
+</div>
+
+<!-- 监控（fixed覆盖层） -->
+<div id="kkMonitorPage" style="display:none;position:fixed;inset:0;z-index:300;flex-direction:column;background:#111;">
+  <div style="background:#1a1a1a;border-bottom:1px solid #333;display:flex;align-items:center;padding:13px 16px;gap:10px;flex-shrink:0;">
+    <span onclick="document.getElementById('kkMonitorPage').style.display='none';" style="font-size:26px;cursor:pointer;color:#aaa;line-height:1;padding:0 4px;">‹</span>
+    <span id="kkMonitorTitle" style="font-size:16px;font-weight:700;color:#ccc;flex:1;"></span>
+    <span onclick="kkRefreshMonitor()" style="cursor:pointer;opacity:0.8;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </span>
+  </div>
+  <div id="kkMonitorGrid" style="flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+</div>
+
+<!-- 衣帽间（fixed覆盖层） -->
+<div id="kkWardrobePage" style="display:none;position:fixed;inset:0;z-index:300;flex-direction:column;background:var(--bg-primary);">
+  <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border-color);display:flex;align-items:center;padding:12px 16px;gap:10px;flex-shrink:0;">
+    <span onclick="document.getElementById('kkWardrobePage').style.display='none';" style="font-size:26px;cursor:pointer;color:var(--text-secondary);line-height:1;padding:0 4px;">‹</span>
+    <span style="font-size:16px;font-weight:700;color:var(--text-primary);flex:1;">Ta的衣帽间</span>
+    <span onclick="kkAddClothes()" style="font-size:22px;cursor:pointer;color:var(--text-secondary);margin-right:8px;">+</span>
+    <span onclick="kkResetWardrobe()" style="font-size:18px;cursor:pointer;color:var(--text-secondary);">↻</span>
+  </div>
+  <div id="kkWardrobePreview">
+    <img id="kkWardrobeAvatar" class="kk-char-avatar" src="">
+    <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+      <div id="kkWrdComment" class="kk-wrd-bubble">点击衣服看看Ta怎么说~</div>
+      <div id="kkWrdReaction" class="kk-wrd-bubble" style="display:none;color:var(--text-primary);"></div>
+    </div>
+  </div>
+  <div class="kk-outfit-slots" id="kkOutfitSlots">
+    <div class="kk-slot" data-t="头饰">头饰</div>
+    <div class="kk-slot" data-t="上装">上衣</div>
+    <div class="kk-slot" data-t="下装">下装</div>
+    <div class="kk-slot" data-t="鞋子">鞋子</div>
+    <div class="kk-slot" data-t="首饰">首饰</div>
+    <div class="kk-slot" data-t="特殊">特殊</div>
+  </div>
+  <button id="kkTryOnBtn" disabled onclick="kkTryOn()">让Ta穿上</button>
+  <div id="kkWardrobeTabs" style="display:flex;padding:8px 12px 0;gap:4px;border-bottom:1px solid var(--border-color);overflow-x:auto;flex-shrink:0;"></div>
+  <div id="kkWardrobeGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;"></div>
+</div>
+
+<!-- 通用底部sheet -->
+<div class="kk-sheet-overlay" id="kkSheet">
+  <div class="kk-sheet">
+    <div class="kk-sheet-head">
+      <span class="kk-sheet-head-title" id="kkSheetTitle"></span>
+      <span class="kk-sheet-close" onclick="kkCloseSheet()">×</span>
+    </div>
+    <div class="kk-sheet-body" id="kkSheetBody"></div>
+    <div class="kk-sheet-foot" id="kkSheetFoot"></div>
+  </div>
+</div>
+
+<!-- 查岗API设置页 -->
+<div class="page" id="kkApiPage" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+  <div class="kk-header">
+    <span class="kk-back" onclick="goBack()">‹</span>
+    <span class="kk-title">🏠 查岗API</span>
+    <button onclick="kkSaveApi()" style="background:linear-gradient(135deg,#f7971e,#ffd200);color:#333;border:none;padding:7px 14px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">保存</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px;">
+    <div style="font-size:13px;color:var(--text-secondary);background:var(--bg-secondary);padding:12px 14px;border-radius:12px;margin-bottom:16px;line-height:1.6;">
+      查岗专用API，不填则依次回退：<strong>副API2 → 副API1 → 主API</strong>
+    </div>
+    <div style="background:var(--bg-secondary);border-radius:16px;padding:16px;">
+      <div style="margin-bottom:10px;"><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">API地址</label>
+        <input type="text" id="kkApiUrl2" class="input" placeholder="https://api.example.com/v1" style="width:100%;box-sizing:border-box;"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">API Key</label>
+        <input type="password" id="kkApiKey2" class="input" placeholder="sk-..." style="width:100%;box-sizing:border-box;"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">模型名称</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="kkApiModel2" class="input" placeholder="gpt-4o" style="flex:1;min-width:0;">
+          <button class="fetch-models-btn" onclick="fetchModelsForPage('kkApiUrl2','kkApiKey2','kkApiModel2','kkApiModelSel2')">获取模型</button>
+        </div>
+        <select id="kkApiModelSel2" class="input" style="width:100%;margin-top:6px;" onchange="if(this.value)document.getElementById('kkApiModel2').value=this.value;">
+          <option value="">— 填好地址和Key后获取模型 —</option>
+        </select>
+      </div>
+      <div><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">Max Tokens</label>
+        <input type="number" id="kkApiMaxTokens2" class="input" value="4000" min="1" max="32000" style="width:100%;box-sizing:border-box;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 查岗APP HTML END ==================== -->
+
+<script>
 // ===== 聊天样式设置系统 =====
 window._chatStyleSettings = {};
 var _cssStyleEl = null;
