@@ -7089,12 +7089,12 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
 
       <!-- 操作栏 -->
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 16px 0;">
-        <div style="display:flex;gap:4px;align-items:center;">
-          <div onclick="closeChatMusicPlayer()" role="button" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#aaa;-webkit-tap-highlight-color:transparent;user-select:none;line-height:1;">‹</div>
-          <div onclick="closeChatMusicPlayer()" role="button" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#aaa;-webkit-tap-highlight-color:transparent;user-select:none;border-radius:50%;background:rgba(0,0,0,0.06);">×</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 16px 0;">
+        <div style="display:flex; gap:6px;">
+          <button onclick="closeChatMusicPlayer()" style="background:none;border:none;font-size:22px;color:#999;cursor:pointer;line-height:1;padding:4px;">‹</button>
+          <button onclick="closeChatMusicPlayer()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;line-height:1;padding:4px;">×</button>
         </div>
-        <div style="font-size:11px;color:#bbb;letter-spacing:0.2px;">左滑唱片查看歌词</div>
+        <div style="font-size:11px;color:#bbb;">左滑唱片查看歌词</div>
       </div>
 
       <!-- 唱片 ↔ 歌词 横滑区 -->
@@ -7115,7 +7115,7 @@ window.onerror = function(msg, src, line, col, err) {
           <!-- 歌词面 -->
           <div style="flex-shrink:0; width:100%; display:flex; flex-direction:column; padding:4px 0 0;">
             <div style="text-align:center; padding:4px 20px; display:flex; align-items:center; justify-content:center; gap:8px;">
-              <div onclick="cmpSlideToDisc()" role="button" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#aaa;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">‹</div>
+              <button onclick="cmpSlideToDisc()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;padding:2px;">‹</button>
               <div id="cmpLyricSongTitle" style="font-size:13px;font-weight:700;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">请添加歌曲</div>
             </div>
             <div id="cmpLyricScroll" style="height:136px; overflow-y:auto; padding:6px 24px 8px; font-size:13px; line-height:2; color:#555; text-align:center;">
@@ -7127,41 +7127,23 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
 
       <!-- 进度条 -->
-      <div style="padding:6px 24px 0;display:flex;align-items:center;gap:12px;">
-        <span id="cmpCurrentTime" style="font-size:11px;color:#aaa;min-width:32px;font-variant-numeric:tabular-nums;">0:00</span>
-        <div id="cmpProgressTrack" onclick="cmpSeek(event)"
-          style="flex:1;height:4px;background:rgba(0,0,0,0.1);border-radius:4px;cursor:pointer;position:relative;overflow:visible;">
-          <div id="cmpProgressFill" style="height:100%;width:0%;background:#1c1c1e;border-radius:4px;transition:width 0.25s linear;position:relative;">
-            <div style="width:12px;height:12px;border-radius:50%;background:#1c1c1e;position:absolute;right:-6px;top:-4px;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
-          </div>
+      <div style="padding:4px 20px 0; display:flex; align-items:center; gap:10px;">
+        <span id="cmpCurrentTime" style="font-size:11px;color:#999;min-width:32px;">0:00</span>
+        <div id="cmpProgressTrack" onclick="cmpSeek(event)" style="flex:1;height:4px;background:#ddd;border-radius:2px;cursor:pointer;position:relative;">
+          <div id="cmpProgressFill" style="height:100%;width:0%;background:#333;border-radius:2px;transition:width 0.3s;"></div>
         </div>
-        <span id="cmpTotalTime" style="font-size:11px;color:#aaa;min-width:32px;text-align:right;font-variant-numeric:tabular-nums;">0:00</span>
+        <span id="cmpTotalTime" style="font-size:11px;color:#999;min-width:32px;text-align:right;">0:00</span>
       </div>
 
-      <!-- 控制按钮（全部用div，彻底防止button系统样式污染） -->
-      <div style="display:flex;justify-content:center;align-items:center;gap:20px;padding:12px 20px 14px;">
-        <!-- 上一首 -->
-        <div onclick="els.prevBtn.click()" role="button"
-          style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;" fill="#333"><path d="M6 6h2v12H6V6zm3.5 6 8.5 6V6l-8.5 6z"/></svg>
-        </div>
-        <!-- 播放/暂停 - 固定黑色 -->
-        <div id="cmpPlayPauseBtn" onclick="els.playBtn.click()" role="button"
-          style="width:54px;height:54px;min-width:54px;min-height:54px;border-radius:50%;background-color:#1c1c1e;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.22);-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;position:relative;overflow:hidden;">
-          <svg id="cmpIconPlay" viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;position:absolute;" fill="#ffffff"><path d="M8 5v14l11-7z"/></svg>
-          <svg id="cmpIconPause" viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;position:absolute;display:none;" fill="#ffffff"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        </div>
-        <!-- 下一首 -->
-        <div onclick="els.nextBtn.click()" role="button"
-          style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;" fill="#333"><path d="M16 18h2V6h-2v12zM6 18l8.5-6L6 6v12z"/></svg>
-        </div>
-        <!-- 播放模式 -->
-        <div onclick="els.modeBtn.click();updateCmpModeLabel()" id="cmpModeBtn" role="button"
-          style="background:none;border:1.5px solid #e0e0e0;border-radius:14px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">顺序</div>
-        <!-- 歌词 -->
-        <div onclick="cmpToggleLyricMode()" id="cmpLyricBtn" role="button"
-          style="background:none;border:1.5px solid #e0e0e0;border-radius:14px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">歌词</div>
+      <!-- 控制按钮 -->
+      <div style="display:flex; justify-content:center; align-items:center; gap:16px; padding:10px 20px 12px;">
+        <button onclick="els.prevBtn.click()" style="background:none;border:none;font-size:24px;color:#333;cursor:pointer;padding:4px;line-height:1;">◀</button>
+        <button id="cmpPlayPauseBtn" onclick="els.playBtn.click()" style="width:48px;height:48px;border-radius:50%;background:#333;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button onclick="els.nextBtn.click()" style="background:none;border:none;font-size:24px;color:#333;cursor:pointer;padding:4px;line-height:1;">▶</button>
+        <button onclick="els.modeBtn.click();updateCmpModeLabel()" id="cmpModeBtn" style="background:none;border:1px solid #ddd;border-radius:12px;padding:4px 10px;font-size:12px;color:#666;cursor:pointer;">顺序</button>
+        <button onclick="cmpToggleLyricMode()" id="cmpLyricBtn" style="background:none;border:1px solid #ddd;border-radius:12px;padding:4px 10px;font-size:12px;color:#666;cursor:pointer;">歌词</button>
       </div>
 
       <!-- 分隔线 -->
@@ -7173,7 +7155,7 @@ window.onerror = function(msg, src, line, col, err) {
     <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px 8px; flex-shrink:0;">
         <span style="font-weight:700;font-size:15px;">播放列表</span>
-        <div onclick="addSongFromOnlineSearch()" role="button" style="font-size:13px;color:#e85151;cursor:pointer;font-weight:600;padding:4px 8px;border-radius:8px;-webkit-tap-highlight-color:transparent;user-select:none;">＋ 搜索</div>
+        <button onclick="addSongFromOnlineSearch()" style="background:none;border:none;font-size:13px;color:#e85151;cursor:pointer;font-weight:600;">＋ 搜索</button>
       </div>
       <div id="chatMusicPlaylistBody" style="flex:1; overflow-y:auto; padding:0 0 16px;"></div>
     </div>
@@ -9310,17 +9292,10 @@ function formatMessageTime(isoString) {
             }
         }
 
-        // 清理历史记录中的重复项
+        // 历史记录保留所有播放，不去重（每次播放都是独立记录）
+        // 仅按时间倒序排列
         if (state.history && state.history.length > 0) {
-            const uniqueMap = new Map();
-            state.history.forEach(item => {
-                const key = item.id ? item.id : `${item.name}|${item.artist}`;
-                const existing = uniqueMap.get(key);
-                if (!existing || (item.playedAt > existing.playedAt)) {
-                    uniqueMap.set(key, item);
-                }
-            });
-            state.history = Array.from(uniqueMap.values()).sort((a, b) => (b.playedAt || 0) - (a.playedAt || 0));
+            state.history.sort((a, b) => (b.playedAt || 0) - (a.playedAt || 0));
         }
 
         // 7. 加载后确保 state.messages 和 state.friend._messages 一致
@@ -10635,17 +10610,10 @@ if (pageId === 'playerPage') {
 
     // 添加到历史记录（最新放在最前）
 if (song) {
-    // 去重：如果已存在相同歌曲（以 id 或名称+艺术家判断），则移除旧记录
-    const existingIndex = state.history.findIndex(s => 
-        (s.id && s.id === song.id) || (!s.id && s.name === song.name && s.artist === song.artist)
-    );
-    if (existingIndex !== -1) {
-        state.history.splice(existingIndex, 1);
-    }
-    // 添加最新记录到最前
+    // 历史记录允许重复（每次播放都记录一条，不去重）
     state.history.unshift({ ...song, playedAt: Date.now() });
-    // 限制历史记录数量为 50
-    if (state.history.length > 50) state.history.pop();
+    // 限制历史记录数量为 200（保留更多播放记录）
+    if (state.history.length > 200) state.history.pop();
     
     // 更新最近常听计数
     if (song.id) {
@@ -12118,13 +12086,9 @@ window.addSongFromArtist = function(index) {
                 state.playlist = [];
                 state.playlistSource = 'search';
             }
-            const existingIndex = state.playlist.findIndex(s => s.id === song.id);
-            if (existingIndex >= 0) {
-                state.currentIndex = existingIndex;
-            } else {
-                state.playlist.push(song);
-                state.currentIndex = state.playlist.length - 1;
-            }
+            // 播放列表允许重复，直接追加（不去重）
+            state.playlist.push(song);
+            state.currentIndex = state.playlist.length - 1;
             
             loadSong(song);
             
@@ -23404,8 +23368,8 @@ window.renderRecentPlays = renderRecentPlays;
         if (!song || !song.url) return;
         // 先添加到播放列表
         if (!state.playlist) state.playlist = [];
-        let idx = state.playlist.findIndex(s => s.id && s.id === song.id);
-        if (idx < 0) { state.playlist.push(song); idx = state.playlist.length - 1; }
+        // 每次播放追加新条目，不去重（可重复播放同一首）
+        state.playlist.push(song); let idx = state.playlist.length - 1;
         state.currentIndex = idx;
         // 加载歌曲（设置src、更新UI、加载歌词）
         loadSong(song);
@@ -32787,7 +32751,7 @@ window.mPlaySongOnly = function(keyOrSong) {
   var st = getSt();
   if (!st.playlist) st.playlist = [];
   var idx = st.playlist.findIndex(function(s){return s.id===song.id;});
-  if (idx < 0) { st.playlist.push(song); idx = st.playlist.length-1; }
+  st.playlist.push(song); idx = st.playlist.length-1;
   st.currentIndex = idx;
   st.isPlaying = true;
   if (window.loadSong) {
@@ -33529,32 +33493,14 @@ function _cmpSyncState() {
     } catch(e) {}
 }
 
-
-// cmpPlayPauseBtn 颜色守卫 + 果冻
-(function() {
-    var cBtn = document.getElementById('cmpPlayPauseBtn');
-    if (!cBtn) return;
-    function lockCmp(){ cBtn.style.setProperty('background-color','#1c1c1e','important'); cBtn.style.setProperty('background','#1c1c1e','important'); }
-    cBtn.addEventListener('touchstart', function(){
-        lockCmp();
-        cBtn.style.animation='none'; void cBtn.offsetWidth;
-        cBtn.style.animation='playBtnJelly .4s ease-out';
-        setTimeout(function(){ cBtn.style.animation=''; }, 450);
-    }, {passive:true});
-    cBtn.addEventListener('click', lockCmp);
-    setInterval(lockCmp, 300);
-})();
-
 window.updateCmpPlayState = function() {
-    var audio = _cmpGetAudio();
-    var playing = audio && !audio.paused;
-    var ip  = document.getElementById('cmpIconPlay');
-    var ipa = document.getElementById('cmpIconPause');
-    var btn = document.getElementById('cmpPlayPauseBtn');
-    if (ip)  ip.style.display  = playing ? 'none' : '';
-    if (ipa) ipa.style.display = playing ? ''     : 'none';
-    // 持续锁色
-    if (btn) { btn.style.setProperty('background-color','#1c1c1e','important'); btn.style.setProperty('background','#1c1c1e','important'); }
+    const audio = _cmpGetAudio();
+    const btn = document.getElementById('cmpPlayPauseBtn');
+    if (!btn) return;
+    const playing = audio && !audio.paused;
+    btn.innerHTML = playing
+        ? '<svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M8 5v14l11-7z"/></svg>';
 };
 
 window.updateCmpModeLabel = function() {
