@@ -4222,12 +4222,8 @@ window.onerror = function(msg, src, line, col, err) {
     <!-- 微信风格：按住说话按钮（默认隐藏，切换语音模式时显示） -->
     <button id="holdToTalkBtn" style="display:none;flex:1;height:36px;background:var(--accent-dim);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:14px;cursor:pointer;user-select:none;-webkit-user-select:none;font-weight:500;flex-shrink:0;"
         onmousedown="holdTalkStart(event)" onmouseup="holdTalkEnd(event)" ontouchstart="holdTalkStart(event)" ontouchend="holdTalkEnd(event)" ontouchcancel="holdTalkCancel(event)">按住 说话</button>
-    <div id="chatSendBtn" role="button" aria-label="发送"
-        style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#a18cd1,#fbc2eb);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(161,140,209,0.4);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation;">
-        <svg viewBox="0 0 24 24" fill="#ffffff" style="width:18px;height:18px;pointer-events:none;flex-shrink:0;">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-        </svg>
-    </div>
+    <button id="chatSendBtn" aria-label="发送"
+        style="min-width:52px;height:36px;border-radius:18px;background:linear-gradient(135deg,#a18cd1,#fbc2eb);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(161,140,209,0.4);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation;border:none;padding:0 14px;font-size:14px;font-weight:600;color:#fff;letter-spacing:0.5px;">发送</button>
 </div>
     </div>
 </div>
@@ -7093,12 +7089,12 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
 
       <!-- 操作栏 -->
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 16px 0;">
-        <div style="display:flex; gap:6px;">
-          <button onclick="closeChatMusicPlayer()" style="background:none;border:none;font-size:22px;color:#999;cursor:pointer;line-height:1;padding:4px;">‹</button>
-          <button onclick="closeChatMusicPlayer()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;line-height:1;padding:4px;">×</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 16px 0;">
+        <div style="display:flex;gap:4px;align-items:center;">
+          <div onclick="closeChatMusicPlayer()" role="button" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#aaa;-webkit-tap-highlight-color:transparent;user-select:none;line-height:1;">‹</div>
+          <div onclick="closeChatMusicPlayer()" role="button" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#aaa;-webkit-tap-highlight-color:transparent;user-select:none;border-radius:50%;background:rgba(0,0,0,0.06);">×</div>
         </div>
-        <div style="font-size:11px;color:#bbb;">左滑唱片查看歌词</div>
+        <div style="font-size:11px;color:#bbb;letter-spacing:0.2px;">左滑唱片查看歌词</div>
       </div>
 
       <!-- 唱片 ↔ 歌词 横滑区 -->
@@ -7119,7 +7115,7 @@ window.onerror = function(msg, src, line, col, err) {
           <!-- 歌词面 -->
           <div style="flex-shrink:0; width:100%; display:flex; flex-direction:column; padding:4px 0 0;">
             <div style="text-align:center; padding:4px 20px; display:flex; align-items:center; justify-content:center; gap:8px;">
-              <button onclick="cmpSlideToDisc()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;padding:2px;">‹</button>
+              <div onclick="cmpSlideToDisc()" role="button" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#aaa;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">‹</div>
               <div id="cmpLyricSongTitle" style="font-size:13px;font-weight:700;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">请添加歌曲</div>
             </div>
             <div id="cmpLyricScroll" style="height:136px; overflow-y:auto; padding:6px 24px 8px; font-size:13px; line-height:2; color:#555; text-align:center;">
@@ -7131,23 +7127,41 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
 
       <!-- 进度条 -->
-      <div style="padding:4px 20px 0; display:flex; align-items:center; gap:10px;">
-        <span id="cmpCurrentTime" style="font-size:11px;color:#999;min-width:32px;">0:00</span>
-        <div id="cmpProgressTrack" onclick="cmpSeek(event)" style="flex:1;height:4px;background:#ddd;border-radius:2px;cursor:pointer;position:relative;">
-          <div id="cmpProgressFill" style="height:100%;width:0%;background:#333;border-radius:2px;transition:width 0.3s;"></div>
+      <div style="padding:6px 24px 0;display:flex;align-items:center;gap:12px;">
+        <span id="cmpCurrentTime" style="font-size:11px;color:#aaa;min-width:32px;font-variant-numeric:tabular-nums;">0:00</span>
+        <div id="cmpProgressTrack" onclick="cmpSeek(event)"
+          style="flex:1;height:4px;background:rgba(0,0,0,0.1);border-radius:4px;cursor:pointer;position:relative;overflow:visible;">
+          <div id="cmpProgressFill" style="height:100%;width:0%;background:#1c1c1e;border-radius:4px;transition:width 0.25s linear;position:relative;">
+            <div style="width:12px;height:12px;border-radius:50%;background:#1c1c1e;position:absolute;right:-6px;top:-4px;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          </div>
         </div>
-        <span id="cmpTotalTime" style="font-size:11px;color:#999;min-width:32px;text-align:right;">0:00</span>
+        <span id="cmpTotalTime" style="font-size:11px;color:#aaa;min-width:32px;text-align:right;font-variant-numeric:tabular-nums;">0:00</span>
       </div>
 
-      <!-- 控制按钮 -->
-      <div style="display:flex; justify-content:center; align-items:center; gap:16px; padding:10px 20px 12px;">
-        <button onclick="els.prevBtn.click()" style="background:none;border:none;font-size:24px;color:#333;cursor:pointer;padding:4px;line-height:1;">◀</button>
-        <button id="cmpPlayPauseBtn" onclick="els.playBtn.click()" style="width:48px;height:48px;border-radius:50%;background:#333;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
-          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <button onclick="els.nextBtn.click()" style="background:none;border:none;font-size:24px;color:#333;cursor:pointer;padding:4px;line-height:1;">▶</button>
-        <button onclick="els.modeBtn.click();updateCmpModeLabel()" id="cmpModeBtn" style="background:none;border:1px solid #ddd;border-radius:12px;padding:4px 10px;font-size:12px;color:#666;cursor:pointer;">顺序</button>
-        <button onclick="cmpToggleLyricMode()" id="cmpLyricBtn" style="background:none;border:1px solid #ddd;border-radius:12px;padding:4px 10px;font-size:12px;color:#666;cursor:pointer;">歌词</button>
+      <!-- 控制按钮（全部用div，彻底防止button系统样式污染） -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:20px;padding:12px 20px 14px;">
+        <!-- 上一首 -->
+        <div onclick="els.prevBtn.click()" role="button"
+          style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;" fill="#333"><path d="M6 6h2v12H6V6zm3.5 6 8.5 6V6l-8.5 6z"/></svg>
+        </div>
+        <!-- 播放/暂停 - 固定黑色 -->
+        <div id="cmpPlayPauseBtn" onclick="els.playBtn.click()" role="button"
+          style="width:54px;height:54px;min-width:54px;min-height:54px;border-radius:50%;background-color:#1c1c1e;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.22);-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;position:relative;overflow:hidden;">
+          <svg id="cmpIconPlay" viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;position:absolute;" fill="#ffffff"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="cmpIconPause" viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;position:absolute;display:none;" fill="#ffffff"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </div>
+        <!-- 下一首 -->
+        <div onclick="els.nextBtn.click()" role="button"
+          style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;" fill="#333"><path d="M16 18h2V6h-2v12zM6 18l8.5-6L6 6v12z"/></svg>
+        </div>
+        <!-- 播放模式 -->
+        <div onclick="els.modeBtn.click();updateCmpModeLabel()" id="cmpModeBtn" role="button"
+          style="background:none;border:1.5px solid #e0e0e0;border-radius:14px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">顺序</div>
+        <!-- 歌词 -->
+        <div onclick="cmpToggleLyricMode()" id="cmpLyricBtn" role="button"
+          style="background:none;border:1.5px solid #e0e0e0;border-radius:14px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">歌词</div>
       </div>
 
       <!-- 分隔线 -->
@@ -7159,7 +7173,7 @@ window.onerror = function(msg, src, line, col, err) {
     <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px 8px; flex-shrink:0;">
         <span style="font-weight:700;font-size:15px;">播放列表</span>
-        <button onclick="addSongFromOnlineSearch()" style="background:none;border:none;font-size:13px;color:#e85151;cursor:pointer;font-weight:600;">＋ 搜索</button>
+        <div onclick="addSongFromOnlineSearch()" role="button" style="font-size:13px;color:#e85151;cursor:pointer;font-weight:600;padding:4px 8px;border-radius:8px;-webkit-tap-highlight-color:transparent;user-select:none;">＋ 搜索</div>
       </div>
       <div id="chatMusicPlaylistBody" style="flex:1; overflow-y:auto; padding:0 0 16px;"></div>
     </div>
@@ -9527,7 +9541,7 @@ if (state.currentSong) {
                 els.disc.classList.add('playing');
                 els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
                 { const lb=document.getElementById('lyricPlayBtn'); if(lb) lb.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; const lc=document.getElementById('lyricMiniCover'); if(lc) lc.classList.add('playing'); }
-                state.listenStartTime = Date.now();
+                window._listenStart();
             }).catch((err) => {
                 console.log('自动播放被浏览器阻止', err);
                 state.isPlaying = false;
@@ -10135,7 +10149,7 @@ window.playSongFromHistory = async function(index) {
         state.isPlaying = true;
         els.disc.classList.add('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-        state.listenStartTime = Date.now();
+        window._listenStart();
         els.audio.play().catch(() => {});
     }
     saveData();
@@ -10172,7 +10186,7 @@ window.playSongFromPlaylistIndex = async function(index) {
         state.isPlaying = true;
         els.disc.classList.add('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-        state.listenStartTime = Date.now();
+        window._listenStart();
         els.audio.play().catch(() => {});
     }
 };
@@ -10663,11 +10677,8 @@ if (song) {
             els.disc.classList.remove('playing');
             els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
             if (window._syncLyricView) window._syncLyricView();
-            if (state.listenStartTime) {
-                state.listenTime += Math.floor((Date.now() - state.listenStartTime) / 1000);
-                state.listenStartTime = null;
-                saveData();
-            }
+            window._listenStop();
+            saveData();
         } else {
             // BUGFIX: audio.src 为空时，先重新获取 URL 再播放
             const audioSrcEmpty = !els.audio.src || els.audio.src === '' || els.audio.src === window.location.href;
@@ -10691,7 +10702,7 @@ if (song) {
                         els.disc.classList.add('playing');
                         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
                         if (window._syncLyricView) window._syncLyricView();
-                        state.listenStartTime = Date.now();
+                        window._listenStart();
                     }).catch(err => { console.error('播放失败:', err); showToast('播放失败，请重试'); });
                 } else {
                     showToast('无播放链接，请重新搜索歌曲');
@@ -10708,7 +10719,7 @@ if (song) {
                         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
                         if (window._syncLyricView) window._syncLyricView();
                         if (window.updateCmpPlayState) window.updateCmpPlayState();
-                        state.listenStartTime = Date.now();
+                        window._listenStart();
                     }).catch(error => {
                         console.error('播放失败:', error);
                         if (state.currentSong.url) {
@@ -10721,7 +10732,7 @@ if (song) {
                                     els.disc.classList.add('playing');
                                     els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
                                     if (window.updateCmpPlayState) window.updateCmpPlayState();
-                                    state.listenStartTime = Date.now();
+                                    window._listenStart();
                                 }).catch(e2 => { showToast('播放失败，请重试'); });
                             });
                         } else if (state.currentSong.id) {
@@ -12022,13 +12033,13 @@ window.playSongFromArtist = async function(index) {
     state.isPlaying = true;
     els.disc.classList.add('playing');
     els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    state.listenStartTime = Date.now();
+    window._listenStart();
     els.audio.play().catch(e => {
         console.warn('自动播放失败', e);
         state.isPlaying = false;
         els.disc.classList.remove('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        state.listenStartTime = null;
+        window._listenStop();
     });
     saveData();
     // 不跳转页面，停留在当前歌手页面
@@ -12120,14 +12131,14 @@ window.addSongFromArtist = function(index) {
             state.isPlaying = true;
             els.disc.classList.add('playing');
             els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-            state.listenStartTime = Date.now();
+            window._listenStart();
             
             els.audio.play().catch(error => {
                 console.error('自动播放失败:', error);
                 state.isPlaying = false;
                 els.disc.classList.remove('playing');
                 els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-                state.listenStartTime = null;
+                window._listenStop();
                 showToast('自动播放失败，请手动点击播放按钮');
             });
             
@@ -14141,23 +14152,19 @@ window.deleteMemory = function(id) {
         var _ci = document.getElementById('chatInput');
 
         // --- contenteditable 工具 ---
-        // 读取纯文本（去掉HTML标签和多余空白）
         window._ciGet = function() {
             if (!_ci) return '';
             return (_ci.innerText || _ci.textContent || '').replace(/\u00a0/g,' ').trim();
         };
-        // 清空
         window._ciClear = function() {
             if (!_ci) return;
             _ci.innerHTML = '';
             _ci.textContent = '';
         };
-        // 写入文本
         window._ciSet = function(v) {
             if (!_ci) return;
             _ci.textContent = v || '';
         };
-        // 同步到 els（兼容其他地方用 els.chatInput）
         if (window.els) {
             Object.defineProperty(els, 'chatInputVal', {
                 get: function() { return window._ciGet(); },
@@ -14165,66 +14172,37 @@ window.deleteMemory = function(id) {
             });
         }
 
-        // --- 发送逻辑 ---
-        var _busy = false;
-        function _doSend() {
-            sendMessage(true);
-        }
-        function _doJelly() {
-            if (_busy || !_sb) return;
-            _busy = true;
-            var a = _sb.animate([
-                {transform:'scale(1,1)'},{transform:'scale(0.82,1.18)'},
-                {transform:'scale(1.18,0.84)'},{transform:'scale(0.92,1.08)'},
-                {transform:'scale(1.06,0.95)'},{transform:'scale(0.98,1.02)'},
-                {transform:'scale(1,1)'}
-            ], {duration:400, easing:'ease-out', fill:'none'});
-            a.onfinish = a.oncancel = function(){ _busy = false; };
-        }
-
-        // --- 发送按钮事件（touchstart 无延迟，click 做PC备用）---
-        var _sbTouched = false;
+        // --- 发送按钮：用 onclick，button 元素在 Android 上全区域可靠响应 ---
         if (_sb) {
-            _sb.addEventListener('touchstart', function(e) {
+            _sb.onclick = function(e) {
                 e.preventDefault();
-                _sbTouched = true;
-                _doSend();
-                _doJelly();
-            }, {passive: false});
-            _sb.addEventListener('click', function() {
-                if (_sbTouched) { _sbTouched = false; return; }
-                _doSend();
-                _doJelly();
-            });
+                sendMessage(true);
+            };
         }
 
         // --- contenteditable 回车发送 ---
-        // Android 软键盘回车：keydown 的 key='Enter'，但部分输入法是 'Unidentified'
-        // 用 keydown 拦截 Enter，阻止默认换行，发送消息
         if (_ci) {
             _ci.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     e.preventDefault();
                     e.stopPropagation();
-                    _ci._enterJustFired = true;  // ★ 标记刚刚回车，防止 input 事件重复发送
+                    _ci._enterJustFired = true;
                     setTimeout(function(){ _ci._enterJustFired = false; }, 300);
-                    sendMessage(false); // 回车：只发消息，不触发AI
-                    _doJelly();
+                    sendMessage(false);
                 }
             });
             _ci.addEventListener('input', function() {
-                if (_ci._enterJustFired) return;  // ★ 回车后300ms内的 input 事件忽略，防止重复发送
+                if (_ci._enterJustFired) return;
                 var raw = _ci.innerHTML || '';
                 if (raw.includes('<br') || raw.includes('<div') || (_ci.innerText||'').includes('\n')) {
                     var txt = (_ci.innerText||'').replace(/\n/g,'').trim();
                     _ci.innerHTML = '';
                     if (txt) {
                         _ci.textContent = txt;
-                        setTimeout(function(){ sendMessage(false); _doJelly(); }, 0); // 回车兜底也不触发AI
+                        setTimeout(function(){ sendMessage(false); }, 0);
                     }
                 }
             });
-            // 聚焦时滚到底
             _ci.addEventListener('focus', function() {
                 var cm = document.getElementById('chatMessages');
                 if (cm) setTimeout(function(){ cm.scrollTop = cm.scrollHeight; }, 100);
@@ -14858,6 +14836,10 @@ function getAllLocalSongs() {
 
 async function handleAIAction_play(songName) {
     if (!songName) return;
+    // 冷却：自动切歌最少间隔5分钟
+    const _now = Date.now();
+    if (window._lastAIMusicTrigger && (_now - window._lastAIMusicTrigger) < 5 * 60 * 1000) return;
+    window._lastAIMusicTrigger = _now;
     const aiName = state.friend?.name || 'AI';
     addSystemMessage(`♫ ${aiName} 想播放：${songName}`);
     addLog(`${state.friend.name} 尝试播放：${songName}`, 'ai_action');
@@ -14953,6 +14935,10 @@ async function handleAIAction_play(songName) {
 }
 // 处理AI随机切歌操作（搜索新歌）
 function handleAIAction_play_random() {
+    // 冷却：自动切歌最少间隔5分钟
+    const _now = Date.now();
+    if (window._lastAIMusicTrigger && (_now - window._lastAIMusicTrigger) < 5 * 60 * 1000) return;
+    window._lastAIMusicTrigger = _now;
     const aiName = state.friend?.name || 'AI';
     addSystemMessage(`${aiName} 从你的收藏中随机选歌...`);
     addLog(`${state.friend.name} 随机选歌`, 'ai_action');
@@ -15616,14 +15602,14 @@ window.togglePlaylistHomeDisplay = function() {
     state.isPlaying = true;
     els.disc.classList.add('playing');
     els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    state.listenStartTime = Date.now();
+    window._listenStart();
 
     els.audio.play().catch(error => {
         console.error('播放失败:', error);
         state.isPlaying = false;
         els.disc.classList.remove('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        state.listenStartTime = null;
+        window._listenStop();
         alert('自动播放失败，请手动点击播放按钮');
     });
 
@@ -15785,13 +15771,13 @@ document.getElementById('coverUploadPlaylist').addEventListener('change', async 
     state.isPlaying = true;
     els.disc.classList.add('playing');
     els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    state.listenStartTime = Date.now();
+    window._listenStart();
     els.audio.play().catch(error => {
         console.error('播放失败:', error);
         state.isPlaying = false;
         els.disc.classList.remove('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        state.listenStartTime = null;
+        window._listenStop();
         showToast('自动播放失败，请手动点击播放按钮');
     });
     
@@ -17886,29 +17872,50 @@ window.deleteCssPresetItem = function(type, idx) {
     window.openModal = openModal;
     window.closeModal = closeModal;
     
-    // 更新一起听时间
+    // 更新一起听时间（per-AI：读 state.friend._listenTime）
     function updateListenTime() {
-        let totalSeconds = state.listenTime;
-        
-        if (state.listenStartTime) {
-            totalSeconds += Math.floor((Date.now() - state.listenStartTime) / 1000);
+        const _af = state.friend || {};
+        let totalSeconds = (_af._listenTime || 0);
+        if (_af._listenStartTime) {
+            totalSeconds += Math.floor((Date.now() - _af._listenStartTime) / 1000);
         }
-        
         const txt = formatListenTime(totalSeconds);
         els.listenTogetherTime.textContent = txt;
-        // 同步更新 chat 悬浮播放器的时间显示
         const cmpTC = document.getElementById('cmpTimeCounter');
         if (cmpTC) cmpTC.textContent = txt;
     }
     
     setInterval(updateListenTime, 1000);
+
+// ── 每AI听歌计时辅助函数 ──
+window._listenGetAF = function() { return (window.state && window.state.friend) ? window.state.friend : null; };
+window._listenStart = function() {
+    var af = window._listenGetAF(); if (!af) return;
+    if (!af._listenStartTime) {
+        // 第一次与此AI一起听：记录首次时间
+        if (!af._listenFirstTime) af._listenFirstTime = Date.now();
+        af._listenStartTime = Date.now();
+    }
+};
+window._listenStop = function() {
+    var af = window._listenGetAF(); if (!af) return;
+    if (af._listenStartTime) {
+        af._listenTime = (af._listenTime || 0) + Math.floor((Date.now() - af._listenStartTime) / 1000);
+        af._listenStartTime = null;
+    }
+};
+window._listenIsRunning = function() {
+    var af = window._listenGetAF(); return !!(af && af._listenStartTime);
+};
+
     
-    // 自动保存
+    // 自动保存（per-AI）
     setInterval(() => {
-        if (state.listenStartTime) {
-            const elapsed = Math.floor((Date.now() - state.listenStartTime) / 1000);
-            state.listenTime += 60;
-            state.listenStartTime = Date.now() - ((elapsed % 60) * 1000);
+        const _af2 = state.friend || {};
+        if (_af2._listenStartTime) {
+            const elapsed = Math.floor((Date.now() - _af2._listenStartTime) / 1000);
+            _af2._listenTime = (_af2._listenTime || 0) + 60;
+            _af2._listenStartTime = Date.now() - ((elapsed % 60) * 1000);
             saveData();
         }
     }, 60000);
@@ -17919,7 +17926,18 @@ window.deleteCssPresetItem = function(type, idx) {
 window._applyDiaryCss = function(css) {
     var el = document.getElementById('_diaryCssStyle');
     if (!el) { el = document.createElement('style'); el.id = '_diaryCssStyle'; document.head.appendChild(el); }
-    el.textContent = css || '';
+    // 只作用于日记页面和收藏页面，不影响其他页面
+    if (!css || !css.trim()) { el.textContent = ''; return; }
+    // 为每条规则加上作用域前缀
+    var scoped = css.replace(/([^{}]+)\{/g, function(match, selectors) {
+        var prefixed = selectors.split(',').map(function(s) {
+            s = s.trim();
+            if (!s) return s;
+            return '#diaryPage ' + s + ', #favoritePage ' + s;
+        }).join(', ');
+        return prefixed + ' {';
+    });
+    el.textContent = scoped;
 };
 
 // 每次打开日记页面时重新注入CSS（防止style被清掉）
@@ -23240,7 +23258,7 @@ window.playRecentSong = async function(sid) {
     state.isPlaying = true;
     els.disc.classList.add('playing');
     els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    state.listenStartTime = Date.now();
+    window._listenStart();
     
     // 关闭最近常听面板
     document.getElementById('recentPlaysPageOverlay')?.remove();
@@ -23250,7 +23268,7 @@ window.playRecentSong = async function(sid) {
         state.isPlaying = false;
         els.disc.classList.remove('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        state.listenStartTime = null;
+        window._listenStop();
         showToast('请手动点击播放');
     }
     saveData();
@@ -23395,7 +23413,7 @@ window.renderRecentPlays = renderRecentPlays;
         state.isPlaying = true;
         els.disc.classList.add('playing');
         els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-        state.listenStartTime = Date.now();
+        window._listenStart();
         // 直接play()，浏览器会等src加载好（与音乐app playSongFromSearch一致）
         els.audio.play().then(() => {
             if (window._syncLyricView) window._syncLyricView();
@@ -23412,7 +23430,7 @@ window.renderRecentPlays = renderRecentPlays;
                     state.isPlaying = false;
                     els.disc.classList.remove('playing');
                     els.playBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-                    state.listenStartTime = null;
+                    window._listenStop();
                 });
             });
         });
@@ -26471,11 +26489,7 @@ function _updateFcPostComments(momentId) {
         else fcContent.appendChild(commentsContainer);
     }
     commentsContainer.innerHTML = commentsHtml;
-    // scroll last comment into view
-    requestAnimationFrame(function(){
-        const lastComment = commentsContainer.lastElementChild;
-        if (lastComment) lastComment.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    });
+    // 不自动滚屏，用户可手动滑动查看
 
     (m.comments || []).forEach((c, ci_idx) => {
         if (c.imgUrl) {
@@ -33515,14 +33529,32 @@ function _cmpSyncState() {
     } catch(e) {}
 }
 
+
+// cmpPlayPauseBtn 颜色守卫 + 果冻
+(function() {
+    var cBtn = document.getElementById('cmpPlayPauseBtn');
+    if (!cBtn) return;
+    function lockCmp(){ cBtn.style.setProperty('background-color','#1c1c1e','important'); cBtn.style.setProperty('background','#1c1c1e','important'); }
+    cBtn.addEventListener('touchstart', function(){
+        lockCmp();
+        cBtn.style.animation='none'; void cBtn.offsetWidth;
+        cBtn.style.animation='playBtnJelly .4s ease-out';
+        setTimeout(function(){ cBtn.style.animation=''; }, 450);
+    }, {passive:true});
+    cBtn.addEventListener('click', lockCmp);
+    setInterval(lockCmp, 300);
+})();
+
 window.updateCmpPlayState = function() {
-    const audio = _cmpGetAudio();
-    const btn = document.getElementById('cmpPlayPauseBtn');
-    if (!btn) return;
-    const playing = audio && !audio.paused;
-    btn.innerHTML = playing
-        ? '<svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
-        : '<svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M8 5v14l11-7z"/></svg>';
+    var audio = _cmpGetAudio();
+    var playing = audio && !audio.paused;
+    var ip  = document.getElementById('cmpIconPlay');
+    var ipa = document.getElementById('cmpIconPause');
+    var btn = document.getElementById('cmpPlayPauseBtn');
+    if (ip)  ip.style.display  = playing ? 'none' : '';
+    if (ipa) ipa.style.display = playing ? ''     : 'none';
+    // 持续锁色
+    if (btn) { btn.style.setProperty('background-color','#1c1c1e','important'); btn.style.setProperty('background','#1c1c1e','important'); }
 };
 
 window.updateCmpModeLabel = function() {
@@ -40489,12 +40521,14 @@ window.openVideoCall = function() {
     var sendBtnEl = document.getElementById('chatSendBtn');
     if (sendBtnEl && !sendBtnEl._callSyncPatched) {
       sendBtnEl._callSyncPatched = true;
-      sendBtnEl.addEventListener('touchstart', function() {
+      var _origOnClick = sendBtnEl.onclick;
+      sendBtnEl.onclick = function(e) {
         var txt = (typeof window._ciGet === 'function') ? window._ciGet() : '';
         if (txt && (window._voiceCallActive || _vcConnected)) {
           setTimeout(function() { window._injectChatMsgToCall(txt); }, 500);
         }
-      }, true);
+        if (_origOnClick) _origOnClick.call(sendBtnEl, e);
+      };
     }
   }
   // 等DOM稳定后再挂
@@ -44338,6 +44372,22 @@ function extractJsonArray(text) {
         localStorage.setItem('shopCart', '[]');
         refreshCartBadge();
         if (typeof showToast === 'function') showToast(`🎉 结算成功！¥${total.toFixed(2)}`);
+        // 购物车结算也加入礼物记录（模拟物流签收）
+        const _cartOrders = JSON.parse(localStorage.getItem('shopOrders') || '[]');
+        const _justAdded = _cartOrders.slice(0, cart.length); // 刚刚 unshift 进去的
+        _justAdded.forEach(function(o) {
+            const _dms = o.shop === '京东'
+                ? (30 * 1000 + Math.random() * 60 * 1000)
+                : (60 * 1000 + Math.random() * 90 * 1000);
+            setTimeout(function() {
+                const gifts = JSON.parse(localStorage.getItem('giftRecords') || '[]');
+                if (gifts.find(function(g){ return g._id === o._id; })) return; // 去重
+                gifts.unshift({ _id: o._id, item: o.item, price: o.price, shop: o.shop, emoji: o.emoji || '📦', to: '', sent: false, payMethod: o.payMethod, time: new Date().toISOString() });
+                localStorage.setItem('giftRecords', JSON.stringify(gifts));
+                if (typeof updateGiftCount === 'function') updateGiftCount();
+                if (typeof showToast === 'function') showToast(`✅ 「${o.item}」已签收！可以去礼物记录送出了 🎁`);
+            }, _dms);
+        });
         setTimeout(() => { openShopOrders(); }, 400);
     };
 
