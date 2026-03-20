@@ -7135,15 +7135,25 @@ window.onerror = function(msg, src, line, col, err) {
         <span id="cmpTotalTime" style="font-size:11px;color:#999;min-width:32px;text-align:right;">0:00</span>
       </div>
 
-      <!-- 控制按钮 -->
-      <div style="display:flex; justify-content:center; align-items:center; gap:16px; padding:10px 20px 12px;">
-        <button onclick="els.prevBtn.click()" style="background:none;border:none;font-size:24px;color:#333;cursor:pointer;padding:4px;line-height:1;">◀</button>
-        <button id="cmpPlayPauseBtn" onclick="els.playBtn.click()" style="width:48px;height:48px;border-radius:50%;background:#333;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
-          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <button onclick="els.nextBtn.click()" style="background:none;border:none;font-size:24px;color:#333;cursor:pointer;padding:4px;line-height:1;">▶</button>
-        <button onclick="els.modeBtn.click();updateCmpModeLabel()" id="cmpModeBtn" style="background:none;border:1px solid #ddd;border-radius:12px;padding:4px 10px;font-size:12px;color:#666;cursor:pointer;">顺序</button>
-        <button onclick="cmpToggleLyricMode()" id="cmpLyricBtn" style="background:none;border:1px solid #ddd;border-radius:12px;padding:4px 10px;font-size:12px;color:#666;cursor:pointer;">歌词</button>
+      <!-- 控制按钮（全部 div，彻底绕开 Android button 默认白色闪烁）-->
+      <div style="display:flex;justify-content:center;align-items:center;gap:20px;padding:12px 20px 14px;">
+        <div onclick="els.prevBtn.click()" role="button"
+          style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;border-radius:50%;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;" fill="#333"><path d="M6 6h2v12H6V6zm3.5 6 8.5 6V6l-8.5 6z"/></svg>
+        </div>
+        <div id="cmpPlayPauseBtn" onclick="els.playBtn.click()" role="button"
+          style="width:54px;height:54px;min-width:54px;min-height:54px;border-radius:50%;background-color:#1c1c1e;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.22);-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;position:relative;overflow:hidden;">
+          <svg id="cmpIconPlay" viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;position:absolute;" fill="#ffffff"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="cmpIconPause" viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;position:absolute;display:none;" fill="#ffffff"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </div>
+        <div onclick="els.nextBtn.click()" role="button"
+          style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;border-radius:50%;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;pointer-events:none;" fill="#333"><path d="M16 18h2V6h-2v12zM6 18l8.5-6L6 6v12z"/></svg>
+        </div>
+        <div onclick="els.modeBtn.click();updateCmpModeLabel()" id="cmpModeBtn" role="button"
+          style="border:1.5px solid #e0e0e0;border-radius:14px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">顺序</div>
+        <div onclick="cmpToggleLyricMode()" id="cmpLyricBtn" role="button"
+          style="border:1.5px solid #e0e0e0;border-radius:14px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;flex-shrink:0;">歌词</div>
       </div>
 
       <!-- 分隔线 -->
@@ -9292,10 +9302,17 @@ function formatMessageTime(isoString) {
             }
         }
 
-        // 历史记录保留所有播放，不去重（每次播放都是独立记录）
-        // 仅按时间倒序排列
+        // 清理历史记录中的重复项
         if (state.history && state.history.length > 0) {
-            state.history.sort((a, b) => (b.playedAt || 0) - (a.playedAt || 0));
+            const uniqueMap = new Map();
+            state.history.forEach(item => {
+                const key = item.id ? item.id : `${item.name}|${item.artist}`;
+                const existing = uniqueMap.get(key);
+                if (!existing || (item.playedAt > existing.playedAt)) {
+                    uniqueMap.set(key, item);
+                }
+            });
+            state.history = Array.from(uniqueMap.values()).sort((a, b) => (b.playedAt || 0) - (a.playedAt || 0));
         }
 
         // 7. 加载后确保 state.messages 和 state.friend._messages 一致
@@ -10610,10 +10627,17 @@ if (pageId === 'playerPage') {
 
     // 添加到历史记录（最新放在最前）
 if (song) {
-    // 历史记录允许重复（每次播放都记录一条，不去重）
+    // 去重：如果已存在相同歌曲（以 id 或名称+艺术家判断），则移除旧记录
+    const existingIndex = state.history.findIndex(s => 
+        (s.id && s.id === song.id) || (!s.id && s.name === song.name && s.artist === song.artist)
+    );
+    if (existingIndex !== -1) {
+        state.history.splice(existingIndex, 1);
+    }
+    // 添加最新记录到最前
     state.history.unshift({ ...song, playedAt: Date.now() });
-    // 限制历史记录数量为 200（保留更多播放记录）
-    if (state.history.length > 200) state.history.pop();
+    // 限制历史记录数量为 50
+    if (state.history.length > 50) state.history.pop();
     
     // 更新最近常听计数
     if (song.id) {
@@ -12086,9 +12110,13 @@ window.addSongFromArtist = function(index) {
                 state.playlist = [];
                 state.playlistSource = 'search';
             }
-            // 播放列表允许重复，直接追加（不去重）
-            state.playlist.push(song);
-            state.currentIndex = state.playlist.length - 1;
+            const existingIndex = state.playlist.findIndex(s => s.id === song.id);
+            if (existingIndex >= 0) {
+                state.currentIndex = existingIndex;
+            } else {
+                state.playlist.push(song);
+                state.currentIndex = state.playlist.length - 1;
+            }
             
             loadSong(song);
             
@@ -23368,8 +23396,8 @@ window.renderRecentPlays = renderRecentPlays;
         if (!song || !song.url) return;
         // 先添加到播放列表
         if (!state.playlist) state.playlist = [];
-        // 每次播放追加新条目，不去重（可重复播放同一首）
-        state.playlist.push(song); let idx = state.playlist.length - 1;
+        let idx = state.playlist.findIndex(s => s.id && s.id === song.id);
+        if (idx < 0) { state.playlist.push(song); idx = state.playlist.length - 1; }
         state.currentIndex = idx;
         // 加载歌曲（设置src、更新UI、加载歌词）
         loadSong(song);
@@ -32751,7 +32779,7 @@ window.mPlaySongOnly = function(keyOrSong) {
   var st = getSt();
   if (!st.playlist) st.playlist = [];
   var idx = st.playlist.findIndex(function(s){return s.id===song.id;});
-  st.playlist.push(song); idx = st.playlist.length-1;
+  if (idx < 0) { st.playlist.push(song); idx = st.playlist.length-1; }
   st.currentIndex = idx;
   st.isPlaying = true;
   if (window.loadSong) {
@@ -33379,9 +33407,10 @@ window.openChatMusicPlaylist = function() {
     if (!body) return;
     const playlist = state.playlist || [];
     if (!playlist.length) { body.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">播放列表为空</div>'; return; }
-    const cur = state.currentSong;
+    // 用 currentIndex 精准定位高亮，避免同名歌曲全部高亮的问题
+    const curIdx = state.currentIndex;
     body.innerHTML = playlist.map((s,i) => {
-        const isCur = cur && (s.id === cur.id || s.url === cur.url);
+        const isCur = (i === curIdx);
         const coverStyle = s.cover ? `background-image:url(${s.cover});background-size:cover;background-position:center;` : 'background:linear-gradient(135deg,#e85151,#c0392b);';
         return `<div onclick="(window.playSongFromPlaylistIndex||function(x){window._playSongNow&&window._playSongNow(window.state&&window.state.playlist&&window.state.playlist[x])})(${i});" style="display:flex;align-items:center;gap:12px;padding:10px 16px;${isCur ? 'background:#fef0f0;' : ''}cursor:pointer;border-bottom:1px solid #f8f8f8;">
             <div style="width:40px;height:40px;border-radius:6px;flex-shrink:0;${coverStyle}"></div>
@@ -33389,7 +33418,7 @@ window.openChatMusicPlaylist = function() {
                 <div style="font-size:14px;font-weight:${isCur ? '700' : '400'};color:${isCur ? '#e85151' : '#222'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name || '未知'}</div>
                 <div style="font-size:12px;color:#999;margin-top:2px;">${s.artist || ''}</div>
             </div>
-            <button onclick="event.stopPropagation();state.playlist.splice(${i},1);if(state.currentSong&&state.currentSong.id==='${s.id}')state.currentSong=null;saveData();openChatMusicPlaylist();" style="background:none;border:none;color:#ccc;font-size:18px;cursor:pointer;padding:4px;flex-shrink:0;">×</button>
+            <div onclick="event.stopPropagation();state.playlist.splice(${i},1);if(state.currentIndex>=${i})state.currentIndex=Math.max(0,state.currentIndex-1);saveData();openChatMusicPlaylist();" role="button" style="color:#ccc;font-size:18px;cursor:pointer;padding:4px;flex-shrink:0;-webkit-tap-highlight-color:transparent;user-select:none;">×</div>
         </div>`;
     }).join('');
 };
@@ -33426,15 +33455,15 @@ function _cmpSyncState() {
         const titleEl = document.getElementById('cmpSongTitle');
         const artistEl = document.getElementById('cmpArtist');
         if (titleEl) {
-            if (titleEl.textContent !== ((song && song.name) || '请添加歌曲')) {
-                titleEl.textContent = (song && song.name) ? song.name : '请添加歌曲';
-                // 歌曲变了 → 刷新嵌入的播放列表
-                const _cmpOv = document.getElementById('chatMusicPlayerOverlay');
-                if (_cmpOv && _cmpOv.style.display !== 'none' && typeof window.openChatMusicPlaylist === 'function') {
-                    window.openChatMusicPlaylist();
-                }
-            }
+            titleEl.textContent = (song && song.name) ? song.name : '请添加歌曲';
         }
+        // 每次同步都刷新播放列表高亮（用 currentIndex 精准定位，开销极低）
+        (function() {
+            var _cmpOv = document.getElementById('chatMusicPlayerOverlay');
+            if (_cmpOv && _cmpOv.style.display !== 'none' && typeof window.openChatMusicPlaylist === 'function') {
+                window.openChatMusicPlaylist();
+            }
+        })();
         if (artistEl) artistEl.textContent = (song && song.artist) ? song.artist : '...';
 
         // 头像
@@ -33493,14 +33522,29 @@ function _cmpSyncState() {
     } catch(e) {}
 }
 
+
+// cmpPlayPauseBtn 颜色守卫
+(function _cmpColorGuard() {
+    var btn = document.getElementById('cmpPlayPauseBtn');
+    if (!btn) { setTimeout(_cmpColorGuard, 500); return; }
+    function lock() {
+        btn.style.setProperty('background-color','#1c1c1e','important');
+        btn.style.setProperty('background','#1c1c1e','important');
+    }
+    btn.addEventListener('touchstart', function(){ lock(); }, {passive:true});
+    btn.addEventListener('click', lock);
+    setInterval(lock, 250);
+})();
+
 window.updateCmpPlayState = function() {
-    const audio = _cmpGetAudio();
-    const btn = document.getElementById('cmpPlayPauseBtn');
-    if (!btn) return;
-    const playing = audio && !audio.paused;
-    btn.innerHTML = playing
-        ? '<svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
-        : '<svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M8 5v14l11-7z"/></svg>';
+    var audio = _cmpGetAudio();
+    var playing = audio && !audio.paused;
+    var ip  = document.getElementById('cmpIconPlay');
+    var ipa = document.getElementById('cmpIconPause');
+    var btn = document.getElementById('cmpPlayPauseBtn');
+    if (ip)  ip.style.display  = playing ? 'none' : '';
+    if (ipa) ipa.style.display = playing ? ''     : 'none';
+    if (btn) { btn.style.setProperty('background-color','#1c1c1e','important'); btn.style.setProperty('background','#1c1c1e','important'); }
 };
 
 window.updateCmpModeLabel = function() {
